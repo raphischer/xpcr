@@ -1,0 +1,4 @@
+matplotlib
+gluonts
+mxnet
+numpy==1.18.5
