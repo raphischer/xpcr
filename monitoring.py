@@ -239,14 +239,18 @@ def monitor_flops_papi(prof_func, event='PAPI_DP_OPS'):
 
 class Monitoring:
 
-    def __init__(self, gpu_interval, cpu_interval, output_dir, prefix='') -> None:
+    def __init__(self, gpu_interval, cpu_interval, output_dir, prefix=None) -> None:
+        if prefix is None:
+            prefix = ''
+        else:
+            prefix = prefix + '_'
         self.monitoring = []
         if gpu_interval > 0:
-            self.monitoring.append(Monitor(monitor_pynvml, interval=gpu_interval, outfile=os.path.join(output_dir, f'{prefix}monitoring_pynvml.json')))
+            self.monitoring.append(Monitor(monitor_pynvml, interval=gpu_interval, outfile=os.path.join(output_dir, f'{prefix}pynvml.monitoring')))
         if cpu_interval > 0:
-            self.monitoring.append(Monitor(monitor_psutil, interval=cpu_interval, outfile=os.path.join(output_dir, f'{prefix}monitoring_psutil.json'), device_id=os.getpid()))
-            self.monitoring.append(Monitor(monitor_pyrapl, interval=cpu_interval, outfile=os.path.join(output_dir, f'{prefix}monitoring_pyrapl.json')))
-        # time.sleep(1 * min([cpu_interval, gpu_interval]))
+            self.monitoring.append(Monitor(monitor_psutil, interval=cpu_interval, outfile=os.path.join(output_dir, f'{prefix}psutil.monitoring'), device_id=os.getpid()))
+            self.monitoring.append(Monitor(monitor_pyrapl, interval=cpu_interval, outfile=os.path.join(output_dir, f'{prefix}pyrapl.monitoring')))
+        time.sleep(1 * min([cpu_interval, gpu_interval]))
 
     def stop(self):
         for monitor in self.monitoring:

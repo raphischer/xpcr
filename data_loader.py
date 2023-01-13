@@ -1,7 +1,5 @@
 from datetime import datetime
 from distutils.util import strtobool
-import os
-import subprocess
 
 import pandas as pd
 
@@ -32,19 +30,6 @@ FREQUENCY_MAP = {
    "quarterly": "1Q",
    "yearly": "1Y"
 }
-
-
-def load_data(ds_name, directory='mnt_data/data'):
-    ds_name_tsf = f'{ds_name}.tsf'
-    full_path = os.path.join(directory, ds_name_tsf)
-    if not os.path.isfile(full_path):
-        cwd = os.getcwd()
-        os.chdir(directory)
-        subprocess.call(["wget", f"https://zenodo.org/record/4656522/files/{ds_name}.zip"])
-        subprocess.call(["unzip", f"{ds_name}.zip"])
-        subprocess.call(["rm", f"{ds_name}.zip"])
-        os.chdir(cwd)
-    return convert_tsf_to_dataframe(full_path)
 
 
 # Converts the contents in a .tsf file into a dataframe and returns it along with other meta-data of the dataset: frequency, horizon, whether the dataset contains missing values and whether the series have equal lengths

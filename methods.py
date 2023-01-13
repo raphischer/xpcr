@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 
 from gluonts.model.deepar import DeepAREstimator
@@ -12,7 +13,7 @@ from gluonts.evaluation.backtest import make_evaluation_predictions
 from gluonts.evaluation import Evaluator
 
 
-from data_loader import load_data
+from data_loader import convert_tsf_to_dataframe as load_data
 
 
 METHODS = {
@@ -27,7 +28,15 @@ METHODS = {
 def init_model_and_data(args):
     dataset, method, lag, epochs = args.dataset, args.model, args.lag, args.epochs
 
-    ds, freq, seasonality, forecast_horizon, contain_missing_values, contain_equal_length = load_data(dataset)
+    full_path = os.path.join(args.datadir, dataset + '.tsf')
+    ds, freq, seasonality, forecast_horizon, contain_missing_values, contain_equal_length = load_data(full_path)
+
+    # forecast horizon might not be available from tsf
+    if forecast_horizon is None:
+        if not hasattr(args, "external_forecast_horizon"):
+            raise Exception("Please provide the required forecast horizon")
+        else:
+            forecast_horizon = args.external_forecast_horizon
 
     all_train_ts = []
     all_fcast_ts = []
@@ -60,6 +69,9 @@ def init_model_and_data(args):
 
 
 def evaluate(predictor, ts_test):
+
+    # TODO check for integer_conversion in args and round?
+
     forecast, groundtruth = make_evaluation_predictions(dataset=ts_test, predictor=predictor, num_samples=100)
     
     forecast = list(forecast)
