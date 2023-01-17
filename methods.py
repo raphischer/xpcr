@@ -1,5 +1,7 @@
 import os
 import pandas as pd
+import inspect
+from datetime import datetime
 
 from gluonts.model.deepar import DeepAREstimator
 from gluonts.model.n_beats import NBEATSEstimator
@@ -15,6 +17,7 @@ from gluonts.evaluation import Evaluator
 
 from data_loader import convert_tsf_to_dataframe as load_data
 
+# SUBMODULES = [pkg.name for pkg in pkgutil.walk_packages(gluonts.model.__path__, gluonts.model.__name__+'.') if pkg.ispkg]
 
 METHODS = {
     "feed_forward": SimpleFeedForwardEstimator,
@@ -43,7 +46,7 @@ def init_model_and_data(args):
 
     for _, row in ds.iterrows():
 
-        ts_start = row["start_timestamp"] # if "start_timestamp" in ds.columns else datetime(1900, 1, 1, 0, 0, 0)
+        ts_start = row["start_timestamp"] if "start_timestamp" in ds.columns else datetime(1900, 1, 1, 0, 0, 0)
         ts_data = row["series_value"]
 
         # use gluonts data format
@@ -60,10 +63,19 @@ def init_model_and_data(args):
     fcast_gluonts_ds = ListDataset(all_fcast_ts, freq=freq)
 
     trainer = Trainer(epochs=epochs)
-    try:
-        estimator = METHODS[method](freq=freq, context_length=lag, prediction_length=forecast_horizon, trainer=trainer)
-    except TypeError:
-        estimator = METHODS[method](context_length=lag, prediction_length=forecast_horizon, trainer=trainer)
+    args = {
+        'freq': freq,
+        'context_length': lag,
+        'prediction_length': forecast_horizon,
+        'trainer': trainer
+    }
+
+    exp_args = inspect.signature(METHODS[method]).parameters
+    for key in list(args.keys()):
+        if key not in exp_args:
+            del(args[key])
+
+    estimator = METHODS[method](**args)
 
     return train_gluonts_ds, fcast_gluonts_ds, estimator
 

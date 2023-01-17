@@ -9,10 +9,10 @@ res_dir = 'mnt_data/results_merged'
 log_metric_extractor = {
     'method': lambda log: log['config']['model'],
     'dataset': lambda log: log['config']['dataset'],
-    'runtime': lambda log: log['validation']['monitoring_pyrapl']['total']['total_duration'],
-    'RMSE': lambda log: log['validation']['results']['metrics']['aggregated']['RMSE'],
-    'RMSE': lambda log: log['validation']['results']['metrics']['aggregated']['MAPE'],
-    'sMAPE': lambda log: log['validation']['results']['metrics']['aggregated']['sMAPE']
+    'runtime': lambda log: log['validation_pyrapl']['total']['total_duration'],
+    'RMSE': lambda log: log['validation_results']['metrics']['aggregated']['RMSE'],
+    'RMSE': lambda log: log['validation_results']['metrics']['aggregated']['MAPE'],
+    'sMAPE': lambda log: log['validation_results']['metrics']['aggregated']['sMAPE']
 }
 
 logs = []

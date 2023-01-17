@@ -19,7 +19,7 @@ def read_txt(filepath):
 
 
 def read_monitoring(filepath):
-    aggregate_log(filepath)
+    return aggregate_log(filepath)
 
 
 def aggregate_results(directory):
@@ -29,7 +29,6 @@ def aggregate_results(directory):
     for filename in os.listdir(directory):
         fbase, ext = os.path.splitext(filename)
         reader_method = f'read_{ext[1:]}'
-        print(directory, reader_method in reader_methods, filename, reader_method)
         if reader_method in reader_methods:
             res[fbase] = reader_methods[reader_method](os.path.join(directory, filename))
     return res
