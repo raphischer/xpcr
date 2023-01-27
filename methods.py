@@ -2,12 +2,17 @@ import os
 import pandas as pd
 import inspect
 from datetime import datetime
+from typing import Dict, Optional
 
 from gluonts.model.deepar import DeepAREstimator
 from gluonts.model.n_beats import NBEATSEstimator
 from gluonts.model.simple_feedforward import SimpleFeedForwardEstimator
 from gluonts.model.transformer import TransformerEstimator
 from gluonts.model.wavenet import WaveNetEstimator
+from gluonts.model.lstnet import LSTNetEstimator
+from gluonts.model.tft import TemporalFusionTransformerEstimator
+from gluonts.model.r_forecast import RForecastPredictor
+
 from gluonts.dataset.common import ListDataset
 from gluonts.dataset.field_names import FieldName
 from gluonts.mx import Trainer
@@ -17,14 +22,37 @@ from gluonts.evaluation import Evaluator
 
 from data_loader import convert_tsf_to_dataframe as load_data
 
+class ARIMAWrapper(RForecastPredictor):
+
+    def __init__(
+        self,
+        freq: str,
+        prediction_length: int,
+        period: int = None,
+        trunc_length: Optional[int] = None,
+        params: Optional[Dict] = None,
+    ) -> None:
+
+        super().__init__(
+            freq=freq,
+            prediction_length=prediction_length,
+            method_name='arima',
+            period=period,
+            trunc_length=trunc_length,
+            params=params
+        )
+
 # SUBMODULES = [pkg.name for pkg in pkgutil.walk_packages(gluonts.model.__path__, gluonts.model.__name__+'.') if pkg.ispkg]
 
 METHODS = {
-    "feed_forward": SimpleFeedForwardEstimator,
-    "deepar": DeepAREstimator,
-    "nbeats": NBEATSEstimator,
-    "wavenet": WaveNetEstimator,
-    "transformer": TransformerEstimator
+    "arima": ARIMAWrapper,
+    "tempfus": TemporalFusionTransformerEstimator,  # 2021, LSTM, self attention
+    "deepar": DeepAREstimator,                      # 2020, RNN
+    "nbeats": NBEATSEstimator,                      # 2019, MLP, residual links
+    "lstnet": LSTNetEstimator,                      # 2018, LSTM
+    "transformer": TransformerEstimator,            # 2017, MLP, multi-head attention
+    "wavenet": WaveNetEstimator,                    # 2016, Dilated convolution
+    "feed_forward": SimpleFeedForwardEstimator
 }
 
 
@@ -93,4 +121,4 @@ def evaluate(predictor, ts_test):
     evaluator = Evaluator(quantiles=[0.1, 0.5, 0.9])
     agg_metrics, item_metrics = evaluator(groundtruth, forecast)
 
-    return {'aggregated': agg_metrics, 'item': item_metrics}
+    return {'aggregated': agg_metrics} # , 'item': item_metrics}

@@ -68,7 +68,7 @@ def process_directory(directory, output_log_dir=None, output_agglog_dir=None):
 def main(directory, output_log_dir=None, output_agglog_dir=None, clean=False):
     if clean: # remove all subdirectory contents
         for rootdir in [output_log_dir, output_agglog_dir]:
-            if os.path.isdir(rootdir):
+            if rootdir is not None and os.path.isdir(rootdir):
                 for subdir in os.listdir(rootdir):
                     if os.path.isfile(os.path.join(rootdir, subdir)):
                         os.remove(os.path.join(rootdir, subdir))

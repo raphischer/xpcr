@@ -75,33 +75,39 @@ def main(args):
     # tmp = sys.stdout # reroute the stdout to logfile, remember to call close!
     # sys.stdout = Logger(os.path.join(output_dir, f'logfile.txt')),
 
-    ts_train, ts_test, estimator = init_model_and_data(args)
+    ts_train, ts_test, model = init_model_and_data(args)
 
-    monitoring = Monitoring(0, args.cpu_monitor_interval, output_dir)
-    start_time = time.time()
-    predictor = estimator.train(training_data=ts_train)
-    end_time = time.time()
-    monitoring.stop()
+    if not hasattr(model, 'train'):
+        # no global training needed, model is only a predictor
+        pass
 
-    results = {
-        'history': {}, # TODO track history
-        'start': start_time,
-        'end': end_time,
-        'model': None
-    }
-    # write results
-    with open(os.path.join(output_dir, f'results.json'), 'w') as rf:
-        json.dump(results, rf, indent=4, cls=PatchedJSONEncoder)
+    else:
+        # model is a GluonTS estimator, that upon calling 'train' returns a predictor
+        monitoring = Monitoring(args.gpu_monitor_interval, args.cpu_monitor_interval, output_dir)
+        start_time = time.time()
+        model = model.train(training_data=ts_train)
+        end_time = time.time()
+        monitoring.stop()
+
+        results = {
+            'history': {}, # TODO track history
+            'start': start_time,
+            'end': end_time,
+            'model': None
+        }
+        # write results
+        with open(os.path.join(output_dir, f'results.json'), 'w') as rf:
+            json.dump(results, rf, indent=4, cls=PatchedJSONEncoder)
 
 
 
     split = 'validation' ############## INFERENCE ##############
     setattr(args, 'train_logdir', output_dir)
     output_dir = create_output_dir(args.output_dir, 'infer', args.__dict__)
-    monitoring = Monitoring(0, args.cpu_monitor_interval, output_dir, split)
+    monitoring = Monitoring(args.gpu_monitor_interval, args.cpu_monitor_interval, output_dir, split)
     start_time = time.time()
 
-    metrics = evaluate(predictor, ts_test)
+    metrics = evaluate(model, ts_test)
 
     end_time = time.time()
     monitoring.stop()
@@ -137,13 +143,14 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset',    default='cif_2016_dataset')
-    parser.add_argument('--model',      default='nbeats')
+    parser.add_argument('--model',      default='arima')
     parser.add_argument('--output-dir', default='mnt_data/results')
     parser.add_argument('--epochs',     default=100)
     parser.add_argument('--datadir',    default='mnt_data/data')
 
     # randomization and hardware profiling
-    parser.add_argument("--cpu-monitor-interval", default=.01, type=float, help="Setting to > 0 activates CPU profiling every X seconds")
+    parser.add_argument("--cpu-monitor-interval", default=.05, type=float, help="Setting to > 0 activates CPU profiling every X seconds")
+    parser.add_argument("--gpu-monitor-interval", default=.05, type=float, help="Setting to > 0 activates CPU profiling every X seconds")
     parser.add_argument("--seed", type=int, default=42, help="Seed to use (if -1, uses and logs random seed)")
 
     args = parser.parse_args()
