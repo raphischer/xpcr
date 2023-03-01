@@ -20,7 +20,7 @@ if -1 in VISIBLE_GPUS:
 # TODO improve RAPL compability, maybe using https://github.com/djselbeck/rapl-read-ryzen
 
 
-def aggregate_log(fpath):
+def aggregate_monitoring_log(fpath):
     if not os.path.isfile(fpath):
         return None
     results = defaultdict(dict)
