@@ -1,14 +1,4 @@
 {
-    "model": {
-        "name": "Model Name"
-    },
-    "dataset": {
-        "name": "Dataset Name"
-    },
-    "environment": {
-        "name": "Environment"
-    },
-
     "train_running_time": {
         "name": "Training Time",
         "unit": "seconds",

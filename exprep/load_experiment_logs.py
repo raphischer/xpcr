@@ -142,3 +142,13 @@ def load_database(logdir_root, outout_logdir_merged=None, output_tar_dir=None, p
     aggregated_logs = aggregate_logs(logs, property_extractors_module)
 
     return aggregated_logs
+
+
+def find_sub_database(database, dataset=None, task=None, environment=None):
+    if dataset is not None:
+        database = database[database['dataset'] == dataset]
+    if task is not None:
+        database = database[database['task'] == task]
+    if environment is not None:
+        database = database[database['environment'] == environment]
+    return database

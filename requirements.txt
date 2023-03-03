@@ -4,3 +4,12 @@ mxnet
 numpy==1.18.5
 rpy2
 # install R, and from R run install.packages("curl", "forecast")
+ 
+# rating and results generation (ELEx)
+dash
+plotly
+dash-bootstrap-components
+reportlab
+PyMuPDF
+qrcode
+pint

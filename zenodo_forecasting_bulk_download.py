@@ -1,6 +1,7 @@
 import requests
 import os
 import subprocess
+import json
 
 directory='mnt_data/data'
 
@@ -8,6 +9,8 @@ response = requests.get('https://zenodo.org/api/records',
                         params={'communities': 'forecasting', 'size': 1000, 'status': 'published',
                                 'access_token': 'ANON'})
 resp = response.json()
+
+dataset_meta = {}
 
 for hit in resp['hits']['hits']:
     if len(hit['files']) > 1:
@@ -26,6 +29,15 @@ for hit in resp['hits']['hits']:
         os.chdir(cwd)
     if os.path.isfile(full_path):
         print('SUCCESS   ', ds_name)
+        dataset_meta[ds_name] = {
+            'name': hit['metadata']['title'],
+            'doi': hit['metadata']['doi'],
+            'license': hit['metadata']['license'],
+            'publication_date': hit['metadata']['publication_date']
+        }
     else:
         print('ERROR   ', ds_name)
     print('--------------------------------------')
+
+with open('meta_datasets.json', 'w') as meta:
+    json.dump(dataset_meta, meta, indent=4)
