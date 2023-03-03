@@ -42,20 +42,20 @@ def read_log_directory(directory):
     return res
 
 
-def process_directory(directory, merged_log_dir=None, output_tar_dir=None):
+def process_directory(directory, outout_logdir_merged=None, output_tar_dir=None):
     print('Processing', directory)
     # create summary
-    if merged_log_dir is not None: 
-        if not os.path.isdir(merged_log_dir):
-            os.makedirs(merged_log_dir)
-        agglog_name = os.path.join(merged_log_dir, basename(directory) + '.json')
+    if outout_logdir_merged is not None: 
+        if not os.path.isdir(outout_logdir_merged):
+            os.makedirs(outout_logdir_merged)
+        agglog_name = os.path.join(outout_logdir_merged, basename(directory) + '.json')
         # load if already exists
         if os.path.isfile(agglog_name):
             res = read_json(agglog_name)
         else:
             res = read_log_directory(directory)
-            if merged_log_dir is not None:
-                res['full_log'] = os.path.join(merged_log_dir, basename(directory) + '.tar.gz')
+            if outout_logdir_merged is not None:
+                res['full_log'] = os.path.join(outout_logdir_merged, basename(directory) + '.tar.gz')
             with open(agglog_name, 'w') as agglog:
                 json.dump(res, agglog, indent=4, cls=PatchedJSONEncoder)
     else:
@@ -102,74 +102,43 @@ def merge_database(database):
     return grouped_results.reset_index()
 
 
-def aggregate_logs(logs, property_extractors_module, database_fname):
+def aggregate_logs(logs, property_extractors_module):
     # import extractors
     if property_extractors_module is None:
         property_extractors_module = 'properties'
     try:
         property_extractors = importlib.import_module(property_extractors_module).PROPERTIES
     except (AttributeError, ImportError) as e:
-        raise RuntimeError(f'Error when trying to import aggregators from {args.experiment_properties} module!')
+        raise RuntimeError(f'Error when trying to import aggregators from {property_extractors_module} module!')
 
-    if os.path.isfile(database_fname): # if available, read from disc
-        aggregated_logs = pd.read_pickle(database_fname)
-    else:
-        if not isinstance(logs, list):
-            # directory given instead of logs
-            if not os.path.isdir(logs):
-                raise RuntimeError('Please pass a list of merged logs, or the directory where respective .json logs can be found!')
-            # parse all logs in directory
-            lognames = [os.path.join(logs, fname) for fname in os.listdir(logs) if fname.endswith('.json')]
-            logs = [read_json(fname) for fname in lognames]
-        
-        # aggregate properties per log, build database, and merge to single entries per (configuration X environment) combination
-        agg_logs = [ aggregate_log(log, property_extractors) for log in logs ]
-        aggregated_logs = pd.DataFrame.from_records(agg_logs)
-        merged_database = merge_database(aggregated_logs)
-        merged_database.to_pickle(database_fname)
+    if not isinstance(logs, list):
+        # directory given instead of logs
+        if not os.path.isdir(logs):
+            raise RuntimeError('Please pass a list of merged logs, or the directory where respective .json logs can be found!')
+        # parse all logs in directory
+        lognames = [os.path.join(logs, fname) for fname in os.listdir(logs) if fname.endswith('.json')]
+        logs = [read_json(fname) for fname in lognames]
+    
+    # aggregate properties per log, build database, and merge to single entries per (configuration X environment) combination
+    agg_logs = [ aggregate_log(log, property_extractors) for log in logs ]
+    aggregated_logs = pd.DataFrame.from_records(agg_logs)
+    merged_database = merge_database(aggregated_logs)
 
     return merged_database
 
 
-def load_database(results_dir, merged_log_dir=None, output_tar_dir=None, property_extractors_module=None, database_fname='database.pkl', clean=False):
+def load_database(logdir_root, outout_logdir_merged=None, output_tar_dir=None, property_extractors_module=None, clean=False):
     if clean: # remove all subdirectory contents
-        if os.path.isfile(database_fname):
-            os.remove(database_fname)
-        for rootdir in [merged_log_dir, output_tar_dir]:
+        for rootdir in [outout_logdir_merged, output_tar_dir]:
             if rootdir is not None and os.path.isdir(rootdir):
                 shutil.rmtree(rootdir)
     # process
     logs = []
-    for dir in sorted(os.listdir(results_dir)):
-        log = process_directory(os.path.join(results_dir, dir), merged_log_dir, output_tar_dir)
+    for dir in sorted(os.listdir(logdir_root)):
+        log = process_directory(os.path.join(logdir_root, dir), outout_logdir_merged, output_tar_dir)
         logs.append(log)
 
     # aggregate
-    aggregated_logs = aggregate_logs(logs, property_extractors_module, database_fname)
+    aggregated_logs = aggregate_logs(logs, property_extractors_module)
 
     return aggregated_logs
-
-
-if __name__ == '__main__':
-
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument("--results-dir", default="mnt_data/results", type=str, help="directory with experimental result sub directories")
-    parser.add_argument("--merged-log-dir", default="mnt_data/results_merged", type=str, help="directory where merged experiment logs (json format) are created")
-    parser.add_argument("--output-tar-dir", default=None, type=str, help="directory where the full logs shall be stored (.tar.gz archives)")
-    parser.add_argument("--property-extractors-module", default="properties", help="python file with PROPERTIES dictionary, which maps properties to executable extractor functions")
-    parser.add_argument("--database-fname", default="database.pkl", help="filename for the database that shall be created")
-    parser.add_argument("--clean", action="store_true", help="set to first delete all content in given output directories")
-
-    args = parser.parse_args()
-
-    # parse results directories
-    database = load_database(args.results_dir, args.merged_log_dir, args.output_tar_dir, args.property_extractors_module, args.database_fname, args.clean)
-
-    print(f'Database constructed from logs has {database.shape} entries')
-
-    # for task, task_agg_logs in aggregated_logs.items():
-    #     print('Results for', task)
-    #     total_ds = pd.unique(task_agg_logs['dataset']).size
-    #     best_per_ds = task_agg_logs.groupby('dataset').apply( lambda grp: grp.iloc[grp['RMSE'].argmin()].drop('dataset') )
-    #     print(best_per_ds)

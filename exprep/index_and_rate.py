@@ -85,7 +85,9 @@ def calculate_optimal_boundaries(summaries, quantiles):
     return load_boundaries(boundaries)
 
 
-def load_boundaries(content="boundaries.json"):
+def load_boundaries(content=None):
+    if content is None:
+        content = {'default': [1.5, 1.0, 0.5, 0.25]}
     if isinstance(content, dict):
         boundary_json = content
     elif isinstance(content, str):
