@@ -1,33 +1,39 @@
 {
-    "train_running_time": {
-        "name": "Training Time",
-        "unit": "seconds",
-        "group": "Resources"
-    },
     "train_power_draw": {
         "name": "Training Power Draw",
         "unit": "wattseconds",
-        "group": "Resources"
+        "group": "Resources",
+        "weight": 0.6
+    },
+    "train_running_time": {
+        "name": "Training Time",
+        "unit": "seconds",
+        "group": "Resources",
+        "weight": 0.4
     },
     
-    "running_time": {
-        "name": "Evaluation Time",
-        "unit": "seconds",
-        "group": "Resources"
-    },
     "power_draw": {
         "name": "Evaluation Power Draw",
         "unit": "wattseconds",
-        "group": "Resources"
+        "group": "Resources",
+        "weight": 0.6
+    },
+    "running_time": {
+        "name": "Evaluation Time",
+        "unit": "seconds",
+        "group": "Resources",
+        "weight": 0.4
     },
     "RMSE": {
         "name": "Evaluation RMSE",
         "unit": "number",
-        "group": "Quality"
+        "group": "Quality",
+        "weight": 0.6
     },
     "sMAPE": {
         "name": "Evaluation sMAPE",
         "unit": "number",
-        "group": "Quality"
+        "group": "Quality",
+        "weight": 0.4
     }
 }

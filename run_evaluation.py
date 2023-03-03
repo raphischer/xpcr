@@ -38,7 +38,7 @@ if __name__ == '__main__':
 
     if args.mode == 'interactive':
         app = Visualization(rated_database, boundaries, real_boundaries, args.dataset_meta)
-        app.run_server(debug=args.debug, host=args.host, port=args.port)
+        app.run_server()#debug=args.debug, host=args.host, port=args.port)
 
     if args.mode == 'paper_results':
         pass
