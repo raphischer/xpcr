@@ -4,7 +4,7 @@ import json
 import numpy as np
 import pandas as pd
 
-from unit_reformatting import CustomUnitReformater
+from exprep.unit_reformatting import CustomUnitReformater
 
 
 def calculate_compound_rating(ratings, mode, meanings=None):
@@ -192,49 +192,6 @@ def rate_database(database, boundaries=None, references=None, properties_meta='p
         idc = grouped_by.indices[group_field_vals]
         database.loc[idc] = data
     return database, boundaries, real_boundaries
-
-
-    # reference_values = {}
-    # for ds, ds_logs in summaries.items():
-    #     reference_name = references[ds]
-    #     reference_values[ds] = {}
-    #     for task_type, task_logs in ds_logs.items():
-    #         reference_values[ds][task_type] = {env_key: {} for env_key in task_logs.keys()}
-    #         for env_key, env_logs in task_logs.items():
-    #             for model in env_logs:
-    #                 if model['name'] == reference_name:
-    #                     for metrics_key, metrics_val in model.items():
-    #                         if isinstance(metrics_val, dict) and 'value' in metrics_val:
-    #                             if metrics_val['value'] is None:
-    #                                 raise RuntimeError(f'Found unratable metric {metrics_key} for reference model {reference_name} on {env_key} {task_type}!')
-    #                             reference_values[ds][task_type][env_key][metrics_key] = metrics_val['value']
-    #                     break
-    #             else:
-    #                 raise RuntimeError(f'Reference {reference_name} not found in {ds} {task_type} {env_key} logs!')
-            
-    #         # Calculate value indices using reference values and boundaries
-    #         for env_key, env_summs in summaries[ds][task_type].items():
-    #             for model in env_summs:
-    #                 for key in model.keys():
-    #                     if isinstance(model[key], dict) and 'value' in model[key]:
-    #                         if model[key]['value'] is None:
-    #                             model[key]['index'] = None
-    #                             model[key]['rating'] = 4
-    #                         else:
-    #                             model[key]['index'] = value_to_index(model[key]['value'], reference_values[ds][task_type][env_key][key], key)
-    #                             model[key]['rating'] = index_to_rating(model[key]['index'], boundaries[key])
-
-    # # Calculate the real-valued boundaries
-    # real_boundaries = {}
-    # for ds, ds_ref_values in reference_values.items():
-    #     real_boundaries[ds] = {}
-    #     for task_type, task_ref_values in ds_ref_values.items():
-    #         real_boundaries[ds][task_type] = {env_key: {} for env_key in task_ref_values.keys()}
-    #         for env_key, env_ref_values in task_ref_values.items():
-    #             for key, val in env_ref_values.items():
-    #                 real_boundaries[ds][task_type][env_key][key] = [(index_to_value(start, val, key), index_to_value(stop, val, key)) for (start, stop) in boundaries[key]]
-    
-    # return summaries, boundaries, real_boundaries
 
 
 if __name__ == '__main__':
