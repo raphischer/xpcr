@@ -14,7 +14,7 @@ from exprep.index_and_rate import rate_database, load_boundaries, save_boundarie
 from exprep.elex.pages import create_page
 from exprep.elex.util import summary_to_html_tables, toggle_element_visibility
 from exprep.elex.graphs import create_scatter_graph, create_bar_graph, add_rating_background
-from exprep.labels.label_generation import EnergyLabel
+from exprep.labels.label_generation import PropertyLabel
 from exprep.unit_reformatting import CustomUnitReformater
 from exprep.load_experiment_logs import find_sub_database
 
@@ -37,7 +37,7 @@ class Visualization(dash.Dash):
             'task': self.tasks[self.datasets[0]][0],
             'env': self.environments[(self.datasets[0], self.tasks[self.datasets[0]][0])][0]
         }
-        self.curr_model = { 'summary': None, 'label': None, 'logs': None }
+        self.curr_model = { 'model': None, 'label': None}
 
         # create a dict with all metrics for any dataset & task combination, and a map of metric unit symbols
         self.metrics, self.metric_units = {}, {}
@@ -194,19 +194,18 @@ class Visualization(dash.Dash):
 
     def display_model(self, hover_data=None, env_names=None, rating_mode=None):
         if hover_data is None:
-            self.curr_model = { 'summary': None, 'label': None, 'logs': None }
+            self.curr_model = { 'model': None, 'label': None}
             model_table, metric_table,  enc_label, link, open = None, None, None, "/", True
         else:
             self.rating_mode = self.rating_mode if rating_mode is None else rating_mode
             point = hover_data['points'][0]
             env_name = env_names[point['curveNumber']]
-            self.curr_model['summary'] = self.summaries[self.curr_data['ds']][self.curr_data['task']][env_name][point['pointNumber']]
-            self.curr_model['logs'] = self.logs[self.curr_data['ds']][self.curr_data['task']][env_name][point['pointNumber']]
-            self.curr_model['label'] = EnergyLabel(self.curr_model['summary'], self.rating_mode)
+            self.curr_model['model'] = find_sub_database(self.curr_data['sub_database'], environment=env_name).iloc[point['pointNumber']].to_dict()
+            self.curr_model['label'] = PropertyLabel(self.curr_model['model'], self.rating_mode)
 
-            model_table, metric_table = summary_to_html_tables(self.curr_model['summary'], self.rating_mode)
+            model_table, metric_table = summary_to_html_tables(self.curr_model['model'], self.rating_mode)
             enc_label = self.curr_model['label'].to_encoded_image()
-            link = self.curr_model['summary']['model_info']['url']
+            link = self.curr_model['model']['model_info']['url']
             open = False
         return model_table, metric_table,  enc_label, enc_label, link, open
 
@@ -226,15 +225,16 @@ class Visualization(dash.Dash):
             return dict(content=save_weights(self.summaries, None), filename='weights.json')
 
     def save_label(self, lbl_clicks=None, lbl_clicks2=None, sum_clicks=None, log_clicks=None):
-        if (lbl_clicks is None and lbl_clicks2 is None and sum_clicks is None and log_clicks is None) or self.curr_model['summary'] is None:
+        if (lbl_clicks is None and lbl_clicks2 is None and sum_clicks is None and log_clicks is None) or self.curr_model['model'] is None:
             return # callback init
         f_id = f'{self.curr_model["summary"]["name"]}_{self.curr_model["summary"]["environment"]}'
         if 'label' in dash.callback_context.triggered[0]['prop_id']:
             return dcc.send_bytes(self.curr_model['label'].write(), filename=f'energy_label_{f_id}.pdf')
         elif 'sum' in dash.callback_context.triggered[0]['prop_id']:
-            return dict(content=json.dumps(self.curr_model['summary'], indent=4), filename=f'energy_summary_{f_id}.json')
+            return dict(content=json.dumps(self.curr_model['model'], indent=4), filename=f'energy_summary_{f_id}.json')
         else: # full logs
-            return dict(content=json.dumps(self.curr_model['logs'], indent=4), filename=f'energy_logs_{f_id}.json')
+            # TODO load logs
+            raise NotImplementedError
 
 
 if __name__ == '__main__':

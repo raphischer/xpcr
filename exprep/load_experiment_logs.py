@@ -97,7 +97,7 @@ def merge_database(database):
     grouped = database.groupby(['configuration', 'environment'])
     grouped_results = grouped.first() # take first occurence as a start
     mean_values = grouped.mean()
-    grouped_results.update(mean_values)
+    grouped_results.update(mean_values) # TODO also merge the individual log directories into list
     grouped_results['n_results'] = grouped.size()
     return grouped_results.reset_index()
 

@@ -8,10 +8,12 @@ from exprep.unit_reformatting import CustomUnitReformater
 
 
 def calculate_compound_rating(ratings, mode, meanings=None):
-    if isinstance(ratings, pd.Series): # model summary given instead of list of ratings
-        weights = [val['weight'] for val in ratings if isinstance(val, dict) and 'rating' in val if val['weight'] > 0]
+    if isinstance(ratings, pd.Series):
+        ratings = ratings.to_dict()
+    if isinstance(ratings, dict): # model summary given instead of list of ratings
+        weights = [val['weight'] for val in ratings.values() if isinstance(val, dict) and 'rating' in val if val['weight'] > 0]
         weights = [w / sum(weights) for w in weights]
-        ratings = [val['rating'] for val in ratings if isinstance(val, dict) and 'rating' in val if val['weight'] > 0]
+        ratings = [val['rating'] for val in ratings.values() if isinstance(val, dict) and 'rating' in val if val['weight'] > 0]
     else:
         weights = [1.0 / len(ratings) for _ in ratings]
     if meanings is None:
