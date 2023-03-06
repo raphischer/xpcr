@@ -19,7 +19,8 @@
             "method": "RNN",
             "implementation": "MXNet,?PyTorch",
             "paper": "Salinas et al. 2020",
-            "url": "https://doi.org/10.1016/j.ijforecast.2019.07.001"
+            "url": "https://doi.org/10.1016/j.ijforecast.2019.07.001",
+            "module": "gluonts.mx.model.deepar._estimator"
         },
         "unnamed_0": {
             "name": "DeepState",
@@ -28,7 +29,8 @@
             "method": "RNN, state-space model",
             "implementation": "MXNet",
             "paper": "Rangapuram et al. 2018",
-            "url": "https://papers.nips.cc/paper/2018/hash/5cf68969fb67aa6082363a6d4e6468e2-Abstract.html"
+            "url": "https://papers.nips.cc/paper/2018/hash/5cf68969fb67aa6082363a6d4e6468e2-Abstract.html",
+            "module": null
         },
         "unnamed_1": {
             "name": "DeepFactor",
@@ -37,7 +39,8 @@
             "method": "RNN, state-space model, Gaussian process",
             "implementation": "MXNet",
             "paper": "Wang et al. 2019",
-            "url": "https://proceedings.mlr.press/v97/wang19k.html"
+            "url": "https://proceedings.mlr.press/v97/wang19k.html",
+            "module": null
         },
         "unnamed_2": {
             "name": "Deep Renewal Processes",
@@ -46,7 +49,8 @@
             "method": "RNN",
             "implementation": "MXNet",
             "paper": "T?rkmen et al. 2021",
-            "url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0259764"
+            "url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0259764",
+            "module": null
         },
         "unnamed_3": {
             "name": "GPForecaster",
@@ -55,7 +59,8 @@
             "method": "MLP, Gaussian process",
             "implementation": "MXNet",
             "paper": null,
-            "url": null
+            "url": null,
+            "module": null
         },
         "unnamed_4": {
             "name": "MQ-CNN",
@@ -64,7 +69,8 @@
             "method": "CNN encoder, MLP decoder",
             "implementation": "MXNet",
             "paper": "Wen et al. 2017",
-            "url": "https://arxiv.org/abs/1711.11053"
+            "url": "https://arxiv.org/abs/1711.11053",
+            "module": null
         },
         "unnamed_5": {
             "name": "MQ-RNN",
@@ -73,7 +79,8 @@
             "method": "RNN encoder, MLP encoder",
             "implementation": "MXNet",
             "paper": "Wen et al. 2017",
-            "url": "https://arxiv.org/abs/1711.11053"
+            "url": "https://arxiv.org/abs/1711.11053",
+            "module": null
         },
         "unnamed_6": {
             "name": "N-BEATS",
@@ -82,7 +89,8 @@
             "method": "MLP, residual links",
             "implementation": "MXNet",
             "paper": "Oreshkin et al. 2019",
-            "url": "https://openreview.net/forum?id=r1ecqn4YwB"
+            "url": "https://openreview.net/forum?id=r1ecqn4YwB",
+            "module": null
         },
         "unnamed_7": {
             "name": "Rotbaum",
@@ -91,7 +99,8 @@
             "method": "XGBoost, Quantile Regression Forests, LightGBM, Level Set Forecaster",
             "implementation": "Numpy",
             "paper": "Hasson et al. 2021",
-            "url": "https://openreview.net/forum?id=VD3TMzyxKK"
+            "url": "https://openreview.net/forum?id=VD3TMzyxKK",
+            "module": null
         },
         "unnamed_8": {
             "name": "Temporal Fusion Transformer",
@@ -100,7 +109,8 @@
             "method": "LSTM, self attention",
             "implementation": "MXNet",
             "paper": "Lim et al. 2021",
-            "url": "https://doi.org/10.1016/j.ijforecast.2021.03.012"
+            "url": "https://doi.org/10.1016/j.ijforecast.2021.03.012",
+            "module": null
         },
         "transformer": {
             "name": "Transformer",
@@ -109,7 +119,8 @@
             "method": "MLP, multi-head attention",
             "implementation": "MXNet",
             "paper": "Vaswani et al. 2017",
-            "url": "https://papers.nips.cc/paper/2017/hash/3f5ee243547dee91fbd053c1c4a845aa-Abstract.html"
+            "url": "https://papers.nips.cc/paper/2017/hash/3f5ee243547dee91fbd053c1c4a845aa-Abstract.html",
+            "module": "gluonts.mx.model.transformer._estimator"
         },
         "wavenet": {
             "name": "WaveNet",
@@ -118,7 +129,8 @@
             "method": "Dilated convolution",
             "implementation": "MXNet",
             "paper": "van den Oord et al. 2016",
-            "url": "https://arxiv.org/abs/1609.03499"
+            "url": "https://arxiv.org/abs/1609.03499",
+            "module": "gluonts.mx.model.wavenet._estimator"
         },
         "unnamed_9": {
             "name": "SimpleFeedForward",
@@ -127,7 +139,8 @@
             "method": "MLP",
             "implementation": "MXNet,?PyTorch",
             "paper": null,
-            "url": null
+            "url": null,
+            "module": null
         },
         "unnamed_10": {
             "name": "DeepVAR",
@@ -136,7 +149,8 @@
             "method": "RNN",
             "implementation": "MXNet",
             "paper": "Salinas et al. 2019",
-            "url": "https://proceedings.neurips.cc/paper/2019/hash/0b105cf1504c4e241fcc6d519ea962fb-Abstract.html"
+            "url": "https://proceedings.neurips.cc/paper/2019/hash/0b105cf1504c4e241fcc6d519ea962fb-Abstract.html",
+            "module": null
         },
         "unnamed_11": {
             "name": "GPVAR",
@@ -145,7 +159,8 @@
             "method": "RNN, Gaussian process",
             "implementation": "MXNet",
             "paper": "Salinas et al. 2019",
-            "url": "https://proceedings.neurips.cc/paper/2019/hash/0b105cf1504c4e241fcc6d519ea962fb-Abstract.html"
+            "url": "https://proceedings.neurips.cc/paper/2019/hash/0b105cf1504c4e241fcc6d519ea962fb-Abstract.html",
+            "module": null
         },
         "lstnet": {
             "name": "LSTNet",
@@ -154,7 +169,8 @@
             "method": "LSTM",
             "implementation": "MXNet",
             "paper": "Lai et al. 2018",
-            "url": "https://doi.org/10.1145/3209978.3210006"
+            "url": "https://doi.org/10.1145/3209978.3210006",
+            "module": "gluonts.mx.model.lstnet._estimator"
         },
         "unnamed_12": {
             "name": "DeepTPP",
@@ -163,7 +179,8 @@
             "method": "RNN, temporal point process",
             "implementation": "MXNet",
             "paper": "Shchur et al. 2020",
-            "url": "https://arxiv.org/pdf/1909.12127"
+            "url": "https://arxiv.org/pdf/1909.12127",
+            "module": null
         },
         "unnamed_13": {
             "name": "DeepVARHierarchical",
@@ -172,7 +189,8 @@
             "method": "RNN",
             "implementation": "MXNet",
             "paper": "Rangapuram et al. 2021",
-            "url": "https://proceedings.mlr.press/v139/rangapuram21a.html"
+            "url": "https://proceedings.mlr.press/v139/rangapuram21a.html",
+            "module": null
         },
         "unnamed_14": {
             "name": "RForecast",
@@ -181,7 +199,8 @@
             "method": "ARIMA, ETS, Croston, TBATS",
             "implementation": "Wrapped R package",
             "paper": "Hyndman et al. 2008",
-            "url": "https://www.jstatsoft.org/article/view/v027i03"
+            "url": "https://www.jstatsoft.org/article/view/v027i03",
+            "module": null
         },
         "unnamed_15": {
             "name": "Prophet",
@@ -190,7 +209,8 @@
             "method": "-",
             "implementation": "Wrapped Python package",
             "paper": "Taylor et al. 2017",
-            "url": "https://doi.org/10.1080/00031305.2017.1380080"
+            "url": "https://doi.org/10.1080/00031305.2017.1380080",
+            "module": null
         },
         "unnamed_16": {
             "name": "NaiveSeasonal",
@@ -199,7 +219,8 @@
             "method": "-",
             "implementation": "Numpy",
             "paper": "Hyndman et al. 2018",
-            "url": "https://otexts.com/fpp2/simple-methods.html#seasonal-na%C3%AFve-method"
+            "url": "https://otexts.com/fpp2/simple-methods.html#seasonal-na%C3%AFve-method",
+            "module": null
         },
         "unnamed_17": {
             "name": "Naive2",
@@ -208,7 +229,8 @@
             "method": "-",
             "implementation": "Numpy",
             "paper": "Makridakis et al. 1998",
-            "url": "https://www.wiley.com/en-ie/Forecasting:+Methods+and+Applications,+3rd+Edition-p-9780471532330"
+            "url": "https://www.wiley.com/en-ie/Forecasting:+Methods+and+Applications,+3rd+Edition-p-9780471532330",
+            "module": null
         },
         "unnamed_18": {
             "name": "NPTS",
@@ -217,7 +239,8 @@
             "method": "-",
             "implementation": "Numpy",
             "paper": null,
-            "url": null
+            "url": null,
+            "module": null
         }
     },
 
