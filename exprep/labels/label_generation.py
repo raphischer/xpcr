@@ -16,10 +16,10 @@ C_SIZE = (1560, 2411)
 
 POS_GENERAL = {
     # infos that are directly taken from summary via keys
-    "model":       (.04,  .855, 'drawString',        90, '-Bold'),
-    "task":        (.04,  .815, 'drawString',        90, ''),
-    "environment": (.04,  .42,  'drawString',        68, ''),
-    "dataset":     (.95,  .815, 'drawRightString',   90, ''),
+    "model":       (.04,  .855, 'drawString',        80, '-Bold'),
+    "task":        (.04,  .815, 'drawString',        80, ''),
+    "environment": (.04,  .42,  'drawString',        65, ''),
+    "dataset":     (.95,  .815, 'drawRightString',   80, ''),
 }
 
 POS_RATINGS = { char: (.66, y) for char, y in zip('ABCDE', reversed(np.linspace(.461, .727, 5))) }
@@ -53,6 +53,8 @@ def place_relatively(canvas, rel_x, rel_y, draw_method, content, fontstyle='', f
         draw_method(content, x - img.width // 2, y - img.height // 2)
     else:
         canvas.setFont('Helvetica' + fontstyle, font_size)
+        if isinstance(content, dict) and 'name' in content:
+            content = content['name']
         draw_method(x, y, content)
 
 
@@ -86,10 +88,10 @@ def draw_qr(canvas, qr, x, y, width):
         canvas.rect(x + (i * width), y + int(width * qr_pix.shape[0]) - ((j + 1) * width), width, width, fill=1, stroke=0)
 
 
-def find_icon(metric_name, metric_group, icons):
+def find_icon(metric_key, metric_group, icons):
     # check for exact name match
     for key, path in icons.items():
-        if key == metric_name:
+        if key == metric_key:
             return path
     # check for exact group match
     for key, path in icons.items():
@@ -97,7 +99,7 @@ def find_icon(metric_name, metric_group, icons):
             return path
     # check for similar name match
     for key, path in icons.items():
-        if key in metric_name:
+        if key in metric_key:
             return path
     # check for similar group match
     for key, path in icons.items():
@@ -122,14 +124,14 @@ class PropertyLabel(fitz.Document):
         canvas = Canvas("result.pdf", pagesize=C_SIZE)
         # background
         place_relatively(canvas, 0.5, 0.5, 'drawInlineImage', os.path.join(PARTS_DIR, f"bg.png"))
-        # Final Rating & QR
+        # rating & QR
         frate = calculate_compound_rating(summary, rating_mode, 'ABCDE')
         pos = POS_RATINGS[frate]
         place_relatively(canvas, pos[0], pos[1], 'drawInlineImage', os.path.join(PARTS_DIR, f"rating_{frate}.png"))
-        # qr = create_qr(summary['model_info']['url'])
-        # draw_qr(canvas, qr, 0.84 * C_SIZE[0], 0.896 * C_SIZE[1], 175)
+        qr = create_qr(summary['model']['url'])
+        draw_qr(canvas, qr, 0.84 * C_SIZE[0], 0.896 * C_SIZE[1], 175)
 
-        # Add stroke to make even bigger letters
+        # Add stroke to make stronger letters
         canvas.setFillColor(black)
         canvas.setLineWidth(3)
         canvas.setStrokeColor(black)
@@ -143,18 +145,18 @@ class PropertyLabel(fitz.Document):
 
         # rated pictograms & values
         for location, positions in POS_METRICS.items():
-            metric_name = metric_map[location]
-            metric = summary[metric_name]
+            metric_key = metric_map[location]
+            metric = summary[metric_key]
             # print icon
-            icon = find_icon(metric_name, metric['group'].lower(), custom_icons)
+            icon = find_icon(metric_key, metric['group'].lower(), custom_icons)
             rating = metric['rating']
             icon = icon.replace('_$.', f'_{rating}.')
             rel_x, rel_y = positions['icon']
             place_relatively(canvas, rel_x, rel_y, 'drawInlineImage', icon)
             # print texts
             # TODO improve this by looking at the absolute height of the placed icon
-            place_relatively(canvas, rel_x, rel_y - 0.08, 'drawCentredString', metric['fmt_val'] + metric['fmt_unit'], '', 56)
-            place_relatively(canvas, rel_x, rel_y - 0.11, 'drawCentredString', metric_name, '', 56)
+            place_relatively(canvas, rel_x, rel_y - 0.08, 'drawCentredString', metric['fmt_val'] + '_' + metric['fmt_unit'], '', 56)
+            place_relatively(canvas, rel_x, rel_y - 0.11, 'drawCentredString', metric['name'], '', 56)
         
         super().__init__(stream=canvas.getpdfdata(), filetype='pdf')
     

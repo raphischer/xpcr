@@ -10,9 +10,8 @@ from dash import dcc
 import dash_bootstrap_components as dbc
 
 from exprep.index_and_rate import rate_database, load_boundaries, save_boundaries, calculate_optimal_boundaries, save_weights, update_weights, calculate_compound_rating
-
 from exprep.elex.pages import create_page
-from exprep.elex.util import summary_to_html_tables, toggle_element_visibility
+from exprep.elex.util import summary_to_html_tables, toggle_element_visibility, fill_meta
 from exprep.elex.graphs import create_scatter_graph, create_bar_graph, add_rating_background
 from exprep.labels.label_generation import PropertyLabel
 from exprep.unit_reformatting import CustomUnitReformater
@@ -21,23 +20,27 @@ from exprep.load_experiment_logs import find_sub_database
 
 class Visualization(dash.Dash):
 
-    def __init__(self, rated_database, boundaries, real_boundaries, dataset_meta, **kwargs):
+    def __init__(self, rated_database, boundaries, real_boundaries, meta, dark_mode=True, **kwargs):
+        self.dark_mode = dark_mode
+        if dark_mode:
+            kwargs['external_stylesheets'] = [dbc.themes.DARKLY]
         super().__init__(__name__, **kwargs)
-        self.dark_mode = 'external_stylesheets' in kwargs and 'darkly' in kwargs['external_stylesheets'][0] # TODO add other darkmode themes
+        
         # init some values
-        rmt = CustomUnitReformater()
-        self.database, self.boundaries, self.real_boundaries = rated_database, boundaries, real_boundaries
+        self.database, self.boundaries, self.real_boundaries, self.meta = rated_database, boundaries, real_boundaries, meta
         self.datasets = pd.unique(self.database['dataset'])
         # init dicts to find restrictions between dataset, task and environments more easily
         self.tasks = {ds: pd.unique(find_sub_database(self.database, ds)['task']) for ds in self.datasets}
         self.environments = {(ds, task): pd.unique(find_sub_database(self.database, ds, task)['environment']) for ds, tasks in self.tasks.items() for task in tasks}
+        self.unit_fmt = CustomUnitReformater()
 
         self.curr_data = {
             'ds': self.datasets[0],
             'task': self.tasks[self.datasets[0]][0],
-            'env': self.environments[(self.datasets[0], self.tasks[self.datasets[0]][0])][0]
+            'env': self.environments[(self.datasets[0], self.tasks[self.datasets[0]][0])][0],
+            'model': None,
+            'label': None
         }
-        self.curr_model = { 'model': None, 'label': None}
 
         # create a dict with all metrics for any dataset & task combination, and a map of metric unit symbols
         self.metrics, self.metric_units = {}, {}
@@ -65,7 +68,7 @@ class Visualization(dash.Dash):
                 self.metrics[(ds, task)] = metrics
         
         # setup page and create callbacks
-        self.layout = create_page(self.datasets, dataset_meta)
+        self.layout = create_page(self.datasets, self.meta['dataset'])
         self.callback(
             [Output('x-weight', 'value'), Output('y-weight', 'value')],
             [Input('xaxis', 'value'), Input('yaxis', 'value'), Input('weights-upload', 'contents')]
@@ -116,7 +119,7 @@ class Visualization(dash.Dash):
         if reference is not None:
             pass
             # TODO only update self.curr_data['sub_database']
-            # self.database, self.boundaries, self.boundaries_real = rate_database(self.database, boundaries=self.boundaries, references= {self.curr_data['ds'] : reference})
+            sub_database, self.boundaries, self.boundaries_real = rate_database(self.curr_data['sub_database'], self.boundaries, {self.curr_data['ds']: reference}, self.meta['properties'], self.unit_fmt)
         self.plot_data = {}
         for env in env_names:
             env_data = { 'names': [], 'ratings': [], 'x': [], 'y': [] }
@@ -190,22 +193,24 @@ class Visualization(dash.Dash):
         self.curr_data['sub_database'] = find_sub_database(self.database, self.curr_data['ds'], self.curr_data['task'])
         models = self.curr_data['sub_database']['model'].values
         ref_options = [{'label': mod, 'value': mod} for mod in models]
-        return avail_envs, [avail_envs[0]['value']], axis_options, self.curr_data['xaxis'], axis_options, self.curr_data['yaxis'], ref_options, 'default'
+        return avail_envs, [avail_envs[0]['value']], axis_options, self.curr_data['xaxis'], axis_options, self.curr_data['yaxis'], ref_options, models[0]
 
     def display_model(self, hover_data=None, env_names=None, rating_mode=None):
         if hover_data is None:
-            self.curr_model = { 'model': None, 'label': None}
+            self.curr_data['model'] = None
+            self.curr_data['label'] = None
             model_table, metric_table,  enc_label, link, open = None, None, None, "/", True
         else:
             self.rating_mode = self.rating_mode if rating_mode is None else rating_mode
             point = hover_data['points'][0]
             env_name = env_names[point['curveNumber']]
-            self.curr_model['model'] = find_sub_database(self.curr_data['sub_database'], environment=env_name).iloc[point['pointNumber']].to_dict()
-            self.curr_model['label'] = PropertyLabel(self.curr_model['model'], self.rating_mode)
+            model = find_sub_database(self.curr_data['sub_database'], environment=env_name).iloc[point['pointNumber']].to_dict()
+            self.curr_data['model'] = fill_meta(model, self.meta)
+            self.curr_data['label'] = PropertyLabel(self.curr_data['model'], self.rating_mode)
 
-            model_table, metric_table = summary_to_html_tables(self.curr_model['model'], self.rating_mode)
-            enc_label = self.curr_model['label'].to_encoded_image()
-            link = self.curr_model['model']['model_info']['url']
+            model_table, metric_table = summary_to_html_tables(self.curr_data['model'], self.rating_mode)
+            enc_label = self.curr_data['label'].to_encoded_image()
+            link = self.curr_data['model']['model']['url']
             open = False
         return model_table, metric_table,  enc_label, enc_label, link, open
 
@@ -225,26 +230,13 @@ class Visualization(dash.Dash):
             return dict(content=save_weights(self.summaries, None), filename='weights.json')
 
     def save_label(self, lbl_clicks=None, lbl_clicks2=None, sum_clicks=None, log_clicks=None):
-        if (lbl_clicks is None and lbl_clicks2 is None and sum_clicks is None and log_clicks is None) or self.curr_model['model'] is None:
+        if (lbl_clicks is None and lbl_clicks2 is None and sum_clicks is None and log_clicks is None) or self.curr_data['model'] is None:
             return # callback init
-        f_id = f'{self.curr_model["summary"]["name"]}_{self.curr_model["summary"]["environment"]}'
+        f_id = f'{self.curr_data["summary"]["name"]}_{self.curr_data["summary"]["environment"]}'
         if 'label' in dash.callback_context.triggered[0]['prop_id']:
-            return dcc.send_bytes(self.curr_model['label'].write(), filename=f'energy_label_{f_id}.pdf')
+            return dcc.send_bytes(self.curr_data['label'].write(), filename=f'energy_label_{f_id}.pdf')
         elif 'sum' in dash.callback_context.triggered[0]['prop_id']:
-            return dict(content=json.dumps(self.curr_model['model'], indent=4), filename=f'energy_summary_{f_id}.json')
+            return dict(content=json.dumps(self.curr_data['model'], indent=4), filename=f'energy_summary_{f_id}.json')
         else: # full logs
             # TODO load logs
             raise NotImplementedError
-
-
-if __name__ == '__main__':
-
-    parser = argparse.ArgumentParser(description="Interactive energy index explorer")
-    parser.add_argument("--directory", default='results', type=str, help="path directory with aggregated logs")
-    parser.add_argument("--host", default='localhost', type=str, help="default host")
-    parser.add_argument("--port", default=8888, type=int, help="default port")
-    parser.add_argument("--debug", default=False, type=bool, help="debugging")
-    args = parser.parse_args()
-
-    app = Visualization(args.directory, external_stylesheets=[dbc.themes.DARKLY])
-    app.run_server(debug=args.debug, host=args.host, port=args.port)# , host='0.0.0.0', port=8888)

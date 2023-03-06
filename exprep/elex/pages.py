@@ -3,7 +3,7 @@ import os
 from dash import html, dcc
 import dash_bootstrap_components as dbc
 
-from exprep.load_experiment_logs import read_json
+from exprep.util import read_json
 
 def create_axis_option(x=True):
     xy = 'x' if x else 'y'

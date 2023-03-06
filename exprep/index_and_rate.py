@@ -63,6 +63,8 @@ def index_to_rating(index, scale):
 
 
 def process_property(value, reference_value, meta, boundaries, higher_better, unit_fmt):
+    if isinstance(value, dict): # re-indexing
+        value = value['value']
     returned_dict = meta.copy()
     if pd.isna(value):
         return value
@@ -156,16 +158,17 @@ def update_weights(summaries, weights, axis=None):
     return summaries
 
 
-def rate_database(database, boundaries=None, references=None, properties_meta='properties_meta.json'):
+def rate_database(database, boundaries=None, references=None, properties_meta=None, unit_fmt=None):
+    
     # load defaults
     if boundaries is None:
         boundaries = load_boundaries()
     if references is None:
         references = {}
-    if isinstance(properties_meta, str) and os.path.isfile(properties_meta):
-        with open(properties_meta, 'r') as pf:
-            properties_meta = json.load(pf)
-    unit_fmt = CustomUnitReformater()
+    if properties_meta is None:
+        properties_meta = {}
+    if unit_fmt is None:
+        unit_fmt = CustomUnitReformater()
     real_boundaries = {}
 
     # group each dataset, task and environment combo
@@ -186,9 +189,10 @@ def rate_database(database, boundaries=None, references=None, properties_meta='p
 
         # rate metrics based on reference
         for prop, meta in properties_meta.items():
-            # TODO encode higher better info in meta
-            higher_better = False
+            higher_better = False # TODO encode higher better info in meta
             ref_val = reference[prop].values[0]
+            if isinstance(ref_val, dict): # re-indexing
+                ref_val = ref_val['value']
             if prop in boundaries:
                 prop_boundaries = boundaries[prop]
             else:
@@ -196,7 +200,7 @@ def rate_database(database, boundaries=None, references=None, properties_meta='p
                 boundaries[prop] = prop_boundaries # store so that they can be changed in returned boundaries
             data[prop] = data[prop].map(lambda value: process_property(value, ref_val, meta, prop_boundaries, higher_better, unit_fmt))
             # calculate real boundary values
-            if 'Unit' in meta: # TODO is this condition for indexable metrics 
+            if 'unit' in meta: # TODO is this condition for indexable metrics 
                 real_boundaries[group_field_vals][prop] = [(index_to_value(start, ref_val, higher_better), index_to_value(stop, ref_val, higher_better)) for (start, stop) in prop_boundaries]
         
         # store results back to database

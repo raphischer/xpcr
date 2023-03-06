@@ -4,6 +4,7 @@ import os
 import random as python_random
 import sys
 import pkg_resources
+import re
 
 import numpy as np
 import pandas as pd
@@ -11,10 +12,31 @@ import pandas as pd
 from exprep.monitoring import log_system_info
 
 
+def load_meta(directory=None):
+    if directory is None:
+        directory = os.getcwd()
+    meta = {}
+    for fname in os.listdir():
+        re_match = re.match('meta_(.*).json', fname)
+        if re_match:
+            meta[re_match.group(1)] = read_json(os.path.join(directory, fname))
+    return meta
+
+
 def basename(directory):
     if len(os.path.basename(directory)) == 0:
         directory = os.path.dirname(directory)
     return os.path.basename(directory)
+
+
+def read_json(filepath):
+    with open(filepath, 'r') as logf:
+        return json.load(logf)
+
+
+def read_txt(filepath):
+    with open(filepath, 'r') as reqf:
+        return [line.strip() for line in reqf.readlines()]
 
 
 class PatchedJSONEncoder(json.JSONEncoder):

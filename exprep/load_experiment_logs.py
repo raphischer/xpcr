@@ -9,21 +9,12 @@ import pandas as pd
 import numpy as np
 
 from exprep.monitoring import aggregate_monitoring_log
-from exprep.util import basename, PatchedJSONEncoder
+from exprep.util import basename, PatchedJSONEncoder, read_json, read_txt
 
 
 #############################
 ####     log loading     ####
 #############################
-
-def read_json(filepath):
-    with open(filepath, 'r') as logf:
-        return json.load(logf)
-
-
-def read_txt(filepath):
-    with open(filepath, 'r') as reqf:
-        return [line.strip() for line in reqf.readlines()]
 
 
 def read_monitoring(filepath):

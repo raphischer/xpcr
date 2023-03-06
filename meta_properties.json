@@ -25,13 +25,13 @@
         "weight": 0.4
     },
     "RMSE": {
-        "name": "Evaluation RMSE",
+        "name": "Test RMSE",
         "unit": "number",
         "group": "Quality",
         "weight": 0.6
     },
     "sMAPE": {
-        "name": "Evaluation sMAPE",
+        "name": "Test sMAPE",
         "unit": "number",
         "group": "Quality",
         "weight": 0.4

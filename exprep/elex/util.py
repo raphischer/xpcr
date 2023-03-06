@@ -26,14 +26,23 @@ PATTERNS = ["", "/", ".", "x", "-", "\\", "|", "+", "."]
 #     return full_str
 
 
+def fill_meta(summary, meta):
+    for property, value in list(summary.items()):
+        try:
+            summary[property] = meta[property][value]
+        except KeyError:
+            pass
+    return summary
+
+
 def summary_to_html_tables(summary, rating_mode):
     final_rating = calculate_compound_rating(summary, rating_mode)
     info_header = [
         html.Thead(html.Tr([html.Th("Task"), html.Th("Model Name"), html.Th("Environment"), html.Th("Final Rating")]))
     ]
     
-    task = f"{summary['task_type']} on {summary['dataset_info']['name']}"
-    info_row = [html.Tbody([html.Tr([html.Td(field) for field in [task, summary['name'], summary['environment'], final_rating]])])]
+    task = f"{summary['task']} on {summary['dataset']['name']}"
+    info_row = [html.Tbody([html.Tr([html.Td(field) for field in [task, summary['model']['name'], summary['environment'], final_rating]])])]
 
     metrics_header = [
         html.Thead(html.Tr([html.Th("Metric"), html.Th("Value"), html.Th("Index"), html.Th("Rating")]))
@@ -41,17 +50,13 @@ def summary_to_html_tables(summary, rating_mode):
     metrics_rows = []
     for key, val in summary.items():
         if isinstance(val, dict) and "value" in val:
-            if val["value"] is None:
-                value, index = "n.a.", "n.a."
-            else:
-                value, index = val["fmt_val"], f'{val["index"]:6.4f}'[:6]
+            value, index = val["fmt_val"], f'{val["index"]:6.4f}'[:6]
             table_cells = [f'{val["name"]} {val["fmt_unit"]}', value, index, val["rating"]]
             metrics_rows.append(html.Tr([html.Td(field) for field in table_cells]))
 
     model = info_header + info_row
     metrics = metrics_header + [html.Tbody(metrics_rows)]
     return model, metrics
-
 
 
 def toggle_element_visibility(n1, is_open):
