@@ -9,5 +9,730 @@
         "Quadro RTX 5000": "RTX 5000",
         "Intel(R) Xeon(R) W-2155 CPU @ 3.30GHz": "Xeon W-2155",
         "AMD EPYC 7742 64-Core Processor": "EPYC 7742"
+    },
+
+    "model": {
+        "deepar": {
+            "name": "DeepAR",
+            "local/global": "Global",
+            "data": "Univariate",
+            "method": "RNN",
+            "implementation": "MXNet,?PyTorch",
+            "paper": "Salinas et al. 2020",
+            "url": "https://doi.org/10.1016/j.ijforecast.2019.07.001"
+        },
+        "unnamed_0": {
+            "name": "DeepState",
+            "local/global": "Global",
+            "data": "Univariate",
+            "method": "RNN, state-space model",
+            "implementation": "MXNet",
+            "paper": "Rangapuram et al. 2018",
+            "url": "https://papers.nips.cc/paper/2018/hash/5cf68969fb67aa6082363a6d4e6468e2-Abstract.html"
+        },
+        "unnamed_1": {
+            "name": "DeepFactor",
+            "local/global": "Global",
+            "data": "Univariate",
+            "method": "RNN, state-space model, Gaussian process",
+            "implementation": "MXNet",
+            "paper": "Wang et al. 2019",
+            "url": "https://proceedings.mlr.press/v97/wang19k.html"
+        },
+        "unnamed_2": {
+            "name": "Deep Renewal Processes",
+            "local/global": "Global",
+            "data": "Univariate",
+            "method": "RNN",
+            "implementation": "MXNet",
+            "paper": "T?rkmen et al. 2021",
+            "url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0259764"
+        },
+        "unnamed_3": {
+            "name": "GPForecaster",
+            "local/global": "Global",
+            "data": "Univariate",
+            "method": "MLP, Gaussian process",
+            "implementation": "MXNet",
+            "paper": null,
+            "url": null
+        },
+        "unnamed_4": {
+            "name": "MQ-CNN",
+            "local/global": "Global",
+            "data": "Univariate",
+            "method": "CNN encoder, MLP decoder",
+            "implementation": "MXNet",
+            "paper": "Wen et al. 2017",
+            "url": "https://arxiv.org/abs/1711.11053"
+        },
+        "unnamed_5": {
+            "name": "MQ-RNN",
+            "local/global": "Global",
+            "data": "Univariate",
+            "method": "RNN encoder, MLP encoder",
+            "implementation": "MXNet",
+            "paper": "Wen et al. 2017",
+            "url": "https://arxiv.org/abs/1711.11053"
+        },
+        "unnamed_6": {
+            "name": "N-BEATS",
+            "local/global": "Global",
+            "data": "Univariate",
+            "method": "MLP, residual links",
+            "implementation": "MXNet",
+            "paper": "Oreshkin et al. 2019",
+            "url": "https://openreview.net/forum?id=r1ecqn4YwB"
+        },
+        "unnamed_7": {
+            "name": "Rotbaum",
+            "local/global": "Global",
+            "data": "Univariate",
+            "method": "XGBoost, Quantile Regression Forests, LightGBM, Level Set Forecaster",
+            "implementation": "Numpy",
+            "paper": "Hasson et al. 2021",
+            "url": "https://openreview.net/forum?id=VD3TMzyxKK"
+        },
+        "unnamed_8": {
+            "name": "Temporal Fusion Transformer",
+            "local/global": "Global",
+            "data": "Univariate",
+            "method": "LSTM, self attention",
+            "implementation": "MXNet",
+            "paper": "Lim et al. 2021",
+            "url": "https://doi.org/10.1016/j.ijforecast.2021.03.012"
+        },
+        "transformer": {
+            "name": "Transformer",
+            "local/global": "Global",
+            "data": "Univariate",
+            "method": "MLP, multi-head attention",
+            "implementation": "MXNet",
+            "paper": "Vaswani et al. 2017",
+            "url": "https://papers.nips.cc/paper/2017/hash/3f5ee243547dee91fbd053c1c4a845aa-Abstract.html"
+        },
+        "wavenet": {
+            "name": "WaveNet",
+            "local/global": "Global",
+            "data": "Univariate",
+            "method": "Dilated convolution",
+            "implementation": "MXNet",
+            "paper": "van den Oord et al. 2016",
+            "url": "https://arxiv.org/abs/1609.03499"
+        },
+        "unnamed_9": {
+            "name": "SimpleFeedForward",
+            "local/global": "Global",
+            "data": "Univariate",
+            "method": "MLP",
+            "implementation": "MXNet,?PyTorch",
+            "paper": null,
+            "url": null
+        },
+        "unnamed_10": {
+            "name": "DeepVAR",
+            "local/global": "Global",
+            "data": "Multivariate",
+            "method": "RNN",
+            "implementation": "MXNet",
+            "paper": "Salinas et al. 2019",
+            "url": "https://proceedings.neurips.cc/paper/2019/hash/0b105cf1504c4e241fcc6d519ea962fb-Abstract.html"
+        },
+        "unnamed_11": {
+            "name": "GPVAR",
+            "local/global": "Global",
+            "data": "Multivariate",
+            "method": "RNN, Gaussian process",
+            "implementation": "MXNet",
+            "paper": "Salinas et al. 2019",
+            "url": "https://proceedings.neurips.cc/paper/2019/hash/0b105cf1504c4e241fcc6d519ea962fb-Abstract.html"
+        },
+        "lstnet": {
+            "name": "LSTNet",
+            "local/global": "Global",
+            "data": "Multivariate",
+            "method": "LSTM",
+            "implementation": "MXNet",
+            "paper": "Lai et al. 2018",
+            "url": "https://doi.org/10.1145/3209978.3210006"
+        },
+        "unnamed_12": {
+            "name": "DeepTPP",
+            "local/global": "Global",
+            "data": "Multivariate events",
+            "method": "RNN, temporal point process",
+            "implementation": "MXNet",
+            "paper": "Shchur et al. 2020",
+            "url": "https://arxiv.org/pdf/1909.12127"
+        },
+        "unnamed_13": {
+            "name": "DeepVARHierarchical",
+            "local/global": "Global",
+            "data": "Hierarchical",
+            "method": "RNN",
+            "implementation": "MXNet",
+            "paper": "Rangapuram et al. 2021",
+            "url": "https://proceedings.mlr.press/v139/rangapuram21a.html"
+        },
+        "unnamed_14": {
+            "name": "RForecast",
+            "local/global": "Local",
+            "data": "Univariate",
+            "method": "ARIMA, ETS, Croston, TBATS",
+            "implementation": "Wrapped R package",
+            "paper": "Hyndman et al. 2008",
+            "url": "https://www.jstatsoft.org/article/view/v027i03"
+        },
+        "unnamed_15": {
+            "name": "Prophet",
+            "local/global": "Local",
+            "data": "Univariate",
+            "method": "-",
+            "implementation": "Wrapped Python package",
+            "paper": "Taylor et al. 2017",
+            "url": "https://doi.org/10.1080/00031305.2017.1380080"
+        },
+        "unnamed_16": {
+            "name": "NaiveSeasonal",
+            "local/global": "Local",
+            "data": "Univariate",
+            "method": "-",
+            "implementation": "Numpy",
+            "paper": "Hyndman et al. 2018",
+            "url": "https://otexts.com/fpp2/simple-methods.html#seasonal-na%C3%AFve-method"
+        },
+        "unnamed_17": {
+            "name": "Naive2",
+            "local/global": "Local",
+            "data": "Univariate",
+            "method": "-",
+            "implementation": "Numpy",
+            "paper": "Makridakis et al. 1998",
+            "url": "https://www.wiley.com/en-ie/Forecasting:+Methods+and+Applications,+3rd+Edition-p-9780471532330"
+        },
+        "unnamed_18": {
+            "name": "NPTS",
+            "local/global": "Local",
+            "data": "Univariate",
+            "method": "-",
+            "implementation": "Numpy",
+            "paper": null,
+            "url": null
+        }
+    },
+
+    "dataset": {
+        "web_traffic_extended_dataset_without_missing_values": {
+            "name": "Extended Wikipedia Web Traffic Daily Dataset (without Missing Values)",
+            "doi": "10.5281/zenodo.7371038",
+            "license": {
+                "id": "CC-BY-3.0"
+            },
+            "publication_date": "2022-11-28"
+        },
+        "web_traffic_extended_dataset_with_missing_values": {
+            "name": "Extended Wikipedia Web Traffic Daily Dataset (with Missing Values)",
+            "doi": "10.5281/zenodo.7370977",
+            "license": {
+                "id": "CC-BY-3.0"
+            },
+            "publication_date": "2022-11-28"
+        },
+        "oikolab_weather_dataset": {
+            "name": "Oikolab Weather Dataset",
+            "doi": "10.5281/zenodo.5184708",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2021-08-12"
+        },
+        "temperature_rain_dataset_without_missing_values": {
+            "name": "Temperature Rain Dataset without Missing Values",
+            "doi": "10.5281/zenodo.5129091",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2021-07-23"
+        },
+        "temperature_rain_dataset_with_missing_values": {
+            "name": "Temperature Rain Dataset with Missing Values",
+            "doi": "10.5281/zenodo.5129073",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2021-07-23"
+        },
+        "vehicle_trips_dataset_without_missing_values": {
+            "name": "Vehicle Trips Dataset without Missing Values",
+            "doi": "10.5281/zenodo.5122537",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2021-07-22"
+        },
+        "vehicle_trips_dataset_with_missing_values": {
+            "name": "Vehicle Trips Dataset with Missing Values",
+            "doi": "10.5281/zenodo.5122535",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2021-07-22"
+        },
+        "rideshare_dataset_without_missing_values": {
+            "name": "Rideshare Dataset without Missing Values",
+            "doi": "10.5281/zenodo.5122232",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2021-07-22"
+        },
+        "rideshare_dataset_with_missing_values": {
+            "name": "Rideshare Dataset with Missing Values",
+            "doi": "10.5281/zenodo.5122114",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2021-07-22"
+        },
+        "bitcoin_dataset_without_missing_values": {
+            "name": "Bitcoin Dataset without Missing Values",
+            "doi": "10.5281/zenodo.5122101",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2021-07-22"
+        },
+        "bitcoin_dataset_with_missing_values": {
+            "name": "Bitcoin Dataset with Missing Values",
+            "doi": "10.5281/zenodo.5121965",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2021-07-22"
+        },
+        "covid_mobility_dataset_without_missing_values": {
+            "name": "COVID-19 Mobility Dataset (without Missing Values)",
+            "doi": "10.5281/zenodo.4663809",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2021-04-06"
+        },
+        "covid_mobility_dataset_with_missing_values": {
+            "name": "COVID-19 Mobility Dataset (with Missing Values)",
+            "doi": "10.5281/zenodo.4663762",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2021-04-06"
+        },
+        "australian_electricity_demand_dataset": {
+            "name": "Australian Electricity Demand Dataset",
+            "doi": "10.5281/zenodo.4659727",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2021-04-02"
+        },
+        "kdd_cup_2018_dataset_without_missing_values": {
+            "name": "KDD Cup Dataset (without Missing Values)",
+            "doi": "10.5281/zenodo.4656756",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-06-14"
+        },
+        "kdd_cup_2018_dataset_with_missing_values": {
+            "name": "KDD Cup Dataset (with Missing Values)",
+            "doi": "10.5281/zenodo.4656719",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-06-14"
+        },
+        "kaggle_web_traffic_weekly_dataset": {
+            "name": "Kaggle Wikipedia Web Traffic Weekly Dataset",
+            "doi": "10.5281/zenodo.4656664",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-06-13"
+        },
+        "pedestrian_counts_dataset": {
+            "name": "Melbourne Pedestrian Counts Dataset",
+            "doi": "10.5281/zenodo.4656626",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-06-13"
+        },
+        "m4_hourly_dataset": {
+            "name": "M4 Hourly Dataset",
+            "doi": "10.5281/zenodo.4656589",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-06-13"
+        },
+        "london_smart_meters_dataset_without_missing_values": {
+            "name": "London Smart Meters Dataset (without Missing Values)",
+            "doi": "10.5281/zenodo.4656091",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-06-14"
+        },
+        "m4_daily_dataset": {
+            "name": "M4 Daily Dataset",
+            "doi": "10.5281/zenodo.4656548",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-06-13"
+        },
+        "m4_weekly_dataset": {
+            "name": "M4 Weekly Dataset",
+            "doi": "10.5281/zenodo.4656522",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-06-13"
+        },
+        "m4_monthly_dataset": {
+            "name": "M4 Monthly Dataset",
+            "doi": "10.5281/zenodo.4656480",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-06-13"
+        },
+        "m4_quarterly_dataset": {
+            "name": "M4 Quarterly Dataset",
+            "doi": "10.5281/zenodo.4656410",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-06-13"
+        },
+        "m4_yearly_dataset": {
+            "name": "M4 Yearly Dataset",
+            "doi": "10.5281/zenodo.4656379",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-06-12"
+        },
+        "m3_other_dataset": {
+            "name": "M3 Other Dataset",
+            "doi": "10.5281/zenodo.4656335",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-06-12"
+        },
+        "m3_monthly_dataset": {
+            "name": "M3 Monthly Dataset",
+            "doi": "10.5281/zenodo.4656298",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-06-12"
+        },
+        "m3_quarterly_dataset": {
+            "name": "M3 Quarterly Dataset",
+            "doi": "10.5281/zenodo.4656262",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-06-12"
+        },
+        "m3_yearly_dataset": {
+            "name": "M3 Yearly Dataset",
+            "doi": "10.5281/zenodo.4656222",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-06-12"
+        },
+        "m1_yearly_dataset": {
+            "name": "M1 Yearly Dataset",
+            "doi": "10.5281/zenodo.4656193",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-06-11"
+        },
+        "m1_monthly_dataset": {
+            "name": "M1 Monthly Dataset",
+            "doi": "10.5281/zenodo.4656159",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-06-11"
+        },
+        "m1_quarterly_dataset": {
+            "name": "M1 Quarterly Dataset",
+            "doi": "10.5281/zenodo.4656154",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-06-11"
+        },
+        "solar_weekly_dataset": {
+            "name": "Solar Weekly Dataset",
+            "doi": "10.5281/zenodo.4656151",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-06-11"
+        },
+        "solar_10_minutes_dataset": {
+            "name": "Solar Dataset (10 Minutes Observations)",
+            "doi": "10.5281/zenodo.4656144",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-06-11"
+        },
+        "electricity_weekly_dataset": {
+            "name": "Electricity Weekly Dataset",
+            "doi": "10.5281/zenodo.4656141",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-06-11"
+        },
+        "electricity_hourly_dataset": {
+            "name": "Electricity Hourly Dataset",
+            "doi": "10.5281/zenodo.4656140",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-06-11"
+        },
+        "traffic_weekly_dataset": {
+            "name": "Traffic Weekly Dataset",
+            "doi": "10.5281/zenodo.4656135",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-06-11"
+        },
+        "traffic_hourly_dataset": {
+            "name": "Traffic Hourly Dataset",
+            "doi": "10.5281/zenodo.4656132",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-06-11"
+        },
+        "nn5_weekly_dataset": {
+            "name": "NN5 Weekly Dataset",
+            "doi": "10.5281/zenodo.4656125",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-06-11"
+        },
+        "nn5_daily_dataset_without_missing_values": {
+            "name": "NN5 Daily Dataset (without Missing Values)",
+            "doi": "10.5281/zenodo.4656117",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-06-11"
+        },
+        "nn5_daily_dataset_with_missing_values": {
+            "name": "NN5 Daily Dataset (with Missing Values)",
+            "doi": "10.5281/zenodo.4656110",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-06-11"
+        },
+        "tourism_yearly_dataset": {
+            "name": "Tourism Yearly Dataset",
+            "doi": "10.5281/zenodo.4656103",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-06-10"
+        },
+        "tourism_monthly_dataset": {
+            "name": "Tourism Monthly Dataset",
+            "doi": "10.5281/zenodo.4656096",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-06-11"
+        },
+        "tourism_quarterly_dataset": {
+            "name": "Tourism Quarterly Dataset",
+            "doi": "10.5281/zenodo.4656093",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-06-11"
+        },
+        "kaggle_web_traffic_dataset_with_missing_values": {
+            "name": "Kaggle Wikipedia Web Traffic Daily Dataset (with Missing Values)",
+            "doi": "10.5281/zenodo.4656080",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-06-13"
+        },
+        "kaggle_web_traffic_dataset_without_missing_values": {
+            "name": "Kaggle Wikipedia Web Traffic Daily Dataset (without Missing Values)",
+            "doi": "10.5281/zenodo.4656075",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-06-13"
+        },
+        "london_smart_meters_dataset_with_missing_values": {
+            "name": "London Smart Meters Dataset (with Missing Values)",
+            "doi": "10.5281/zenodo.4656072",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-06-13"
+        },
+        "elecdemand_dataset": {
+            "name": "Electricity Demand (Elecdemand) Dataset",
+            "doi": "10.5281/zenodo.4656069",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-06-22"
+        },
+        "saugeenday_dataset": {
+            "name": "Saugeen River Flow (SaugeenDay) Dataset",
+            "doi": "10.5281/zenodo.4656058",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-06-22"
+        },
+        "us_births_dataset": {
+            "name": "US Births Dataset",
+            "doi": "10.5281/zenodo.4656049",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-06-22"
+        },
+        "cif_2016_dataset": {
+            "name": "CIF 2016 Dataset",
+            "doi": "10.5281/zenodo.4656042",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-06-08"
+        },
+        "wind_4_seconds_dataset": {
+            "name": "Wind Power Dataset (4 Seconds Observations)",
+            "doi": "10.5281/zenodo.4656032",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-08-20"
+        },
+        "solar_4_seconds_dataset": {
+            "name": "Solar Power Dataset (4 Seconds Observations)",
+            "doi": "10.5281/zenodo.4656027",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-08-20"
+        },
+        "car_parts_dataset_with_missing_values": {
+            "name": "Car Parts Dataset (with Missing Values)",
+            "doi": "10.5281/zenodo.4656022",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-08-21"
+        },
+        "car_parts_dataset_without_missing_values": {
+            "name": "Car Parts Dataset (without Missing Values)",
+            "doi": "10.5281/zenodo.4656021",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-08-21"
+        },
+        "hospital_dataset": {
+            "name": "Hospital Dataset",
+            "doi": "10.5281/zenodo.4656014",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-08-21"
+        },
+        "covid_deaths_dataset": {
+            "name": "COVID-19 Deaths Dataset",
+            "doi": "10.5281/zenodo.4656009",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-08-21"
+        },
+        "wind_farms_minutely_dataset_with_missing_values": {
+            "name": "Wind Farms Dataset (with Missing Values)",
+            "doi": "10.5281/zenodo.4654909",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-08-23"
+        },
+        "wind_farms_minutely_dataset_without_missing_values": {
+            "name": "Wind Farms Dataset (without Missing Values)",
+            "doi": "10.5281/zenodo.4654858",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-08-23"
+        },
+        "fred_md_dataset": {
+            "name": "FRED-MD Dataset",
+            "doi": "10.5281/zenodo.4654833",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-08-27"
+        },
+        "weather_dataset": {
+            "name": "Weather Dataset",
+            "doi": "10.5281/zenodo.4654822",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-08-27"
+        },
+        "dominick_dataset": {
+            "name": "Dominick Dataset",
+            "doi": "10.5281/zenodo.4654802",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-08-27"
+        },
+        "sunspot_dataset_with_missing_values": {
+            "name": "Sunspot Daily Dataset (with Missing Values)",
+            "doi": "10.5281/zenodo.4654773",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-06-11"
+        },
+        "sunspot_dataset_without_missing_values": {
+            "name": "Sunspot Daily Dataset (without Missing Values)",
+            "doi": "10.5281/zenodo.4654722",
+            "license": {
+                "id": "CC-BY-4.0"
+            },
+            "publication_date": "2020-06-11"
+        }
     }
 }
