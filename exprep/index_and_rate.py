@@ -8,10 +8,10 @@ from exprep.unit_reformatting import CustomUnitReformater
 
 
 def calculate_compound_rating(ratings, mode, meanings=None):
-    if isinstance(ratings, dict): # model summary given instead of list of ratings
-        weights = [val['weight'] for val in ratings.values() if isinstance(val, dict) and 'rating' in val if val['weight'] > 0]
+    if isinstance(ratings, pd.Series): # model summary given instead of list of ratings
+        weights = [val['weight'] for val in ratings if isinstance(val, dict) and 'rating' in val if val['weight'] > 0]
         weights = [w / sum(weights) for w in weights]
-        ratings = [val['rating'] for val in ratings.values() if isinstance(val, dict) and 'rating' in val if val['weight'] > 0]
+        ratings = [val['rating'] for val in ratings if isinstance(val, dict) and 'rating' in val if val['weight'] > 0]
     else:
         weights = [1.0 / len(ratings) for _ in ratings]
     if meanings is None:
@@ -61,13 +61,16 @@ def index_to_rating(index, scale):
 
 
 def process_property(value, reference_value, meta, boundaries, higher_better, unit_fmt):
-    meta['value'] = value
-    if 'unit' in meta: # TODO is this condition for indexable metrics
-        meta['index'] = value_to_index(value, reference_value, higher_better)
-        meta['rating'] = index_to_rating(meta['index'], boundaries)
+    returned_dict = meta.copy()
+    if pd.isna(value):
+        return value
+    returned_dict['value'] = value
+    if 'unit' in returned_dict: # TODO is this condition for indexable metrics
+        returned_dict['index'] = value_to_index(value, reference_value, higher_better)
+        returned_dict['rating'] = index_to_rating(returned_dict['index'], boundaries)
         fmt_val, fmt_unit = unit_fmt.reformat_value(value, meta['unit'])
-        meta.update({'fmt_val': fmt_val, 'fmt_unit': fmt_unit})
-    return meta
+        returned_dict.update({'fmt_val': fmt_val, 'fmt_unit': fmt_unit})
+    return returned_dict
 
 
 def calculate_optimal_boundaries(summaries, quantiles):
@@ -183,8 +186,12 @@ def rate_database(database, boundaries=None, references=None, properties_meta='p
         for prop, meta in properties_meta.items():
             # TODO encode higher better info in meta
             higher_better = False
-            ref_val = reference[prop].values
-            prop_boundaries = boundaries[prop] if prop in boundaries else boundaries['default']
+            ref_val = reference[prop].values[0]
+            if prop in boundaries:
+                prop_boundaries = boundaries[prop]
+            else:
+                prop_boundaries = boundaries['default']
+                boundaries[prop] = prop_boundaries # store so that they can be changed in returned boundaries
             data[prop] = data[prop].map(lambda value: process_property(value, ref_val, meta, prop_boundaries, higher_better, unit_fmt))
             # calculate real boundary values
             if 'Unit' in meta: # TODO is this condition for indexable metrics 
