@@ -7,7 +7,8 @@
         "implementation": "MXNet,?PyTorch",
         "paper": "Salinas et al. 2020",
         "url": "https://doi.org/10.1016/j.ijforecast.2019.07.001",
-        "module": "gluonts.mx.model.deepar._estimator"
+        "module": "gluonts.mx.model.deepar._estimator",
+        "class": "DeepAREstimator"
     },
     "deepstate": {
         "name": "DeepState",
@@ -17,7 +18,8 @@
         "implementation": "MXNet",
         "paper": "Rangapuram et al. 2018",
         "url": "https://papers.nips.cc/paper/2018/hash/5cf68969fb67aa6082363a6d4e6468e2-Abstract.html",
-        "module": null
+        "module": "gluonts.mx.model.deepstate._estimator",
+        "class": "DeepStateEstimator"
     },
     "deepfactor": {
         "name": "DeepFactor",
@@ -27,7 +29,8 @@
         "implementation": "MXNet",
         "paper": "Wang et al. 2019",
         "url": "https://proceedings.mlr.press/v97/wang19k.html",
-        "module": null
+        "module": "gluonts.mx.model.deep_factor._estimator",
+        "class": "DeepFactorEstimator"
     },
     "deeprenewal": {
         "name": "Deep Renewal Processes",
@@ -35,9 +38,10 @@
         "data": "Univariate",
         "method": "RNN",
         "implementation": "MXNet",
-        "paper": "Türkmen et al. 2021",
+        "paper": "T?rkmen et al. 2021",
         "url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0259764",
-        "module": null
+        "module": "gluonts.mx.model.renewal._estimator",
+        "class": "DeepRenewalProcessEstimator"
     },
     "gpforecaster": {
         "name": "GPForecaster",
@@ -46,8 +50,9 @@
         "method": "MLP, Gaussian process",
         "implementation": "MXNet",
         "paper": null,
-        "url": "https://ts.gluon.ai/stable/getting_started/models.html",
-        "module": null
+        "url": null,
+        "module": "gluonts.mx.model.gp_forecaster._estimator",
+        "class": "GaussianProcessEstimator"
     },
     "mqcnn": {
         "name": "MQ-CNN",
@@ -57,7 +62,8 @@
         "implementation": "MXNet",
         "paper": "Wen et al. 2017",
         "url": "https://arxiv.org/abs/1711.11053",
-        "module": null
+        "module": "gluonts.mx.model.seq2seq._mq_dnn_estimator",
+        "class": "MQCNNEstimator"
     },
     "mqrnn": {
         "name": "MQ-RNN",
@@ -67,7 +73,8 @@
         "implementation": "MXNet",
         "paper": "Wen et al. 2017",
         "url": "https://arxiv.org/abs/1711.11053",
-        "module": null
+        "module": "gluonts.mx.model.seq2seq._mq_dnn_estimator",
+        "class": "MQRNNEstimator"
     },
     "nbeats": {
         "name": "N-BEATS",
@@ -77,7 +84,8 @@
         "implementation": "MXNet",
         "paper": "Oreshkin et al. 2019",
         "url": "https://openreview.net/forum?id=r1ecqn4YwB",
-        "module": null
+        "module": "gluonts.mx.model.n_beats._estimator",
+        "class": "NBEATSEstimator"
     },
     "rotbaum": {
         "name": "Rotbaum",
@@ -87,7 +95,8 @@
         "implementation": "Numpy",
         "paper": "Hasson et al. 2021",
         "url": "https://openreview.net/forum?id=VD3TMzyxKK",
-        "module": null
+        "module": "gluonts.model.rotbaum._estimator",
+        "class": "TreeEstimator"
     },
     "tempfus": {
         "name": "Temporal Fusion Transformer",
@@ -97,7 +106,8 @@
         "implementation": "MXNet",
         "paper": "Lim et al. 2021",
         "url": "https://doi.org/10.1016/j.ijforecast.2021.03.012",
-        "module": null
+        "module": "gluonts.mx.model.tft._estimator",
+        "class": "TemporalFusionTransformerEstimator"
     },
     "transformer": {
         "name": "Transformer",
@@ -107,7 +117,8 @@
         "implementation": "MXNet",
         "paper": "Vaswani et al. 2017",
         "url": "https://papers.nips.cc/paper/2017/hash/3f5ee243547dee91fbd053c1c4a845aa-Abstract.html",
-        "module": "gluonts.mx.model.transformer._estimator"
+        "module": "gluonts.mx.model.transformer._estimator",
+        "class": "TransformerEstimator"
     },
     "wavenet": {
         "name": "WaveNet",
@@ -117,17 +128,19 @@
         "implementation": "MXNet",
         "paper": "van den Oord et al. 2016",
         "url": "https://arxiv.org/abs/1609.03499",
-        "module": "gluonts.mx.model.wavenet._estimator"
+        "module": "gluonts.mx.model.wavenet._estimator",
+        "class": "WaveNetEstimator"
     },
-    "feed_forward": {
+    "feedforward": {
         "name": "SimpleFeedForward",
         "local/global": "Global",
         "data": "Univariate",
         "method": "MLP",
         "implementation": "MXNet,?PyTorch",
         "paper": null,
-        "url": "https://ts.gluon.ai/stable/getting_started/models.html",
-        "module": null
+        "url": null,
+        "module": "gluonts.mx.model.simple_feedforward._estimator",
+        "class": "SimpleFeedForwardEstimator"
     },
     "deepvar": {
         "name": "DeepVAR",
@@ -137,7 +150,8 @@
         "implementation": "MXNet",
         "paper": "Salinas et al. 2019",
         "url": "https://proceedings.neurips.cc/paper/2019/hash/0b105cf1504c4e241fcc6d519ea962fb-Abstract.html",
-        "module": null
+        "module": null,
+        "class": null
     },
     "gpvar": {
         "name": "GPVAR",
@@ -147,7 +161,8 @@
         "implementation": "MXNet",
         "paper": "Salinas et al. 2019",
         "url": "https://proceedings.neurips.cc/paper/2019/hash/0b105cf1504c4e241fcc6d519ea962fb-Abstract.html",
-        "module": null
+        "module": null,
+        "class": null
     },
     "lstnet": {
         "name": "LSTNet",
@@ -157,7 +172,8 @@
         "implementation": "MXNet",
         "paper": "Lai et al. 2018",
         "url": "https://doi.org/10.1145/3209978.3210006",
-        "module": "gluonts.mx.model.lstnet._estimator"
+        "module": null,
+        "class": null
     },
     "deeptpp": {
         "name": "DeepTPP",
@@ -167,9 +183,10 @@
         "implementation": "MXNet",
         "paper": "Shchur et al. 2020",
         "url": "https://arxiv.org/pdf/1909.12127",
-        "module": null
+        "module": null,
+        "class": null
     },
-    "deepvh": {
+    "deepvarhierarchical": {
         "name": "DeepVARHierarchical",
         "local/global": "Global",
         "data": "Hierarchical",
@@ -177,19 +194,21 @@
         "implementation": "MXNet",
         "paper": "Rangapuram et al. 2021",
         "url": "https://proceedings.mlr.press/v139/rangapuram21a.html",
-        "module": null
+        "module": null,
+        "class": null
     },
-    "arima": {
-        "name": "ARIMA",
+    "rforecast": {
+        "name": "RForecast",
         "local/global": "Local",
         "data": "Univariate",
         "method": "ARIMA, ETS, Croston, TBATS",
-        "implementation": "RForecast",
+        "implementation": "Wrapped R package",
         "paper": "Hyndman et al. 2008",
         "url": "https://www.jstatsoft.org/article/view/v027i03",
-        "module": null
+        "module": null,
+        "class": null
     },
-    "unnamed_15": {
+    "prophet": {
         "name": "Prophet",
         "local/global": "Local",
         "data": "Univariate",
@@ -197,9 +216,10 @@
         "implementation": "Wrapped Python package",
         "paper": "Taylor et al. 2017",
         "url": "https://doi.org/10.1080/00031305.2017.1380080",
-        "module": null
+        "module": null,
+        "class": null
     },
-    "unnamed_16": {
+    "naiveseasonal": {
         "name": "NaiveSeasonal",
         "local/global": "Local",
         "data": "Univariate",
@@ -207,9 +227,10 @@
         "implementation": "Numpy",
         "paper": "Hyndman et al. 2018",
         "url": "https://otexts.com/fpp2/simple-methods.html#seasonal-na%C3%AFve-method",
-        "module": null
+        "module": "gluonts.model.seasonal_naive._estimator",
+        "class": "SeasonalNaiveEstimator"
     },
-    "unnamed_17": {
+    "naive2": {
         "name": "Naive2",
         "local/global": "Local",
         "data": "Univariate",
@@ -217,16 +238,29 @@
         "implementation": "Numpy",
         "paper": "Makridakis et al. 1998",
         "url": "https://www.wiley.com/en-ie/Forecasting:+Methods+and+Applications,+3rd+Edition-p-9780471532330",
-        "module": null
+        "module": null,
+        "class": null
     },
-    "unnamed_18": {
+    "npts": {
         "name": "NPTS",
         "local/global": "Local",
         "data": "Univariate",
         "method": "-",
         "implementation": "Numpy",
         "paper": null,
-        "url": "https://ts.gluon.ai/stable/getting_started/models.html",
-        "module": null
+        "url": null,
+        "module": null,
+        "class": null
+    },
+    "arima": {
+        "name": "ARIMA",
+        "local/global": "Local",
+        "data": "Univariate",
+        "method": "ARIMA",
+        "implementation": "Wrapped R package",
+        "paper": "Hyndman et al. 2008",
+        "url": "https://www.jstatsoft.org/article/view/v027i03",
+        "module": null,
+        "class": "ARIMAWrapper"
     }
 }

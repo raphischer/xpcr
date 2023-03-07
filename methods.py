@@ -1,16 +1,11 @@
 import os
 import pandas as pd
 import inspect
+import json
 from datetime import datetime
+import importlib
 from typing import Dict, Optional
 
-from gluonts.model.deepar import DeepAREstimator
-from gluonts.model.n_beats import NBEATSEstimator
-from gluonts.model.simple_feedforward import SimpleFeedForwardEstimator
-from gluonts.model.transformer import TransformerEstimator
-from gluonts.model.wavenet import WaveNetEstimator
-from gluonts.model.lstnet import LSTNetEstimator
-from gluonts.model.tft import TemporalFusionTransformerEstimator
 from gluonts.model.r_forecast import RForecastPredictor
 
 from gluonts.dataset.common import ListDataset
@@ -42,22 +37,22 @@ class ARIMAWrapper(RForecastPredictor):
             params=params
         )
 
-# SUBMODULES = [pkg.name for pkg in pkgutil.walk_packages(gluonts.model.__path__, gluonts.model.__name__+'.') if pkg.ispkg]
 
-METHODS = {
-    "arima": ARIMAWrapper,
-    "tempfus": TemporalFusionTransformerEstimator,  # 2021, LSTM, self attention
-    "deepar": DeepAREstimator,                      # 2020, RNN
-    "nbeats": NBEATSEstimator,                      # 2019, MLP, residual links
-    "lstnet": LSTNetEstimator,                      # 2018, LSTM
-    "transformer": TransformerEstimator,            # 2017, MLP, multi-head attention
-    "wavenet": WaveNetEstimator,                    # 2016, Dilated convolution
-    "feed_forward": SimpleFeedForwardEstimator
-}
+with open('meta_model.json', 'r') as meta:
+    MODELS = json.load(meta)
 
 
 def init_model_and_data(args):
-    dataset, method, lag, epochs = args.dataset, args.model, args.lag, args.epochs
+    dataset, model, lag, epochs = args.dataset, args.model, args.lag, args.epochs
+
+    model_props = MODELS[model]
+    if model_props['module'] is None:
+        if not model_props['class'] in globals():
+            raise RuntimeError
+        else:
+            model_cls = globals()[model_props['class']]
+    else:
+        model_cls = getattr(importlib.import_module(model_props['module']), model_props['class'])
 
     full_path = os.path.join(args.datadir, dataset + '.tsf')
     ds, freq, seasonality, forecast_horizon, contain_missing_values, contain_equal_length = load_data(full_path)
@@ -98,12 +93,12 @@ def init_model_and_data(args):
         'trainer': trainer
     }
 
-    exp_args = inspect.signature(METHODS[method]).parameters
+    exp_args = inspect.signature(model_cls).parameters
     for key in list(args.keys()):
         if key not in exp_args:
             del(args[key])
 
-    estimator = METHODS[method](**args)
+    estimator = model_cls(**args)
 
     return train_gluonts_ds, fcast_gluonts_ds, estimator
 

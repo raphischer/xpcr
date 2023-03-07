@@ -4,13 +4,12 @@ import json
 import os
 import pickle
 import time
-import sys
-import re
 import traceback
 
 from methods import init_model_and_data, evaluate
-from util import fix_seed, create_output_dir, Logger, PatchedJSONEncoder
-from monitoring import Monitoring, monitor_flops_papi
+from exprep.util import fix_seed, create_output_dir, Logger, PatchedJSONEncoder
+from codecarbon import OfflineEmissionsTracker
+# from exprep.monitoring import Monitoring, monitor_flops_papi
 
 
 def main(args):
@@ -23,7 +22,7 @@ def main(args):
 
     try:
 
-        lookup = {
+        lookup = { # taken from https://github.com/rakshitha123/TSForecasting
             "cif_2016_dataset": ( 15, 6),
             "nn5_daily_dataset_without_missing_values": ( 9, ),
             "tourism_yearly_dataset": ( 2, ),
@@ -83,11 +82,14 @@ def main(args):
 
         else:
             # model is a GluonTS estimator, that upon calling 'train' returns a predictor
-            monitoring = Monitoring(args.gpu_monitor_interval, args.cpu_monitor_interval, output_dir)
+            emissions_tracker = OfflineEmissionsTracker(measure_power_secs=args.cpu_monitor_interval, country_iso_code="DEU", save_to_file=True, output_dir=output_dir)
+            emissions_tracker.start()
+            # monitoring = Monitoring(args.gpu_monitor_interval, args.cpu_monitor_interval, output_dir)
             start_time = time.time()
             model = model.train(training_data=ts_train)
             end_time = time.time()
-            monitoring.stop()
+            emissions_tracker.stop()
+            # monitoring.stop()
 
             results = {
                 'history': {}, # TODO track history
@@ -104,13 +106,16 @@ def main(args):
         split = 'validation' ############## INFERENCE ##############
         setattr(args, 'train_logdir', output_dir)
         output_dir = create_output_dir(args.output_dir, 'infer', args.__dict__)
-        monitoring = Monitoring(args.gpu_monitor_interval, args.cpu_monitor_interval, output_dir, split)
+        emissions_tracker = OfflineEmissionsTracker(measure_power_secs=args.cpu_monitor_interval, country_iso_code="DEU", save_to_file=True, output_dir=output_dir)
+        emissions_tracker.start()
+        # monitoring = Monitoring(args.gpu_monitor_interval, args.cpu_monitor_interval, output_dir, split)
         start_time = time.time()
 
         metrics = evaluate(model, ts_test)
 
         end_time = time.time()
-        monitoring.stop()
+        emissions_tracker.stop()
+        # monitoring.stop()
 
         results = {
             'metrics': metrics,
@@ -142,7 +147,7 @@ def main(args):
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dataset',    default='cif_2016_dataset')
+    parser.add_argument('--dataset',    default='bitcoin_dataset_without_missing_values')
     parser.add_argument('--model',      default='arima')
     parser.add_argument('--output-dir', default='mnt_data/results')
     parser.add_argument('--epochs',     default=100)
