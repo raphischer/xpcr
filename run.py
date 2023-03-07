@@ -82,7 +82,7 @@ def main(args):
 
         else:
             # model is a GluonTS estimator, that upon calling 'train' returns a predictor
-            emissions_tracker = OfflineEmissionsTracker(measure_power_secs=args.cpu_monitor_interval, country_iso_code="DEU", save_to_file=True, output_dir=output_dir)
+            emissions_tracker = OfflineEmissionsTracker(measure_power_secs=args.cpu_monitor_interval, log_level='warning', country_iso_code="DEU", save_to_file=True, output_dir=output_dir)
             emissions_tracker.start()
             # monitoring = Monitoring(args.gpu_monitor_interval, args.cpu_monitor_interval, output_dir)
             start_time = time.time()
@@ -106,7 +106,7 @@ def main(args):
         split = 'validation' ############## INFERENCE ##############
         setattr(args, 'train_logdir', output_dir)
         output_dir = create_output_dir(args.output_dir, 'infer', args.__dict__)
-        emissions_tracker = OfflineEmissionsTracker(measure_power_secs=args.cpu_monitor_interval, country_iso_code="DEU", save_to_file=True, output_dir=output_dir)
+        emissions_tracker = OfflineEmissionsTracker(measure_power_secs=args.cpu_monitor_interval, log_level='warning', country_iso_code="DEU", save_to_file=True, output_dir=output_dir)
         emissions_tracker.start()
         # monitoring = Monitoring(args.gpu_monitor_interval, args.cpu_monitor_interval, output_dir, split)
         start_time = time.time()
@@ -154,8 +154,7 @@ if __name__ == "__main__":
     parser.add_argument('--datadir',    default='mnt_data/data')
 
     # randomization and hardware profiling
-    parser.add_argument("--cpu-monitor-interval", default=.05, type=float, help="Setting to > 0 activates CPU profiling every X seconds")
-    parser.add_argument("--gpu-monitor-interval", default=.05, type=float, help="Setting to > 0 activates CPU profiling every X seconds")
+    parser.add_argument("--cpu-monitor-interval", default=0.5, type=float, help="Setting to > 0 activates CPU profiling every X seconds")
     parser.add_argument("--seed", type=int, default=42, help="Seed to use (if -1, uses and logs random seed)")
 
     args = parser.parse_args()
