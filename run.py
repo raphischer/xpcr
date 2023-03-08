@@ -20,51 +20,52 @@ def main(args):
     ############## TRAINING ##############
     output_dir = create_output_dir(args.output_dir, 'train', args.__dict__)
 
+    lookup = { # taken from https://github.com/rakshitha123/TSForecasting
+        "cif_2016_dataset": ( 15, 6),
+        "nn5_daily_dataset_without_missing_values": ( 9, ),
+        "tourism_yearly_dataset": ( 2, ),
+        "tourism_quarterly_dataset": ( 5, ),
+        "tourism_monthly_dataset": ( 15, ),
+        "m1_yearly_dataset": ( 2, ),
+        "m1_quarterly_dataset": ( 5, ),
+        "m1_monthly_dataset": ( 15, ),
+        "m3_yearly_dataset": ( 2, ),
+        "m3_quarterly_dataset": ( 5, ),
+        "m3_monthly_dataset": ( 15, ),
+        "m3_other_dataset": ( 2, ),
+        "m4_quarterly_dataset": ( 5, ),
+        "m4_monthly_dataset": ( 15, ),
+        "m4_weekly_dataset": ( 65, ),
+        "m4_daily_dataset": ( 9, ),
+        "m4_hourly_dataset": ( 210, ),
+        "car_parts_dataset_without_missing_values": ( 15, 12, True),
+        "hospital_dataset": ( 15 ,12, True),
+        "fred_md_dataset": ( 15, 12),
+        "nn5_weekly_dataset": ( 65, 8),
+        "traffic_weekly_dataset": ( 65, 8),
+        "electricity_weekly_dataset": ( 65, 8, True),
+        "solar_weekly_dataset": ( 6, 5),
+        "kaggle_web_traffic_weekly_dataset": ( 10, 8, True),
+        "dominick_dataset": ( 10, 8),
+        "us_births_dataset": ( 9, 30, True),
+        "saugeenday_dataset": ( 9, 30),
+        "sunspot_dataset_without_missing_values": ( 9, 30, True),
+        "covid_deaths_dataset": ( 9, 30, True),
+        "weather_dataset": ( 9, 30),
+        "traffic_hourly_dataset": ( 30, 168),
+        "electricity_hourly_dataset": ( 30, 168, True),
+        "solar_10_minutes_dataset": ( 50, 1008),
+        "kdd_cup_2018_dataset_without_missing_values": ( 210, 168),
+        "pedestrian_counts_dataset": ( 210, 24, True),
+        "bitcoin_dataset_without_missing_values": ( 9, 30),
+        "vehicle_trips_dataset_without_missing_values": ( 9, 30, True),
+        "australian_electricity_demand_dataset": ( 420, 336),
+        "rideshare_dataset_without_missing_values": ( 210, 168),
+        "temperature_rain_dataset_without_missing_values": ( 9, 30)
+    }
+
     try:
 
-        lookup = { # taken from https://github.com/rakshitha123/TSForecasting
-            "cif_2016_dataset": ( 15, 6),
-            "nn5_daily_dataset_without_missing_values": ( 9, ),
-            "tourism_yearly_dataset": ( 2, ),
-            "tourism_quarterly_dataset": ( 5, ),
-            "tourism_monthly_dataset": ( 15, ),
-            "m1_yearly_dataset": ( 2, ),
-            "m1_quarterly_dataset": ( 5, ),
-            "m1_monthly_dataset": ( 15, ),
-            "m3_yearly_dataset": ( 2, ),
-            "m3_quarterly_dataset": ( 5, ),
-            "m3_monthly_dataset": ( 15, ),
-            "m3_other_dataset": ( 2, ),
-            "m4_quarterly_dataset": ( 5, ),
-            "m4_monthly_dataset": ( 15, ),
-            "m4_weekly_dataset": ( 65, ),
-            "m4_daily_dataset": ( 9, ),
-            "m4_hourly_dataset": ( 210, ),
-            "car_parts_dataset_without_missing_values": ( 15, 12, True),
-            "hospital_dataset": ( 15 ,12, True),
-            "fred_md_dataset": ( 15, 12),
-            "nn5_weekly_dataset": ( 65, 8),
-            "traffic_weekly_dataset": ( 65, 8),
-            "electricity_weekly_dataset": ( 65, 8, True),
-            "solar_weekly_dataset": ( 6, 5),
-            "kaggle_web_traffic_weekly_dataset": ( 10, 8, True),
-            "dominick_dataset": ( 10, 8),
-            "us_births_dataset": ( 9, 30, True),
-            "saugeenday_dataset": ( 9, 30),
-            "sunspot_dataset_without_missing_values": ( 9, 30, True),
-            "covid_deaths_dataset": ( 9, 30, True),
-            "weather_dataset": ( 9, 30),
-            "traffic_hourly_dataset": ( 30, 168),
-            "electricity_hourly_dataset": ( 30, 168, True),
-            "solar_10_minutes_dataset": ( 50, 1008),
-            "kdd_cup_2018_dataset_without_missing_values": ( 210, 168),
-            "pedestrian_counts_dataset": ( 210, 24, True),
-            "bitcoin_dataset_without_missing_values": ( 9, 30),
-            "vehicle_trips_dataset_without_missing_values": ( 9, 30, True),
-            "australian_electricity_demand_dataset": ( 420, 336),
-            "rideshare_dataset_without_missing_values": ( 210, 168),
-            "temperature_rain_dataset_without_missing_values": ( 9, 30)
-        }
         setattr(args, 'lag', lookup[args.dataset][0])
         if len(lookup[args.dataset]) > 1:
             setattr(args, 'external_forecast_horizon', lookup[args.dataset][1])
@@ -74,7 +75,7 @@ def main(args):
         # tmp = sys.stdout # reroute the stdout to logfile, remember to call close!
         # sys.stdout = Logger(os.path.join(output_dir, f'logfile.txt')),
 
-        ts_train, ts_test, model = init_model_and_data(args)
+        ts_train, history, ts_test, model = init_model_and_data(args)
 
         if not hasattr(model, 'train'):
             # no global training needed, model is only a predictor
@@ -92,7 +93,9 @@ def main(args):
             # monitoring.stop()
 
             results = {
-                'history': {}, # TODO track history
+                'history': {
+                    'loss': history.loss_history
+                },
                 'start': start_time,
                 'end': end_time,
                 'model': None
@@ -139,16 +142,20 @@ def main(args):
         return output_dir
 
     except Exception as e:
+        print('ERROR\n', e)
         with open(os.path.join(output_dir, f'error.txt'), 'a') as f:
-            f.write(str(e)),
-            f.write(traceback.format_exc()),
+            f.write(str(e))
+            f.write('\n')
+            f.write(traceback.format_exc())
+
+        raise RuntimeError(e)
 
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset',    default='bitcoin_dataset_without_missing_values')
-    parser.add_argument('--model',      default='arima')
+    parser.add_argument('--model',      default='deepar')
     parser.add_argument('--output-dir', default='mnt_data/results')
     parser.add_argument('--epochs',     default=100)
     parser.add_argument('--datadir',    default='mnt_data/data')
