@@ -68,7 +68,7 @@ def create_page(datasets, dataset_meta):
                     id='scale-switch', value='index',
                     options=[
                         {'label': 'Index Scale', 'value': 'index'},
-                        {'label': 'Value Scale', 'value': 'real'}
+                        {'label': 'Value Scale', 'value': 'value'}
                     ],
                 ),
                 html.H4('Reference Model'),

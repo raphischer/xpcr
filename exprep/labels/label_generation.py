@@ -10,8 +10,6 @@ from reportlab.lib.colors import black, white
 import fitz # install via PyMuPDF
 import qrcode
 
-from exprep.index_and_rate import calculate_compound_rating
-
 C_SIZE = (1560, 2411)
 
 POS_GENERAL = {
@@ -111,13 +109,11 @@ def find_icon(metric_key, metric_group, icons):
 
 class PropertyLabel(fitz.Document):
 
-    def __init__(self, summary, rating_mode, metric_map=None, custom_icons=None):
+    def __init__(self, summary, metric_map=None, custom_icons=None):
         if metric_map is None: # display highest weighted metrics
             weights = {prop: vals['weight'] for prop, vals in summary.items() if isinstance(vals, dict) and 'weight' in vals}
-            metrics_sorted_by_weight = list(reversed(sorted(weights, key=weights.get)))
-            if len(metrics_sorted_by_weight) < 4:
-                raise RuntimeError('Please pass at least four rated metrics to Label Creation')
-            metric_map = { position: metrics_sorted_by_weight[idx] for idx, position in enumerate(POS_METRICS.keys()) }
+            met_by_weight = list(reversed(sorted(weights, key=weights.get)))
+            metric_map = { pos: met_by_weight[idx] for idx, pos in enumerate(POS_METRICS.keys()) if idx < len(met_by_weight)}
         if custom_icons is None:
             custom_icons = {}
         custom_icons.update(ICONS)
@@ -125,11 +121,12 @@ class PropertyLabel(fitz.Document):
         # background
         place_relatively(canvas, 0.5, 0.5, 'drawInlineImage', os.path.join(PARTS_DIR, f"bg.png"))
         # rating & QR
-        frate = calculate_compound_rating(summary, rating_mode, 'ABCDE')
+        frate = 'ABCDE'[summary['compound']]
         pos = POS_RATINGS[frate]
         place_relatively(canvas, pos[0], pos[1], 'drawInlineImage', os.path.join(PARTS_DIR, f"rating_{frate}.png"))
-        qr = create_qr(summary['model']['url'])
-        draw_qr(canvas, qr, 0.84 * C_SIZE[0], 0.896 * C_SIZE[1], 175)
+        if 'url' in summary['model']:
+            qr = create_qr(summary['model']['url'])
+            draw_qr(canvas, qr, 0.84 * C_SIZE[0], 0.896 * C_SIZE[1], 175)
 
         # Add stroke to make stronger letters
         canvas.setFillColor(black)
@@ -145,18 +142,19 @@ class PropertyLabel(fitz.Document):
 
         # rated pictograms & values
         for location, positions in POS_METRICS.items():
-            metric_key = metric_map[location]
-            metric = summary[metric_key]
-            # print icon
-            icon = find_icon(metric_key, metric['group'].lower(), custom_icons)
-            rating = metric['rating']
-            icon = icon.replace('_$.', f'_{rating}.')
-            rel_x, rel_y = positions['icon']
-            place_relatively(canvas, rel_x, rel_y, 'drawInlineImage', icon)
-            # print texts
-            # TODO improve this by looking at the absolute height of the placed icon
-            place_relatively(canvas, rel_x, rel_y - 0.08, 'drawCentredString', metric['fmt_val'] + '_' + metric['fmt_unit'], '', 56)
-            place_relatively(canvas, rel_x, rel_y - 0.11, 'drawCentredString', metric['name'], '', 56)
+            if location in metric_map:
+                metric_key = metric_map[location]
+                metric = summary[metric_key]
+                # print icon
+                icon = find_icon(metric_key, metric['group'].lower(), custom_icons)
+                rating = metric['rating']
+                icon = icon.replace('_$.', f'_{rating}.')
+                rel_x, rel_y = positions['icon']
+                place_relatively(canvas, rel_x, rel_y, 'drawInlineImage', icon)
+                # print texts
+                # TODO improve this by looking at the absolute height of the placed icon
+                place_relatively(canvas, rel_x, rel_y - 0.08, 'drawCentredString', metric['fmt_val'] + '_' + metric['fmt_unit'], '', 56)
+                place_relatively(canvas, rel_x, rel_y - 0.11, 'drawCentredString', metric['name'], '', 56)
         
         super().__init__(stream=canvas.getpdfdata(), filetype='pdf')
     

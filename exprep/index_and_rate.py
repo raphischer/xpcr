@@ -7,7 +7,19 @@ import pandas as pd
 from exprep.unit_reformatting import CustomUnitReformater
 
 
-def calculate_compound_rating(ratings, mode, meanings=None):
+def calculate_compound_rating(ratings, mode='optimistic median', meanings=None):
+    if isinstance(ratings, pd.DataFrame): # full database to rate
+        for idx, log in ratings.iterrows():
+            try:
+                ratings.loc[idx,'compound'] = calculate_single_compound_rating(log, mode, meanings)
+            except RuntimeError:
+                ratings.loc[idx,'compound'] = -1
+        ratings['compound'] = ratings['compound'].astype(int)
+        return ratings
+    return calculate_single_compound_rating(ratings, mode, meanings)
+
+
+def calculate_single_compound_rating(ratings, mode, meanings=None):
     if isinstance(ratings, pd.Series):
         ratings = ratings.to_dict()
     if isinstance(ratings, dict): # model summary given instead of list of ratings
@@ -16,6 +28,8 @@ def calculate_compound_rating(ratings, mode, meanings=None):
         ratings = [val['rating'] for val in ratings.values() if isinstance(val, dict) and 'rating' in val if val['weight'] > 0]
     else:
         weights = [1.0 / len(ratings) for _ in ratings]
+    if len(ratings) == 0:
+        raise RuntimeError
     if meanings is None:
         meanings = np.arange(np.max(ratings) + 1, dtype=int)
     round_m = np.ceil if 'pessimistic' in mode else np.floor # optimistic
@@ -158,7 +172,7 @@ def update_weights(summaries, weights, axis=None):
     return summaries
 
 
-def rate_database(database, boundaries=None, references=None, properties_meta=None, unit_fmt=None):
+def rate_database(database, boundaries=None, references=None, properties_meta=None, unit_fmt=None, rating_mode='optimistic median'):
     
     # load defaults
     if boundaries is None:
@@ -172,6 +186,7 @@ def rate_database(database, boundaries=None, references=None, properties_meta=No
     real_boundaries = {}
 
     # group each dataset, task and environment combo
+    database['old_index'] = database.index # store index for mapping the groups later on
     fixed_fields = ['dataset', 'task', 'environment']
     grouped_by = database.groupby(fixed_fields)
 
@@ -204,8 +219,11 @@ def rate_database(database, boundaries=None, references=None, properties_meta=No
                 real_boundaries[group_field_vals][prop] = [(index_to_value(start, ref_val, higher_better), index_to_value(stop, ref_val, higher_better)) for (start, stop) in prop_boundaries]
         
         # store results back to database
-        idc = grouped_by.indices[group_field_vals]
-        database.loc[idc] = data
+        database.loc[data['old_index']] = data
+    
+    database.drop('old_index', axis=1, inplace=True) # drop the tmp index info
+    # calculate compound ratings
+    database = calculate_compound_rating(database, rating_mode)
     return database, boundaries, real_boundaries
 
 

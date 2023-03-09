@@ -8,7 +8,7 @@ from exprep.elex.util import RATING_COLORS, ENV_SYMBOLS, PATTERNS
 def add_rating_background(fig, rating_pos, mode, dark_mode):
     for xi, (x0, x1) in enumerate(rating_pos[0]):
         for yi, (y0, y1) in enumerate(rating_pos[1]):
-            color = calculate_compound_rating([xi, yi], mode, RATING_COLORS)
+            color = calculate_compound_rating([xi, yi], mode, RATING_COLORS[:-1])
             if dark_mode:
                 fig.add_shape(type="rect", layer='below', line=dict(color='#0c122b'), fillcolor=color, x0=x0, x1=x1, y0=y0, y1=y1, opacity=.8)
             else:
@@ -43,9 +43,12 @@ def create_scatter_graph(plot_data, axis_title, dark_mode, ax_border=0.1):
 def create_bar_graph(plot_data, dark_mode, discard_y_axis):
     fig = go.Figure()
     for env_i, (env_name, data) in enumerate(plot_data.items()):
-        counts = np.bincount(data['ratings'], minlength=len(RATING_COLORS))
+        counts = np.zeros(len(RATING_COLORS), dtype=int)
+        unq, cnt = np.unique(data['ratings'], return_counts=True)
+        for u, c in zip(unq, cnt):
+            counts[u] = c
         fig.add_trace(go.Bar(
-            name=env_name, x=['A', 'B', 'C', 'D', 'E'], y=counts, legendgroup=env_name,
+            name=env_name, x=['A', 'B', 'C', 'D', 'E', 'N.A.'], y=counts, legendgroup=env_name,
             marker_pattern_shape=PATTERNS[env_i], marker_color=RATING_COLORS, showlegend=False)
         )
     fig.update_layout(barmode='stack')
