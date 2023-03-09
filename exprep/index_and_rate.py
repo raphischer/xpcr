@@ -212,7 +212,8 @@ def rate_database(database, boundaries=None, references=None, properties_meta=No
                 prop_boundaries = boundaries[prop]
             else:
                 prop_boundaries = boundaries['default']
-                boundaries[prop] = prop_boundaries # store so that they can be changed in returned boundaries
+                 # store so that they can be changed in returned boundaries
+                boundaries[prop] = [bound.copy() for bound in prop_boundaries] # make explicit copies!
             data[prop] = data[prop].map(lambda value: process_property(value, ref_val, meta, prop_boundaries, higher_better, unit_fmt))
             # calculate real boundary values
             if 'unit' in meta: # TODO is this condition for indexable metrics 

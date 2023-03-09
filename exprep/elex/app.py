@@ -85,11 +85,11 @@ class Visualization(dash.Dash):
         ) (self.update_task_changed)
         self.callback(
             [Output(sl_id, prop) for sl_id in ['boundary-slider-x', 'boundary-slider-y'] for prop in ['min', 'max', 'value', 'marks']],
-            [Input('xaxis', 'value'), Input('yaxis', 'value'), Input('boundaries-upload', 'contents'), Input('btn-calc-boundaries', 'n_clicks')]
+            [Input('xaxis', 'value'), Input('yaxis', 'value'), Input('boundaries-upload', 'contents'), Input('btn-calc-boundaries', 'n_clicks'), Input('select-reference', 'value')]
         ) (self.update_boundary_sliders)
         self.callback(
             Output('graph-scatter', 'figure'),
-            [Input('environments', 'value'), Input('scale-switch', 'value'), Input('rating', 'value'), Input('x-weight', 'value'), Input('y-weight', 'value'), Input('select-reference', 'value'), Input('boundary-slider-x', 'value'), Input('boundary-slider-y', 'value')]
+            [Input('environments', 'value'), Input('scale-switch', 'value'), Input('rating', 'value'), Input('x-weight', 'value'), Input('y-weight', 'value'), Input('boundary-slider-x', 'value'), Input('boundary-slider-y', 'value')]
         ) (self.update_scatter_graph)
         self.callback(
             Output('graph-bars', 'figure'),
@@ -108,23 +108,36 @@ class Visualization(dash.Dash):
         self.callback(Output('label-modal', 'is_open'), Input('model-label', "n_clicks"), State('label-modal', 'is_open')) (toggle_element_visibility)
 
 
-    def update_scatter_graph(self, env_names=None, scale_switch=None, rating_mode=None, xweight=None, yweight=None, reference=None, *slider_args):
-        if xweight is not None and 'x-weight' in dash.callback_context.triggered[0]['prop_id']:
+    def update_scatter_graph(self, env_names=None, scale_switch=None, rating_mode=None, xweight=None, yweight=None, *slider_args):
+        triggered_prop = dash.callback_context.triggered[0]['prop_id']
+        if xweight is not None and 'x-weight' in triggered_prop:
             self.summaries = update_weights(self.summaries, xweight, self.curr_data['xaxis'])
-        if yweight is not None and 'y-weight' in dash.callback_context.triggered[0]['prop_id']:
+        if yweight is not None and 'y-weight' in triggered_prop:
             self.summaries = update_weights(self.summaries, yweight, self.curr_data['yaxis'])
-        if any(slider_args) and 'slider' in dash.callback_context.triggered[0]['prop_id']:
-            self.update_boundaries(slider_args)
-        env_names = self.environments[self.curr_data['task']] if env_names is None else env_names
+        update_db = False
         scale_switch = 'index' if scale_switch is None else scale_switch
-        if reference is not None and reference != self.curr_data['reference']:
-            # reference changed, so re-index the current sub database
-            self.curr_data['reference'] = reference
-            self.update_database()
-        if rating_mode != self.rating_mode:
+        if any(slider_args) and 'slider' in triggered_prop:
+            # check if sliders were updated from selecting axes, or if value was changed
+            if 'x' in triggered_prop:
+                axis = self.curr_data['xaxis']
+                values = slider_args[0]
+            else:
+                axis = self.curr_data['yaxis']
+                values = slider_args[1]
+            print(self.boundaries[axis])
+            print(self.boundaries['sMAPE'])
+            for sl_idx, sl_val in enumerate(values):
+                self.boundaries[axis][4 - sl_idx][0] = sl_val
+                self.boundaries[axis][3 - sl_idx][1] = sl_val
+            update_db = True
+        if rating_mode != self.rating_mode: # check if rating mode was changed
             self.rating_mode = rating_mode
+            update_db = True
+        if update_db:
             self.update_database(only_current=False)
         self.plot_data = {}
+        # assemble data for plotting
+        env_names = self.environments[self.curr_data['task']] if env_names is None else env_names
         for env in env_names:
             env_data = { 'names': [], 'ratings': [], 'x': [], 'y': [] }
             for _, log in find_sub_database(self.curr_data['sub_database'], environment=env).iterrows():
@@ -158,7 +171,7 @@ class Visualization(dash.Dash):
         bars = create_bar_graph(self.plot_data, self.dark_mode, discard_y_axis)
         return bars
 
-    def update_boundary_sliders(self, xaxis=None, yaxis=None, uploaded_boundaries=None, calculated_boundaries=None):
+    def update_boundary_sliders(self, xaxis=None, yaxis=None, uploaded_boundaries=None, calculated_boundaries=None, reference=None):
         if uploaded_boundaries is not None:
             raise RuntimeError
             boundaries_dict = json.loads(base64.b64decode(uploaded_boundaries.split(',')[-1]))
@@ -168,6 +181,10 @@ class Visualization(dash.Dash):
             raise RuntimeError
             self.boundaries = calculate_optimal_boundaries(self.summaries, [0.8, 0.6, 0.4, 0.2])
             self.summaries, self.boundaries, self.boundaries_real = rate_database(self.database, boundaries=self.boundaries)
+        if reference is not None and reference != self.curr_data['reference']:
+            # reference changed, so re-index the current sub database
+            self.curr_data['reference'] = reference
+            self.update_database()
         self.curr_data['xaxis'] = xaxis or self.curr_data['xaxis']
         self.curr_data['yaxis'] = yaxis or self.curr_data['yaxis']
         values = []
@@ -179,19 +196,6 @@ class Visualization(dash.Dash):
             marks={ val: {'label': str(val)} for val in np.round(np.linspace(min_v, max_v, 10), 2)}
             values.extend([min_v, max_v, value, marks])
         return values
-    
-    def update_boundaries(self, boundary_slider_values):
-        # check if sliders were updated from selecting axes, or if value was changed
-        update_necessary = False
-        for axis, values in zip([self.curr_data['xaxis'], self.curr_data['yaxis']], boundary_slider_values):
-            for sl_idx, sl_val in enumerate(values):
-                if self.boundaries[axis][4 - sl_idx][0] != sl_val:
-                    self.boundaries[axis][4 - sl_idx][0] = sl_val
-                    self.boundaries[axis][3 - sl_idx][1] = sl_val
-                    update_necessary = True
-        if update_necessary:
-            raise RuntimeError
-            self.summaries, self.boundaries, self.boundaries_real = rate_database(self.database, boundaries=self.boundaries)
 
     def update_ds_changed(self, ds=None):
         self.curr_data['ds'] = ds or self.curr_data['ds']
