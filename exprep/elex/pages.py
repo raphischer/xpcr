@@ -74,6 +74,7 @@ def create_page(datasets, dataset_meta):
                 html.H4('Reference Model'),
                 dbc.Select(id=f'select-reference'),
                 html.H4('Boundaries and Weights'),
+                dbc.Button("Select Optimal Reference", id="btn-optimize-reference", style=style_btn_cfg),
                 dbc.Button("Calculate Optimal Boundaries", id="btn-calc-boundaries", active=False, style=style_btn_cfg),
                 dbc.Button("Save Current Boundaries", id="btn-save-boundaries", style=style_btn_cfg),
                 dcc.Download(id="save-boundaries"),

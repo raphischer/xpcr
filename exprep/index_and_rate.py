@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 
 from exprep.unit_reformatting import CustomUnitReformater
+from exprep.load_experiment_logs import find_sub_database
 
 
 def calculate_compound_rating(ratings, mode='optimistic median', meanings=None):
@@ -91,6 +92,41 @@ def process_property(value, reference_value, meta, boundaries, higher_better, un
     return returned_dict
 
 
+def find_optimal_reference(database, pre_rating_use_meta=None):
+    higher_better = False # TODO encode higher better info in meta
+    model_names = database['model'].values
+    metric_values = {}
+    if pre_rating_use_meta is not None:
+        metrics = [col for col in pre_rating_use_meta.keys() if any([not np.isnan(entry) for entry in database[col]])]
+    else:
+        metrics = [col for col in database.columns if any([isinstance(entry, dict) for entry in database[col]])]
+    # aggregate index values for each metric
+    for metric in metrics:
+        if pre_rating_use_meta is not None:
+            weight = pre_rating_use_meta[metric]['weight']
+            values = {model: val for _, (model, val) in database[['model', metric]].iterrows()}
+        else:
+            weight = 0
+            values = {}
+            for idx, entry in enumerate(database[metric]):
+                if isinstance(entry, dict):
+                    weight = max([entry['weight'], weight])
+                    values[model_names[idx]] = entry['value']
+        # assess the reference for each individual metric
+        ref = np.median(list(values.values())) # TODO allow to change the rating mode
+        values = {name: value_to_index(val, ref, higher_better) for name, val in values.items()}
+        metric_values[metric] = values, weight
+    # calculate model-specific scores based on metrix index values
+    scores = {}
+    for model in model_names:
+        scores[model] = 0
+        for values, weight in metric_values.values():
+            if model in values:
+                scores[model] += values[model] * weight
+    ref_model_idx = np.argsort(list(scores.values()))[len(scores)//2]
+    return model_names[ref_model_idx]
+
+
 def calculate_optimal_boundaries(summaries, quantiles):
     boundaries = {}
     for metric in METRICS_INFO.keys():
@@ -173,7 +209,6 @@ def update_weights(summaries, weights, axis=None):
 
 
 def rate_database(database, boundaries=None, references=None, properties_meta=None, unit_fmt=None, rating_mode='optimistic median'):
-    
     # load defaults
     if boundaries is None:
         boundaries = load_boundaries()
@@ -196,8 +231,7 @@ def rate_database(database, boundaries=None, references=None, properties_meta=No
         if group_fields['dataset'] in references:
             reference_name = references[group_fields['dataset']]
         else:
-            # TODO implement to take the most avg model
-            reference_name = data['model'].iloc[0]
+            reference_name = find_optimal_reference(data, properties_meta) # data['model'].iloc[0]
             references[group_fields['dataset']] = reference_name
         reference = data[data['model'] == reference_name]
         real_boundaries[group_field_vals] = {}
@@ -225,7 +259,33 @@ def rate_database(database, boundaries=None, references=None, properties_meta=No
     database.drop('old_index', axis=1, inplace=True) # drop the tmp index info
     # calculate compound ratings
     database = calculate_compound_rating(database, rating_mode)
-    return database, boundaries, real_boundaries
+    return database, boundaries, real_boundaries, references
+
+
+def find_relevant_metrics(database):
+    all_metrics, metric_units = {}, {}
+    most_imp_res, most_imp_qual = {}, {}
+    for ds in pd.unique(database['dataset']):
+        for task in pd.unique(database[database['dataset'] == ds]['task']):
+            subd = find_sub_database(database, ds, task)
+            metrics = []
+            for col in subd.columns:
+                for val in subd[col]:
+                    if isinstance(val, dict):
+                        metrics.append(col)
+                        if col not in metric_units:
+                            metric_units[col] = val['unit']
+                        else:
+                            if not metric_units[col] == val['unit']:
+                                raise RuntimeError(f'Unit of metric {col} not consistent in database!')
+                        # set axis defaults for dataset / task combo
+                        if val['group'] == 'Resources' and (ds, task) not in most_imp_res:
+                            most_imp_res[(ds, task)] = col
+                        if val['group'] == 'Quality' and (ds, task) not in most_imp_qual:
+                            most_imp_qual[(ds, task)] = col
+                        break
+            all_metrics[(ds, task)] = metrics
+    return all_metrics, metric_units, most_imp_res, most_imp_qual
 
 
 if __name__ == '__main__':

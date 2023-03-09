@@ -9,7 +9,7 @@ from dash.dependencies import Input, Output, State
 from dash import dcc
 import dash_bootstrap_components as dbc
 
-from exprep.index_and_rate import rate_database, load_boundaries, save_boundaries, calculate_optimal_boundaries, save_weights, update_weights
+from exprep.index_and_rate import rate_database, load_boundaries, save_boundaries, calculate_optimal_boundaries, save_weights, update_weights, find_optimal_reference, find_relevant_metrics
 from exprep.elex.pages import create_page
 from exprep.elex.util import summary_to_html_tables, toggle_element_visibility, fill_meta
 from exprep.elex.graphs import create_scatter_graph, create_bar_graph, add_rating_background
@@ -20,14 +20,14 @@ from exprep.load_experiment_logs import find_sub_database
 
 class Visualization(dash.Dash):
 
-    def __init__(self, rated_database, boundaries, real_boundaries, meta, dark_mode=True, **kwargs):
+    def __init__(self, rated_database, boundaries, real_boundaries, meta, references, dark_mode=True, **kwargs):
         self.dark_mode = dark_mode
         if dark_mode:
             kwargs['external_stylesheets'] = [dbc.themes.DARKLY]
         super().__init__(__name__, **kwargs)
         
         # init some values
-        self.database, self.boundaries, self.boundaries_real, self.meta = rated_database, boundaries, real_boundaries, meta
+        self.database, self.boundaries, self.boundaries_real, self.meta, self.references = rated_database, boundaries, real_boundaries, meta, references
         self.update_necessary, self.rating_mode = False, 'optimistic median'
         self.datasets = pd.unique(self.database['dataset'])
 
@@ -40,14 +40,13 @@ class Visualization(dash.Dash):
             'ds': self.datasets[0],
             'task': self.tasks[self.datasets[0]][0],
             'env': self.environments[(self.datasets[0], self.tasks[self.datasets[0]][0])][0],
+            'sub_database': None,
             'model': None,
             'label': None
         }
 
         # create a dict with all metrics for any dataset & task combination, and a map of metric unit symbols
-        self.metrics, self.metric_units = {}, {}
-        self.xaxis_default = {}
-        self.yaxis_default = {}
+        self.metrics, self.metric_units, self.xaxis_default, self.yaxis_default = find_relevant_metrics(self.database)
         for ds in self.datasets:
             for task in self.tasks[ds]:
                 subd = find_sub_database(self.database, ds, task)
@@ -81,7 +80,7 @@ class Visualization(dash.Dash):
         ) (self.update_ds_changed)
         self.callback(
             [Output('environments', 'options'), Output('environments', 'value'), Output('xaxis', 'options'), Output('xaxis', 'value'), Output('yaxis', 'options'),  Output('yaxis', 'value'), Output('select-reference', 'options'), Output('select-reference', 'value')],
-            Input('task-switch', 'value')
+            [Input('task-switch', 'value'), Input('btn-optimize-reference', 'n_clicks')]
         ) (self.update_task_changed)
         self.callback(
             [Output(sl_id, prop) for sl_id in ['boundary-slider-x', 'boundary-slider-y'] for prop in ['min', 'max', 'value', 'marks']],
@@ -164,7 +163,7 @@ class Visualization(dash.Dash):
         if not only_current: # remark for making a full update when task / data set is changed
             self.update_necessary = True
         # update the data currently displayed to user
-        self.curr_data['sub_database'], self.boundaries, self.boundaries_real = rate_database(self.curr_data['sub_database'], self.boundaries, {self.curr_data['ds']: self.curr_data['reference']}, self.meta['properties'], self.unit_fmt, self.rating_mode)
+        self.curr_data['sub_database'], self.boundaries, self.boundaries_real, self.references = rate_database(self.curr_data['sub_database'], self.boundaries, self.references, self.meta['properties'], self.unit_fmt, self.rating_mode)
         self.database.loc[self.curr_data['sub_database'].index] = self.curr_data['sub_database']
 
     def update_bars_graph(self, scatter_graph=None, discard_y_axis=False):
@@ -181,9 +180,9 @@ class Visualization(dash.Dash):
             raise RuntimeError
             self.boundaries = calculate_optimal_boundaries(self.summaries, [0.8, 0.6, 0.4, 0.2])
             self.summaries, self.boundaries, self.boundaries_real = rate_database(self.database, boundaries=self.boundaries)
-        if reference is not None and reference != self.curr_data['reference']:
+        if reference is not None and reference != self.references[self.curr_data['ds']]:
             # reference changed, so re-index the current sub database
-            self.curr_data['reference'] = reference
+            self.references[self.curr_data['ds']] = reference
             self.update_database()
         self.curr_data['xaxis'] = xaxis or self.curr_data['xaxis']
         self.curr_data['yaxis'] = yaxis or self.curr_data['yaxis']
@@ -202,9 +201,12 @@ class Visualization(dash.Dash):
         tasks = [{"label": task.capitalize(), "value": task} for task in self.tasks[self.curr_data['ds']]]
         return tasks, tasks[0]['value']
 
-    def update_task_changed(self, task=None):
+    def update_task_changed(self, task=None, find_optimal_ref=None):
+        if find_optimal_ref is not None:
+            self.references[self.curr_data['ds']] = find_optimal_reference(self.curr_data['sub_database'])
+            self.update_database()
         if self.update_necessary:
-            self.database, self.boundaries, self.boundaries_real = rate_database(self.database, self.boundaries, {self.curr_data['ds']: self.curr_data['reference']}, self.meta['properties'], self.unit_fmt, self.rating_mode)
+            self.database, self.boundaries, self.boundaries_real, self.references = rate_database(self.database, self.boundaries, self.references, self.meta['properties'], self.unit_fmt, self.rating_mode)
             self.update_necessary = False
         self.curr_data['task'] = task or self.curr_data['task']
         avail_envs = [{"label": env, "value": env} for env in self.environments[(self.curr_data['ds'], self.curr_data['task'])]]
@@ -214,17 +216,7 @@ class Visualization(dash.Dash):
         self.curr_data['sub_database'] = find_sub_database(self.database, self.curr_data['ds'], self.curr_data['task'])
         models = self.curr_data['sub_database']['model'].values
         ref_options = [{'label': mod, 'value': mod} for mod in models]
-        
-        # find current reference model
-        for _, row in self.curr_data['sub_database'].iterrows():
-            metric_index_one = [metric['index'] == 1 for metric in row[self.metrics[(self.curr_data['ds'], self.curr_data['task'])]]]
-            if all(metric_index_one):
-                self.curr_data['reference'] = row['model']
-                break
-        else:
-            raise RuntimeError
-
-        return avail_envs, [avail_envs[0]['value']], axis_options, self.curr_data['xaxis'], axis_options, self.curr_data['yaxis'], ref_options, self.curr_data['reference']
+        return avail_envs, [avail_envs[0]['value']], axis_options, self.curr_data['xaxis'], axis_options, self.curr_data['yaxis'], ref_options, self.references[self.curr_data['ds']]
 
     def display_model(self, hover_data=None, env_names=None, rating_mode=None):
         if hover_data is None:
