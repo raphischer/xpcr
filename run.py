@@ -4,11 +4,12 @@ import json
 import os
 import time
 import traceback
+from pathlib import Path
 
-from methods import init_model_and_data, evaluate
+from methods import init_model_and_data, run_validation, evaluate
 from exprep.util import fix_seed, create_output_dir, Logger, PatchedJSONEncoder
 from codecarbon import OfflineEmissionsTracker
-# from exprep.monitoring import Monitoring, monitor_flops_papi
+from exprep.monitoring import monitor_flops_papi # Monitoring
 
 
 def main(args):
@@ -108,23 +109,30 @@ def main(args):
         split = 'validation' ############## INFERENCE ##############
         setattr(args, 'train_logdir', output_dir)
         output_dir = create_output_dir(args.output_dir, 'infer', args.__dict__)
-        emissions_tracker = OfflineEmissionsTracker(measure_power_secs=args.cpu_monitor_interval, log_level='warning', country_iso_code="DEU", save_to_file=True, output_dir=output_dir)
-        emissions_tracker.start()
-        # monitoring = Monitoring(args.gpu_monitor_interval, args.cpu_monitor_interval, output_dir, split)
         start_time = time.time()
 
-        metrics = evaluate(model, ts_test)
+        num_samples = 100
+        emissions_tracker = OfflineEmissionsTracker(measure_power_secs=args.cpu_monitor_interval, log_level='warning', country_iso_code="DEU", save_to_file=True, output_dir=output_dir)
+        emissions_tracker.start()
+        forecast, groundtruth = run_validation(model, ts_test, num_samples)
+        emissions_tracker.stop()
 
+        model.serialize(Path(output_dir))
+        relevant_files = [os.path.join(output_dir, fname) for fname in ['input_transform.json', 'parameters.json', 'prediction_net-0000.params', 'prediction_net-network.json', 'type.txt', 'version.json']]
         end_time = time.time()
         emissions_tracker.stop()
-        # monitoring.stop()
+
+        model_stats = {
+            'params': sum([val._reduce().size for val in model.network._collect_params_with_prefix().values()]),
+            'fsize': sum([os.path.getsize(fname) for fname in relevant_files])
+        }
 
         results = {
-            'metrics': metrics,
+            'metrics': evaluate(forecast, groundtruth),
             'start': start_time,
             'end': end_time,
-            'model': None,
-            'data': None
+            'num_samples': num_samples,
+            'model': model_stats
         }
 
         # write results

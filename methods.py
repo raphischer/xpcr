@@ -122,12 +122,13 @@ def init_model_and_data(args):
     return train_gluonts_ds, history, fcast_gluonts_ds, estimator
 
 
-def evaluate(predictor, ts_test):
-
+def run_validation(predictor, ts_test, num_samples=100):
     # TODO check for integer_conversion in args and round?
+    forecast, groundtruth = make_evaluation_predictions(dataset=ts_test, predictor=predictor, num_samples=num_samples)
+    return forecast, groundtruth
 
-    forecast, groundtruth = make_evaluation_predictions(dataset=ts_test, predictor=predictor, num_samples=100)
-    
+
+def evaluate(forecast, groundtruth):
     forecast = list(forecast)
     groundtruth = list(groundtruth)
     
