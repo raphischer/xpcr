@@ -2,8 +2,10 @@ matplotlib
 gluonts
 mxnet
 numpy==1.18.5
-rpy2
-# install R, and from R run install.packages("curl", "forecast")
+rpy2 # install R, and from R run install.packages("curl", "forecast")
+scikit-learn
+xgboost
+
  
 # rating and results generation (ELEx)
 dash

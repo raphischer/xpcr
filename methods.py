@@ -107,6 +107,10 @@ def init_model_and_data(args):
         args['num_layers'] = 1
         args['num_cells'] = 10
 
+    if model in ['rotbaum', 'naiveseasonal']: # for some reason the args are not in 
+        args['freq'] = freq
+        args['prediction_length'] = forecast_horizon
+
     # already init estimator & predictor for early stopping callback
     estimator = model_cls(**args)
 

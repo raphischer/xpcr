@@ -2,7 +2,6 @@ import argparse
 from datetime import timedelta
 import json
 import os
-import pickle
 import time
 import traceback
 
@@ -147,7 +146,8 @@ def main(args):
             f.write(str(e))
             f.write('\n')
             f.write(traceback.format_exc())
-
+        if "emissions_tracker" in locals().keys():
+            emissions_tracker.stop()
         raise RuntimeError(e)
 
 
