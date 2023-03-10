@@ -172,14 +172,11 @@ class Visualization(dash.Dash):
 
     def update_boundary_sliders(self, xaxis=None, yaxis=None, uploaded_boundaries=None, calculated_boundaries=None, reference=None):
         if uploaded_boundaries is not None:
-            raise RuntimeError
             boundaries_dict = json.loads(base64.b64decode(uploaded_boundaries.split(',')[-1]))
             self.boundaries = load_boundaries(boundaries_dict)
-            self.summaries, self.boundaries, self.boundaries_real = rate_database(self.database, self.boundaries, self.meta['properties'], self.rating_mode)
+            self.update_database(only_current=False)
         if calculated_boundaries is not None and 'calc' in dash.callback_context.triggered[0]['prop_id']:
-            raise RuntimeError
-            self.boundaries = calculate_optimal_boundaries(self.summaries, [0.8, 0.6, 0.4, 0.2])
-            self.summaries, self.boundaries, self.boundaries_real = rate_database(self.database, boundaries=self.boundaries)
+            self.boundaries = calculate_optimal_boundaries(self.database, [0.8, 0.6, 0.4, 0.2])
         if reference is not None and reference != self.references[self.curr_data['ds']]:
             # reference changed, so re-index the current sub database
             self.references[self.curr_data['ds']] = reference
