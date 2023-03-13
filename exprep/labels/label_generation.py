@@ -37,7 +37,7 @@ POS_METRICS = {
     },
 }
 
-PARTS_DIR = os.path.join(os.path.dirname(__file__), "label_design", "parts")
+PARTS_DIR = os.path.join(os.path.dirname(__file__), "label_design", "graphic_parts")
 
 ICONS = { f.split('_0.png')[0]: os.path.join(PARTS_DIR, f.replace('_0.', '_$.')) for f in os.listdir(PARTS_DIR) if f.endswith('_0.png') }
 
