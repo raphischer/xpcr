@@ -247,24 +247,17 @@ def rate_database(database, boundaries=None, references=None, properties_meta=No
         database.loc[data['old_index']] = data
 
     # make certain model metrics available across all tasks
-    # TODO FIX THIS!
     for prop, meta in properties_meta.items():
         if 'independent_of_task' in meta and meta['independent_of_task']:
             fixed_fields = ['dataset', 'environment', 'model']
             grouped_by = database.groupby(fixed_fields)
             for group_field_vals, data in grouped_by:
                 valid = data[prop].dropna()
-                if valid.shape[0] > 1:
-                    raise Warning(f'{valid.shape[0]} not-NA values found for {prop} across all tasks!')
-                # for each row replace
-                print(data[prop])
-                for i in data.index:
-                    if i not in valid.index:
-                        row = data.loc[i]
-                        row.loc[prop] = valid.iloc[0].copy()
-                        data.loc[i] = row
-                print(data[prop])
-                database.loc[data['old_index']] = data
+                if valid.shape[0] != 1:
+                    print(f'{valid.shape[0]} not-NA values found for {prop} across all tasks on {fixed_fields}!')
+                if valid.shape[0] > 0:
+                    data[prop] = [valid.values[0]] * data.shape[0]
+                    database.loc[data['old_index']] = data
     
     database.drop('old_index', axis=1, inplace=True) # drop the tmp index info
     # calculate compound ratings

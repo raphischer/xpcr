@@ -50,7 +50,7 @@
         "method": "MLP, Gaussian process",
         "implementation": "MXNet",
         "paper": null,
-        "url": null,
+        "url": "https://ts.gluon.ai/stable/getting_started/models.html",
         "module": "gluonts.mx.model.gp_forecaster._estimator",
         "class": "GaussianProcessEstimator"
     },
@@ -131,14 +131,14 @@
         "module": "gluonts.mx.model.wavenet._estimator",
         "class": "WaveNetEstimator"
     },
-    "feedforward": {
+    "feed_forward": {
         "name": "SimpleFeedForward",
         "local/global": "Global",
         "data": "Univariate",
         "method": "MLP",
         "implementation": "MXNet,?PyTorch",
         "paper": null,
-        "url": null,
+        "url": "https://ts.gluon.ai/stable/getting_started/models.html",
         "module": "gluonts.mx.model.simple_feedforward._estimator",
         "class": "SimpleFeedForwardEstimator"
     },

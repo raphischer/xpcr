@@ -28,12 +28,14 @@
         "name": "Test RMSE",
         "unit": "number",
         "group": "Quality",
-        "weight": 0.6
+        "weight": 0.6,
+        "independent_of_task": true
     },
     "sMAPE": {
         "name": "Test sMAPE",
         "unit": "number",
         "group": "Quality",
-        "weight": 0.4
+        "weight": 0.4,
+        "independent_of_task": true
     }
 }
