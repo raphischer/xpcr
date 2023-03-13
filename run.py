@@ -120,7 +120,6 @@ def main(args):
         model.serialize(Path(output_dir))
         relevant_files = [os.path.join(output_dir, fname) for fname in ['input_transform.json', 'parameters.json', 'prediction_net-0000.params', 'prediction_net-network.json', 'type.txt', 'version.json']]
         end_time = time.time()
-        emissions_tracker.stop()
 
         try:
             model_stats = {

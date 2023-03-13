@@ -12,22 +12,24 @@ PROPERTIES = {
     },
 
     'train': {
-        'train_running_time': lambda log: log['pyrapl']['total']['total_duration'],
-        'train_power_draw': lambda log: log['pyrapl']['total']['total_power_draw']
+        'train_running_time': lambda log: log['emissions']['duration']['0'],
+        'train_power_draw': lambda log: log['emissions']['energy_consumed']['0']
     },
     
     'infer': {
-        'running_time': lambda log: log['validation_pyrapl']['total']['total_duration'],
-        'power_draw': lambda log: log['validation_pyrapl']['total']['total_power_draw'],
+        'running_time': lambda log: log['emissions']['duration']['0'] / log['validation_results']['num_samples'],
+        'power_draw': lambda log: log['emissions']['energy_consumed']['0'] / log['validation_results']['num_samples'],
         'RMSE': lambda log: log['validation_results']['metrics']['aggregated']['RMSE'],
-        'RMSE': lambda log: log['validation_results']['metrics']['aggregated']['MAPE'],
-        'sMAPE': lambda log: log['validation_results']['metrics']['aggregated']['sMAPE']
+        'MAPE': lambda log: log['validation_results']['metrics']['aggregated']['MAPE'],
+        'MASE': lambda log: log['validation_results']['metrics']['aggregated']['MASE'],
+        'paramaters': lambda log: log['validation_results']['model']['params'],
+        'fsize': lambda log: log['validation_results']['model']['fsize'],
     }
 }
 
 
 def extract_architecture(log):
-    with open('meta_info.json', 'r') as meta:
+    with open('meta_environment.json', 'r') as meta:
         processor_shortforms = json.load(meta)['processor_shortforms']
     if 'GPU' in log['execution_platform']:
         n_gpus = len(log['execution_platform']['GPU'])
@@ -39,7 +41,7 @@ def extract_architecture(log):
 
 
 def extract_software(log):
-    with open('meta_info.json', 'r') as meta:
+    with open('meta_environment.json', 'r') as meta:
         ml_backends = json.load(meta)['ml_backends']
     if 'backend' in log['config']:
         backend_name = log['config']['backend']

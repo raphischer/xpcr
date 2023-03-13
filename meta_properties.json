@@ -13,29 +13,51 @@
     },
     
     "power_draw": {
-        "name": "Evaluation Power Draw",
+        "name": "Power Draw per Sample",
         "unit": "wattseconds",
         "group": "Resources",
         "weight": 0.6
     },
     "running_time": {
-        "name": "Evaluation Time",
+        "name": "Evaluation Time per Sample",
         "unit": "seconds",
         "group": "Resources",
         "weight": 0.4
     },
+
     "RMSE": {
         "name": "Test RMSE",
         "unit": "number",
         "group": "Quality",
-        "weight": 0.6,
+        "weight": 0.3,
         "independent_of_task": true
     },
-    "sMAPE": {
-        "name": "Test sMAPE",
+    "MAPE": {
+        "name": "Test MAPE",
+        "unit": "number",
+        "group": "Quality",
+        "weight": 0.3,
+        "independent_of_task": true
+    },
+    "MASE": {
+        "name": "Test MASE",
         "unit": "number",
         "group": "Quality",
         "weight": 0.4,
+        "independent_of_task": true
+    },
+    "paramaters": {
+        "name": "Number of Parameters",
+        "unit": "number",
+        "group": "Complexity",
+        "weight": 0.7,
+        "independent_of_task": true
+    },
+    "fsize": {
+        "name": "Model Size on Disc",
+        "unit": "byte",
+        "group": "Complexity",
+        "weight": 0.3,
         "independent_of_task": true
     }
 }
