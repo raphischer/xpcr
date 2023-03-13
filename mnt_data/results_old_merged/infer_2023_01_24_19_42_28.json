@@ -1,0 +1,196 @@
+{
+    "directory_name": "infer_2023_01_24_19_42_28",
+    "validation_results": {
+        "metrics": {
+            "aggregated": {
+                "MSE": 102394342.89182815,
+                "abs_error": 18296191.089294434,
+                "abs_target_sum": 166958474.8984375,
+                "abs_target_mean": 19007.112351825763,
+                "seasonal_error": 1542.9874709095218,
+                "MASE": 1.5026634230183387,
+                "MAPE": 0.22922145995991697,
+                "sMAPE": 0.19073633363772396,
+                "MSIS": 11.040958731282712,
+                "QuantileLoss[0.1]": 7698813.50955925,
+                "Coverage[0.1]": 0.09710837887067394,
+                "QuantileLoss[0.5]": 18296191.05353737,
+                "Coverage[0.5]": 0.6039389799635702,
+                "QuantileLoss[0.9]": 10078492.100670623,
+                "Coverage[0.9]": 0.9378415300546448,
+                "RMSE": 10119.008987634517,
+                "NRMSE": 0.5323801322541516,
+                "ND": 0.10958527921642905,
+                "wQuantileLoss[0.1]": 0.04611214563526958,
+                "wQuantileLoss[0.5]": 0.10958527900226163,
+                "wQuantileLoss[0.9]": 0.06036526212162317,
+                "mean_absolute_QuantileLoss": 12024498.887922414,
+                "mean_wQuantileLoss": 0.0720208955863848,
+                "MAE_Coverage": 0.04822404371584699,
+                "OWA": NaN
+            }
+        },
+        "start": 1674585748.958648,
+        "end": 1674585754.3371227,
+        "model": null,
+        "data": null
+    },
+    "validation_pynvml": {
+        "0": {
+            "start_unix": 1674589348.923282,
+            "end_unix": 1674589354.331583,
+            "start_utc": "2023-01-24 19:42:28",
+            "end_utc": "2023-01-24 19:42:34",
+            "total_duration": 5.408301115036011,
+            "nr_measurements": 109,
+            "temperature": {
+                "min": 22,
+                "max": 22,
+                "mean": 22.0,
+                "std": 0.0
+            },
+            "util.gpu": {
+                "min": 0,
+                "max": 0,
+                "mean": 0.0,
+                "std": 0.0
+            },
+            "util.memory": {
+                "min": 0,
+                "max": 0,
+                "mean": 0.0,
+                "std": 0.0
+            },
+            "power_usage": {
+                "min": 1.273,
+                "max": 2.008,
+                "mean": 1.640165137614679,
+                "std": 0.16921743863121103
+            },
+            "memory.used": {
+                "min": 16384000,
+                "max": 16384000,
+                "mean": 16384000.0,
+                "std": 0.0
+            },
+            "memory.free": {
+                "min": 16892231680,
+                "max": 16892231680,
+                "mean": 16892231680.0,
+                "std": 0.0
+            },
+            "total_power_draw": 8.880774673828121
+        },
+        "total": {
+            "start_unix": 1674589348.923282,
+            "end_unix": 1674589354.331583,
+            "nr_measurements": 109,
+            "total_power_draw": 8.880774673828121,
+            "start_utc": "2023-01-24 19:42:28",
+            "end_utc": "2023-01-24 19:42:34",
+            "total_duration": 5.408301115036011
+        }
+    },
+    "validation_pyrapl": {
+        "0": {
+            "start_unix": 1674589348.919193,
+            "end_unix": 1674589354.383321,
+            "start_utc": "2023-01-24 19:42:28",
+            "end_utc": "2023-01-24 19:42:34",
+            "total_duration": 5.464128017425537,
+            "nr_measurements": 110,
+            "duration": {
+                "min": 0.001882,
+                "max": 0.05047,
+                "mean": 0.049690172727272726,
+                "std": 0.004580152573598178
+            },
+            "package-0": {
+                "min": 11.318278427205101,
+                "max": 138.2147192716237,
+                "mean": 86.17922783749432,
+                "std": 20.005621337094865
+            },
+            "package-0.dram": {
+                "min": 2.1845348975466687,
+                "max": 8.57885909390412,
+                "mean": 7.6871751174132354,
+                "std": 1.0581849167329636
+            },
+            "total_power_draw": 474.55933200000004
+        },
+        "total": {
+            "start_unix": 1674589348.919193,
+            "end_unix": 1674589354.383321,
+            "nr_measurements": 110,
+            "total_power_draw": 474.55933200000004,
+            "start_utc": "2023-01-24 19:42:28",
+            "end_utc": "2023-01-24 19:42:34",
+            "total_duration": 5.464128017425537
+        }
+    },
+    "config": {
+        "dataset": "tourism_monthly_dataset",
+        "model": "transformer",
+        "output_dir": "mnt_data/results",
+        "epochs": 100,
+        "datadir": "mnt_data/data",
+        "cpu_monitor_interval": 0.05,
+        "gpu_monitor_interval": 0.05,
+        "seed": 42,
+        "timestamp": "2023_01_24_19_42_28",
+        "lag": 15,
+        "train_logdir": "mnt_data/results/train_2023_01_24_19_40_27"
+    },
+    "requirements": [
+        "# 3.7.7 (default, Mar 23 2020, 22:36:06)",
+        "# [GCC 7.3.0]",
+        "wrapt==1.11.2",
+        "typed-ast==1.4.0",
+        "six==1.12.0",
+        "setuptools==41.6.0",
+        "pytz==2019.3",
+        "python-dateutil==2.8.0",
+        "pyparsing==2.4.2",
+        "pylint==2.4.3",
+        "numpy==1.17.3",
+        "mccabe==0.6.1",
+        "matplotlib==3.1.1",
+        "lazy-object-proxy==1.4.3",
+        "kiwisolver==1.1.0",
+        "isort==4.3.21",
+        "cycler==0.10.0",
+        "astroid==2.3.2",
+        "wheel==0.37.1",
+        "urllib3==1.26.14",
+        "typing-extensions==4.4.0",
+        "tqdm==4.64.1",
+        "toolz==0.12.0",
+        "rpy2==2.9.4",
+        "requests==2.28.2",
+        "pynvml==11.4.1",
+        "pydantic==1.10.4",
+        "pyarrow==8.0.0",
+        "py-rapl==0.1",
+        "pip==22.3.1",
+        "pandas==1.3.5",
+        "orjson==3.8.5",
+        "mxnet==1.9.1",
+        "markupsafe==2.1.1",
+        "jinja2==3.1.2",
+        "idna==3.4",
+        "graphviz==0.8.4",
+        "gluonts==0.11.8",
+        "charset-normalizer==3.0.1",
+        "certifi==2022.12.7"
+    ],
+    "execution_platform": {
+        "System": "Linux",
+        "Node Name": "ls8ws022",
+        "Release": "5.4.0-137-generic",
+        "Version": "#154-Ubuntu SMP Thu Jan 5 17:03:22 UTC 2023",
+        "Machine": "x86_64",
+        "Processor": "Intel(R) Xeon(R) W-2155 CPU @ 3.30GHz"
+    },
+    "full_log": "mnt_data/results_merged/infer_2023_01_24_19_42_28.tar.gz"
+}

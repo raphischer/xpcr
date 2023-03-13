@@ -1,0 +1,165 @@
+{
+    "directory_name": "train_2023_01_27_17_58_21",
+    "pynvml": {
+        "0": {
+            "start_unix": 1674842301.211083,
+            "end_unix": 1674842856.736774,
+            "start_utc": "2023-01-27 17:58:21",
+            "end_utc": "2023-01-27 18:07:36",
+            "total_duration": 555.5256910324097,
+            "nr_measurements": 11072,
+            "temperature": {
+                "min": 22,
+                "max": 23,
+                "mean": 22.853865606936417,
+                "std": 0.35324089829395716
+            },
+            "util.gpu": {
+                "min": 0,
+                "max": 0,
+                "mean": 0.0,
+                "std": 0.0
+            },
+            "util.memory": {
+                "min": 0,
+                "max": 0,
+                "mean": 0.0,
+                "std": 0.0
+            },
+            "power_usage": {
+                "min": 0.988,
+                "max": 2.598,
+                "mean": 1.625537572254335,
+                "std": 0.2721977718872927
+            },
+            "memory.used": {
+                "min": 16384000,
+                "max": 16384000,
+                "mean": 16384000.0,
+                "std": 0.0
+            },
+            "memory.free": {
+                "min": 16892231680,
+                "max": 16892231680,
+                "mean": 16892231680.0,
+                "std": 0.0
+            },
+            "total_power_draw": 902.8293836657725
+        },
+        "total": {
+            "start_unix": 1674842301.211083,
+            "end_unix": 1674842856.736774,
+            "nr_measurements": 11072,
+            "total_power_draw": 902.8293836657725,
+            "start_utc": "2023-01-27 17:58:21",
+            "end_utc": "2023-01-27 18:07:36",
+            "total_duration": 555.5256910324097
+        }
+    },
+    "pyrapl": {
+        "0": {
+            "start_unix": 1674842301.199559,
+            "end_unix": 1674842856.874428,
+            "start_utc": "2023-01-27 17:58:21",
+            "end_utc": "2023-01-27 18:07:36",
+            "total_duration": 555.6748690605164,
+            "nr_measurements": 11072,
+            "duration": {
+                "min": 0.002066,
+                "max": 0.050528,
+                "mean": 0.050187575054190754,
+                "std": 0.0004849684755663703
+            },
+            "package-0": {
+                "min": 11.097156210392903,
+                "max": 117.39361681038756,
+                "mean": 70.13265905004447,
+                "std": 40.88927720465288
+            },
+            "package-0.dram": {
+                "min": 1.3557482871965467,
+                "max": 9.871820794925167,
+                "mean": 7.172053652556328,
+                "std": 2.337816991714121
+            },
+            "total_power_draw": 38928.42829700013
+        },
+        "total": {
+            "start_unix": 1674842301.199559,
+            "end_unix": 1674842856.874428,
+            "nr_measurements": 11072,
+            "total_power_draw": 38928.42829700013,
+            "start_utc": "2023-01-27 17:58:21",
+            "end_utc": "2023-01-27 18:07:36",
+            "total_duration": 555.6748690605164
+        }
+    },
+    "execution_platform": {
+        "System": "Linux",
+        "Node Name": "ls8ws022",
+        "Release": "5.4.0-137-generic",
+        "Version": "#154-Ubuntu SMP Thu Jan 5 17:03:22 UTC 2023",
+        "Machine": "x86_64",
+        "Processor": "Intel(R) Xeon(R) W-2155 CPU @ 3.30GHz"
+    },
+    "results": {
+        "history": {},
+        "start": 1674838701.239388,
+        "end": 1674839256.76614,
+        "model": null
+    },
+    "requirements": [
+        "# 3.7.7 (default, Mar 23 2020, 22:36:06)",
+        "# [GCC 7.3.0]",
+        "wrapt==1.11.2",
+        "typed-ast==1.4.0",
+        "six==1.12.0",
+        "setuptools==41.6.0",
+        "pytz==2019.3",
+        "python-dateutil==2.8.0",
+        "pyparsing==2.4.2",
+        "pylint==2.4.3",
+        "numpy==1.17.3",
+        "mccabe==0.6.1",
+        "matplotlib==3.1.1",
+        "lazy-object-proxy==1.4.3",
+        "kiwisolver==1.1.0",
+        "isort==4.3.21",
+        "cycler==0.10.0",
+        "astroid==2.3.2",
+        "wheel==0.37.1",
+        "urllib3==1.26.14",
+        "typing-extensions==4.4.0",
+        "tqdm==4.64.1",
+        "toolz==0.12.0",
+        "rpy2==2.9.4",
+        "requests==2.28.2",
+        "pynvml==11.4.1",
+        "pydantic==1.10.4",
+        "pyarrow==8.0.0",
+        "py-rapl==0.1",
+        "pip==22.3.1",
+        "pandas==1.3.5",
+        "orjson==3.8.5",
+        "mxnet==1.9.1",
+        "markupsafe==2.1.1",
+        "jinja2==3.1.2",
+        "idna==3.4",
+        "graphviz==0.8.4",
+        "gluonts==0.11.8",
+        "charset-normalizer==3.0.1",
+        "certifi==2022.12.7"
+    ],
+    "config": {
+        "dataset": "us_births_dataset",
+        "model": "nbeats",
+        "output_dir": "mnt_data/results",
+        "epochs": 100,
+        "datadir": "mnt_data/data",
+        "cpu_monitor_interval": 0.05,
+        "gpu_monitor_interval": 0.05,
+        "seed": 42,
+        "timestamp": "2023_01_27_17_58_21"
+    },
+    "full_log": "mnt_data/results_merged/train_2023_01_27_17_58_21.tar.gz"
+}

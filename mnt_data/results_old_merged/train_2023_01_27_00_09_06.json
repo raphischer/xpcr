@@ -1,0 +1,165 @@
+{
+    "directory_name": "train_2023_01_27_00_09_06",
+    "requirements": [
+        "# 3.7.7 (default, Mar 23 2020, 22:36:06)",
+        "# [GCC 7.3.0]",
+        "wrapt==1.11.2",
+        "typed-ast==1.4.0",
+        "six==1.12.0",
+        "setuptools==41.6.0",
+        "pytz==2019.3",
+        "python-dateutil==2.8.0",
+        "pyparsing==2.4.2",
+        "pylint==2.4.3",
+        "numpy==1.17.3",
+        "mccabe==0.6.1",
+        "matplotlib==3.1.1",
+        "lazy-object-proxy==1.4.3",
+        "kiwisolver==1.1.0",
+        "isort==4.3.21",
+        "cycler==0.10.0",
+        "astroid==2.3.2",
+        "wheel==0.37.1",
+        "urllib3==1.26.14",
+        "typing-extensions==4.4.0",
+        "tqdm==4.64.1",
+        "toolz==0.12.0",
+        "rpy2==2.9.4",
+        "requests==2.28.2",
+        "pynvml==11.4.1",
+        "pydantic==1.10.4",
+        "pyarrow==8.0.0",
+        "py-rapl==0.1",
+        "pip==22.3.1",
+        "pandas==1.3.5",
+        "orjson==3.8.5",
+        "mxnet==1.9.1",
+        "markupsafe==2.1.1",
+        "jinja2==3.1.2",
+        "idna==3.4",
+        "graphviz==0.8.4",
+        "gluonts==0.11.8",
+        "charset-normalizer==3.0.1",
+        "certifi==2022.12.7"
+    ],
+    "pynvml": {
+        "0": {
+            "start_unix": 1674778147.103988,
+            "end_unix": 1674778167.588059,
+            "start_utc": "2023-01-27 00:09:07",
+            "end_utc": "2023-01-27 00:09:27",
+            "total_duration": 20.484071016311646,
+            "nr_measurements": 410,
+            "temperature": {
+                "min": 22,
+                "max": 22,
+                "mean": 22.0,
+                "std": 0.0
+            },
+            "util.gpu": {
+                "min": 0,
+                "max": 0,
+                "mean": 0.0,
+                "std": 0.0
+            },
+            "util.memory": {
+                "min": 0,
+                "max": 0,
+                "mean": 0.0,
+                "std": 0.0
+            },
+            "power_usage": {
+                "min": 0.944,
+                "max": 1.771,
+                "mean": 1.2941024390243905,
+                "std": 0.13875760315411748
+            },
+            "memory.used": {
+                "min": 16384000,
+                "max": 16384000,
+                "mean": 16384000.0,
+                "std": 0.0
+            },
+            "memory.free": {
+                "min": 16892231680,
+                "max": 16892231680,
+                "mean": 16892231680.0,
+                "std": 0.0
+            },
+            "total_power_draw": 26.527160129150396
+        },
+        "total": {
+            "start_unix": 1674778147.103988,
+            "end_unix": 1674778167.588059,
+            "nr_measurements": 410,
+            "total_power_draw": 26.527160129150396,
+            "start_utc": "2023-01-27 00:09:07",
+            "end_utc": "2023-01-27 00:09:27",
+            "total_duration": 20.484071016311646
+        }
+    },
+    "pyrapl": {
+        "0": {
+            "start_unix": 1674778147.091846,
+            "end_unix": 1674778167.629996,
+            "start_utc": "2023-01-27 00:09:07",
+            "end_utc": "2023-01-27 00:09:27",
+            "total_duration": 20.53815007209778,
+            "nr_measurements": 411,
+            "duration": {
+                "min": 0.001929,
+                "max": 0.050489,
+                "mean": 0.04997530170316303,
+                "std": 0.002374829317769436
+            },
+            "package-0": {
+                "min": 16.444398134365386,
+                "max": 84.29582584381865,
+                "mean": 73.96652114602453,
+                "std": 15.579208531847824
+            },
+            "package-0.dram": {
+                "min": 2.9030585795749095,
+                "max": 7.213079667063021,
+                "mean": 6.40274237919502,
+                "std": 0.5918660221931484
+            },
+            "total_power_draw": 1521.4979970000009
+        },
+        "total": {
+            "start_unix": 1674778147.091846,
+            "end_unix": 1674778167.629996,
+            "nr_measurements": 411,
+            "total_power_draw": 1521.4979970000009,
+            "start_utc": "2023-01-27 00:09:07",
+            "end_utc": "2023-01-27 00:09:27",
+            "total_duration": 20.53815007209778
+        }
+    },
+    "execution_platform": {
+        "System": "Linux",
+        "Node Name": "ls8ws022",
+        "Release": "5.4.0-137-generic",
+        "Version": "#154-Ubuntu SMP Thu Jan 5 17:03:22 UTC 2023",
+        "Machine": "x86_64",
+        "Processor": "Intel(R) Xeon(R) W-2155 CPU @ 3.30GHz"
+    },
+    "results": {
+        "history": {},
+        "start": 1674774547.1324337,
+        "end": 1674774567.616648,
+        "model": null
+    },
+    "config": {
+        "dataset": "car_parts_dataset_without_missing_values",
+        "model": "feed_forward",
+        "output_dir": "mnt_data/results",
+        "epochs": 100,
+        "datadir": "mnt_data/data",
+        "cpu_monitor_interval": 0.05,
+        "gpu_monitor_interval": 0.05,
+        "seed": 42,
+        "timestamp": "2023_01_27_00_09_06"
+    },
+    "full_log": "mnt_data/results_merged/train_2023_01_27_00_09_06.tar.gz"
+}

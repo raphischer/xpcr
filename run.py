@@ -122,10 +122,13 @@ def main(args):
         end_time = time.time()
         emissions_tracker.stop()
 
-        model_stats = {
-            'params': sum([val._reduce().size for val in model.network._collect_params_with_prefix().values()]),
-            'fsize': sum([os.path.getsize(fname) for fname in relevant_files])
-        }
+        try:
+            model_stats = {
+                'params': sum([val._reduce().size for val in model.network._collect_params_with_prefix().values()]),
+                'fsize': sum([os.path.getsize(fname) for fname in relevant_files])
+            }
+        except Exception:
+            model_stats = {}
 
         results = {
             'metrics': evaluate(forecast, groundtruth),

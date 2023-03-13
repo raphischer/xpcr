@@ -1,0 +1,294 @@
+{
+    "directory_name": "infer_2023_02_27_16_54_22",
+    "requirements": [
+        "# 3.7.7 (default, Mar 23 2020, 22:36:06)",
+        "# [GCC 7.3.0]",
+        "wrapt==1.11.2",
+        "typed-ast==1.4.0",
+        "six==1.12.0",
+        "setuptools==41.6.0",
+        "pytz==2019.3",
+        "python-dateutil==2.8.0",
+        "pyparsing==2.4.2",
+        "pylint==2.4.3",
+        "numpy==1.17.3",
+        "mccabe==0.6.1",
+        "matplotlib==3.1.1",
+        "lazy-object-proxy==1.4.3",
+        "kiwisolver==1.1.0",
+        "isort==4.3.21",
+        "cycler==0.10.0",
+        "astroid==2.3.2",
+        "zipp==3.14.0",
+        "wheel==0.37.1",
+        "urllib3==1.26.14",
+        "typing-extensions==4.4.0",
+        "tqdm==4.64.1",
+        "toolz==0.12.0",
+        "rpy2==2.9.4",
+        "requests==2.28.2",
+        "pynvml==11.4.1",
+        "pydantic==1.10.4",
+        "pyarrow==8.0.0",
+        "py-rapl==0.1",
+        "py-cpuinfo==9.0.0",
+        "psutil==5.9.4",
+        "pip==22.3.1",
+        "pandas==1.3.5",
+        "orjson==3.8.5",
+        "mxnet==1.9.1",
+        "markupsafe==2.1.1",
+        "jinja2==3.1.2",
+        "importlib-metadata==6.0.0",
+        "idna==3.4",
+        "graphviz==0.8.4",
+        "gluonts==0.11.8",
+        "fuzzywuzzy==0.18.0",
+        "codecarbon==2.1.4",
+        "click==8.1.3",
+        "charset-normalizer==3.0.1",
+        "certifi==2022.12.7",
+        "arrow==1.2.3"
+    ],
+    "validation_psutil": {
+        "3184644": {
+            "start_unix": 1677516862.829538,
+            "end_unix": 1677516881.504931,
+            "start_utc": "2023-02-27 16:54:22",
+            "end_utc": "2023-02-27 16:54:41",
+            "total_duration": 18.675392866134644,
+            "nr_measurements": 373,
+            "cpu_num": {
+                "min": 1,
+                "max": 15,
+                "mean": 9.15549597855228,
+                "std": 3.2751322480078473
+            },
+            "cpu_percent": {
+                "min": 0.0,
+                "max": 1125.0,
+                "mean": 927.5965147453084,
+                "std": 215.5221018098841
+            },
+            "mem_rss": {
+                "min": 408113152,
+                "max": 858087424,
+                "mean": 787634148.5469168,
+                "std": 49485214.36168703
+            },
+            "mem_vms": {
+                "min": 5640257536,
+                "max": 6278127616,
+                "mean": 6177788551.892761,
+                "std": 68162084.32785869
+            },
+            "mem_shared": {
+                "min": 135680000,
+                "max": 136155136,
+                "mean": 135918677.10455763,
+                "std": 31836.206901226476
+            },
+            "mem_text": {
+                "min": 2330624,
+                "max": 2330624,
+                "mean": 2330624.0,
+                "std": 0.0
+            },
+            "mem_lib": {
+                "min": 0,
+                "max": 0,
+                "mean": 0.0,
+                "std": 0.0
+            },
+            "mem_data": {
+                "min": 3816505344,
+                "max": 4441542656,
+                "mean": 4371591815.892761,
+                "std": 64088432.683298044
+            },
+            "mem_uss": {
+                "min": 123629568,
+                "max": 600662016,
+                "mean": 514144821.53351206,
+                "std": 93156732.4779762
+            },
+            "mem_pss": {
+                "min": 153543680,
+                "max": 665456640,
+                "mean": 578880932.0321716,
+                "std": 94353578.74579845
+            },
+            "total_power_draw": -1
+        },
+        "total": {
+            "start_unix": 1677516862.829538,
+            "end_unix": 1677516881.504931,
+            "nr_measurements": 373,
+            "total_power_draw": -1,
+            "start_utc": "2023-02-27 16:54:22",
+            "end_utc": "2023-02-27 16:54:41",
+            "total_duration": 18.675392866134644
+        }
+    },
+    "validation_results": {
+        "metrics": {
+            "aggregated": {
+                "MSE": 5792.041290824754,
+                "abs_error": 220236.90187335014,
+                "abs_target_sum": 999365.0,
+                "abs_target_mean": 101.25278622087131,
+                "seasonal_error": 17.508975732203705,
+                "MASE": Infinity,
+                "MAPE": 0.9282365246022003,
+                "sMAPE": 0.29162532552216186,
+                "MSIS": Infinity,
+                "QuantileLoss[0.1]": 120252.14243277311,
+                "Coverage[0.1]": 0.14701114488348532,
+                "QuantileLoss[0.5]": 220236.90409004688,
+                "Coverage[0.5]": 0.5556231003039515,
+                "QuantileLoss[0.9]": 153167.50040776725,
+                "Coverage[0.9]": 0.908308004052685,
+                "RMSE": 76.10546163597428,
+                "NRMSE": 0.7516381966019084,
+                "ND": 0.2203768411674915,
+                "wQuantileLoss[0.1]": 0.12032855106269792,
+                "wQuantileLoss[0.5]": 0.22037684338559674,
+                "wQuantileLoss[0.9]": 0.15326482357073468,
+                "mean_absolute_QuantileLoss": 164552.18231019576,
+                "mean_wQuantileLoss": 0.16465673933967645,
+                "MAE_Coverage": 0.03698074974670724,
+                "OWA": NaN
+            }
+        },
+        "start": 1677513262.8778486,
+        "end": 1677513281.4683964,
+        "model": null,
+        "data": null
+    },
+    "config": {
+        "dataset": "vehicle_trips_dataset_without_missing_values",
+        "model": "wavenet",
+        "output_dir": "mnt_data/results",
+        "epochs": 100,
+        "datadir": "mnt_data/data",
+        "cpu_monitor_interval": 0.05,
+        "gpu_monitor_interval": 0.05,
+        "seed": 42,
+        "timestamp": "2023_02_27_16_54_22",
+        "lag": 9,
+        "external_forecast_horizon": 30,
+        "integer_conversion": true,
+        "train_logdir": "mnt_data/results/train_2023_02_27_16_50_53"
+    },
+    "validation_pyrapl": {
+        "0": {
+            "start_unix": 1677516862.832705,
+            "end_unix": 1677516881.528588,
+            "start_utc": "2023-02-27 16:54:22",
+            "end_utc": "2023-02-27 16:54:41",
+            "total_duration": 18.69588303565979,
+            "nr_measurements": 374,
+            "duration": {
+                "min": 0.002022,
+                "max": 0.050519,
+                "mean": 0.04999404545454545,
+                "std": 0.00248512179315439
+            },
+            "package-0": {
+                "min": 9.568743818001979,
+                "max": 125.2191849204289,
+                "mean": 102.16076544535035,
+                "std": 17.199795219083125
+            },
+            "package-0.dram": {
+                "min": 2.3758654797230467,
+                "max": 9.578281265595368,
+                "mean": 8.56659278484427,
+                "std": 0.8226943291611547
+            },
+            "total_power_draw": 1914.3882880000012
+        },
+        "total": {
+            "start_unix": 1677516862.832705,
+            "end_unix": 1677516881.528588,
+            "nr_measurements": 374,
+            "total_power_draw": 1914.3882880000012,
+            "start_utc": "2023-02-27 16:54:22",
+            "end_utc": "2023-02-27 16:54:41",
+            "total_duration": 18.69588303565979
+        }
+    },
+    "validation_pynvml": {
+        "0": {
+            "start_unix": 1677516862.837558,
+            "end_unix": 1677516881.430287,
+            "start_utc": "2023-02-27 16:54:22",
+            "end_utc": "2023-02-27 16:54:41",
+            "total_duration": 18.592728853225708,
+            "nr_measurements": 372,
+            "temperature": {
+                "min": 27,
+                "max": 28,
+                "mean": 27.72043010752688,
+                "std": 0.44878788719804746
+            },
+            "util.gpu": {
+                "min": 0,
+                "max": 0,
+                "mean": 0.0,
+                "std": 0.0
+            },
+            "util.memory": {
+                "min": 0,
+                "max": 0,
+                "mean": 0.0,
+                "std": 0.0
+            },
+            "power_usage": {
+                "min": 1.172,
+                "max": 2.044,
+                "mean": 1.4225752688172046,
+                "std": 0.13684756149560476
+            },
+            "memory.used": {
+                "min": 16384000,
+                "max": 16384000,
+                "mean": 16384000.0,
+                "std": 0.0
+            },
+            "memory.free": {
+                "min": 16892231680,
+                "max": 16892231680,
+                "mean": 16892231680.0,
+                "std": 0.0
+            },
+            "total_power_draw": 26.459772644775388
+        },
+        "total": {
+            "start_unix": 1677516862.837558,
+            "end_unix": 1677516881.430287,
+            "nr_measurements": 372,
+            "total_power_draw": 26.459772644775388,
+            "start_utc": "2023-02-27 16:54:22",
+            "end_utc": "2023-02-27 16:54:41",
+            "total_duration": 18.592728853225708
+        }
+    },
+    "execution_platform": {
+        "System": "Linux",
+        "Node Name": "ls8ws022",
+        "Release": "5.4.0-137-generic",
+        "Version": "#154-Ubuntu SMP Thu Jan 5 17:03:22 UTC 2023",
+        "Machine": "x86_64",
+        "Processor": "Intel(R) Xeon(R) W-2155 CPU @ 3.30GHz",
+        "Physical cores": 10,
+        "Total cores": 20,
+        "Max Frequency": 4500.0,
+        "Min Frequency": 1200.0,
+        "Current Frequency": 1202.1997500000002,
+        "Total": 67103240192,
+        "Available": 64809365504,
+        "Used": 1551601664
+    },
+    "full_log": "mnt_data/results_merged/infer_2023_02_27_16_54_22.tar.gz"
+}

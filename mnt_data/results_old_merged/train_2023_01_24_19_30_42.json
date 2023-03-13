@@ -1,0 +1,165 @@
+{
+    "directory_name": "train_2023_01_24_19_30_42",
+    "pyrapl": {
+        "0": {
+            "start_unix": 1674588642.694189,
+            "end_unix": 1674589198.405834,
+            "start_utc": "2023-01-24 19:30:42",
+            "end_utc": "2023-01-24 19:39:58",
+            "total_duration": 555.7116448879242,
+            "nr_measurements": 11071,
+            "duration": {
+                "min": 0.00192,
+                "max": 0.050525,
+                "mean": 0.05019542453256256,
+                "std": 0.0004876671478629397
+            },
+            "package-0": {
+                "min": 7.929722772277227,
+                "max": 115.80616441090748,
+                "mean": 68.78128475803204,
+                "std": 41.41887465587592
+            },
+            "package-0.dram": {
+                "min": 1.4427041048692106,
+                "max": 9.754675182117554,
+                "mean": 7.053652994543264,
+                "std": 2.4164941750581925
+            },
+            "total_power_draw": 38176.889937999906
+        },
+        "total": {
+            "start_unix": 1674588642.694189,
+            "end_unix": 1674589198.405834,
+            "nr_measurements": 11071,
+            "total_power_draw": 38176.889937999906,
+            "start_utc": "2023-01-24 19:30:42",
+            "end_utc": "2023-01-24 19:39:58",
+            "total_duration": 555.7116448879242
+        }
+    },
+    "pynvml": {
+        "0": {
+            "start_unix": 1674588642.76631,
+            "end_unix": 1674589198.300575,
+            "start_utc": "2023-01-24 19:30:42",
+            "end_utc": "2023-01-24 19:39:58",
+            "total_duration": 555.5342650413513,
+            "nr_measurements": 11069,
+            "temperature": {
+                "min": 22,
+                "max": 22,
+                "mean": 22.0,
+                "std": 0.0
+            },
+            "util.gpu": {
+                "min": 0,
+                "max": 0,
+                "mean": 0.0,
+                "std": 0.0
+            },
+            "util.memory": {
+                "min": 0,
+                "max": 0,
+                "mean": 0.0,
+                "std": 0.0
+            },
+            "power_usage": {
+                "min": 1.105,
+                "max": 2.714,
+                "mean": 1.7647910380341496,
+                "std": 0.28123627795733697
+            },
+            "memory.used": {
+                "min": 16384000,
+                "max": 16384000,
+                "mean": 16384000.0,
+                "std": 0.0
+            },
+            "memory.free": {
+                "min": 16892231680,
+                "max": 16892231680,
+                "mean": 16892231680.0,
+                "std": 0.0
+            },
+            "total_power_draw": 980.1436244616677
+        },
+        "total": {
+            "start_unix": 1674588642.76631,
+            "end_unix": 1674589198.300575,
+            "nr_measurements": 11069,
+            "total_power_draw": 980.1436244616677,
+            "start_utc": "2023-01-24 19:30:42",
+            "end_utc": "2023-01-24 19:39:58",
+            "total_duration": 555.5342650413513
+        }
+    },
+    "config": {
+        "dataset": "tourism_monthly_dataset",
+        "model": "nbeats",
+        "output_dir": "mnt_data/results",
+        "epochs": 100,
+        "datadir": "mnt_data/data",
+        "cpu_monitor_interval": 0.05,
+        "gpu_monitor_interval": 0.05,
+        "seed": 42,
+        "timestamp": "2023_01_24_19_30_42"
+    },
+    "requirements": [
+        "# 3.7.7 (default, Mar 23 2020, 22:36:06)",
+        "# [GCC 7.3.0]",
+        "wrapt==1.11.2",
+        "typed-ast==1.4.0",
+        "six==1.12.0",
+        "setuptools==41.6.0",
+        "pytz==2019.3",
+        "python-dateutil==2.8.0",
+        "pyparsing==2.4.2",
+        "pylint==2.4.3",
+        "numpy==1.17.3",
+        "mccabe==0.6.1",
+        "matplotlib==3.1.1",
+        "lazy-object-proxy==1.4.3",
+        "kiwisolver==1.1.0",
+        "isort==4.3.21",
+        "cycler==0.10.0",
+        "astroid==2.3.2",
+        "wheel==0.37.1",
+        "urllib3==1.26.14",
+        "typing-extensions==4.4.0",
+        "tqdm==4.64.1",
+        "toolz==0.12.0",
+        "rpy2==2.9.4",
+        "requests==2.28.2",
+        "pynvml==11.4.1",
+        "pydantic==1.10.4",
+        "pyarrow==8.0.0",
+        "py-rapl==0.1",
+        "pip==22.3.1",
+        "pandas==1.3.5",
+        "orjson==3.8.5",
+        "mxnet==1.9.1",
+        "markupsafe==2.1.1",
+        "jinja2==3.1.2",
+        "idna==3.4",
+        "graphviz==0.8.4",
+        "gluonts==0.11.8",
+        "charset-normalizer==3.0.1",
+        "certifi==2022.12.7"
+    ],
+    "results": {
+        "history": {},
+        "start": 1674585042.73406,
+        "end": 1674585598.3078783,
+        "model": null
+    },
+    "execution_platform": {
+        "System": "Linux",
+        "Node Name": "ls8ws022",
+        "Release": "5.4.0-137-generic",
+        "Version": "#154-Ubuntu SMP Thu Jan 5 17:03:22 UTC 2023",
+        "Machine": "x86_64",
+        "Processor": "Intel(R) Xeon(R) W-2155 CPU @ 3.30GHz"
+    },
+    "full_log": "mnt_data/results_merged/train_2023_01_24_19_30_42.tar.gz"
+}
