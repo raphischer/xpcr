@@ -9,7 +9,7 @@ from dash.dependencies import Input, Output, State
 from dash import dcc
 import dash_bootstrap_components as dbc
 
-from exprep.index_and_rate import rate_database, load_boundaries, save_boundaries, calculate_optimal_boundaries, save_weights, update_weights, calculate_compound_rating
+from exprep.index_and_rate import rate_database, load_boundaries, save_boundaries, calculate_optimal_boundaries, save_weights, update_weights, find_optimal_reference, find_relevant_metrics
 from exprep.elex.pages import create_page
 from exprep.elex.util import summary_to_html_tables, toggle_element_visibility, fill_meta
 from exprep.elex.graphs import create_scatter_graph, create_bar_graph, add_rating_background
@@ -20,15 +20,17 @@ from exprep.load_experiment_logs import find_sub_database
 
 class Visualization(dash.Dash):
 
-    def __init__(self, rated_database, boundaries, real_boundaries, meta, dark_mode=True, **kwargs):
+    def __init__(self, rated_database, boundaries, real_boundaries, meta, references, dark_mode=True, **kwargs):
         self.dark_mode = dark_mode
         if dark_mode:
             kwargs['external_stylesheets'] = [dbc.themes.DARKLY]
         super().__init__(__name__, **kwargs)
         
         # init some values
-        self.database, self.boundaries, self.real_boundaries, self.meta = rated_database, boundaries, real_boundaries, meta
+        self.database, self.boundaries, self.boundaries_real, self.meta, self.references = rated_database, boundaries, real_boundaries, meta, references
+        self.update_necessary, self.rating_mode = False, 'optimistic median'
         self.datasets = pd.unique(self.database['dataset'])
+
         # init dicts to find restrictions between dataset, task and environments more easily
         self.tasks = {ds: pd.unique(find_sub_database(self.database, ds)['task']) for ds in self.datasets}
         self.environments = {(ds, task): pd.unique(find_sub_database(self.database, ds, task)['environment']) for ds, tasks in self.tasks.items() for task in tasks}
@@ -38,14 +40,13 @@ class Visualization(dash.Dash):
             'ds': self.datasets[0],
             'task': self.tasks[self.datasets[0]][0],
             'env': self.environments[(self.datasets[0], self.tasks[self.datasets[0]][0])][0],
+            'sub_database': None,
             'model': None,
             'label': None
         }
 
         # create a dict with all metrics for any dataset & task combination, and a map of metric unit symbols
-        self.metrics, self.metric_units = {}, {}
-        self.xaxis_default = {}
-        self.yaxis_default = {}
+        self.metrics, self.metric_units, self.xaxis_default, self.yaxis_default = find_relevant_metrics(self.database)
         for ds in self.datasets:
             for task in self.tasks[ds]:
                 subd = find_sub_database(self.database, ds, task)
@@ -79,15 +80,15 @@ class Visualization(dash.Dash):
         ) (self.update_ds_changed)
         self.callback(
             [Output('environments', 'options'), Output('environments', 'value'), Output('xaxis', 'options'), Output('xaxis', 'value'), Output('yaxis', 'options'),  Output('yaxis', 'value'), Output('select-reference', 'options'), Output('select-reference', 'value')],
-            Input('task-switch', 'value')
+            [Input('task-switch', 'value'), Input('btn-optimize-reference', 'n_clicks')]
         ) (self.update_task_changed)
         self.callback(
             [Output(sl_id, prop) for sl_id in ['boundary-slider-x', 'boundary-slider-y'] for prop in ['min', 'max', 'value', 'marks']],
-            [Input('xaxis', 'value'), Input('yaxis', 'value'), Input('boundaries-upload', 'contents'), Input('btn-calc-boundaries', 'n_clicks')]
+            [Input('xaxis', 'value'), Input('yaxis', 'value'), Input('boundaries-upload', 'contents'), Input('btn-calc-boundaries', 'n_clicks'), Input('select-reference', 'value')]
         ) (self.update_boundary_sliders)
         self.callback(
             Output('graph-scatter', 'figure'),
-            [Input('environments', 'value'), Input('scale-switch', 'value'), Input('rating', 'value'), Input('x-weight', 'value'), Input('y-weight', 'value'), Input('select-reference', 'value'), Input('boundary-slider-x', 'value'), Input('boundary-slider-y', 'value')]
+            [Input('environments', 'value'), Input('scale-switch', 'value'), Input('rating', 'value'), Input('x-weight', 'value'), Input('y-weight', 'value'), Input('boundary-slider-x', 'value'), Input('boundary-slider-y', 'value')]
         ) (self.update_scatter_graph)
         self.callback(
             Output('graph-bars', 'figure'),
@@ -106,85 +107,104 @@ class Visualization(dash.Dash):
         self.callback(Output('label-modal', 'is_open'), Input('model-label', "n_clicks"), State('label-modal', 'is_open')) (toggle_element_visibility)
 
 
-    def update_scatter_graph(self, env_names=None, scale_switch=None, rating_mode=None, xweight=None, yweight=None, reference=None, *slider_args):
-        if xweight is not None and 'x-weight' in dash.callback_context.triggered[0]['prop_id']:
-            self.summaries = update_weights(self.summaries, xweight, self.xaxis)
-        if yweight is not None and 'y-weight' in dash.callback_context.triggered[0]['prop_id']:
-            self.summaries = update_weights(self.summaries, yweight, self.yaxis)
-        if any(slider_args) and 'slider' in dash.callback_context.triggered[0]['prop_id']:
-            self.update_boundaries(slider_args)
-        env_names = self.environments[self.curr_data['task']] if env_names is None else env_names
+    def update_scatter_graph(self, env_names=None, scale_switch=None, rating_mode=None, xweight=None, yweight=None, *slider_args):
+        triggered_prop = dash.callback_context.triggered[0]['prop_id']
+        if xweight is not None and 'x-weight' in triggered_prop:
+            self.summaries = update_weights(self.summaries, xweight, self.curr_data['xaxis'])
+        if yweight is not None and 'y-weight' in triggered_prop:
+            self.summaries = update_weights(self.summaries, yweight, self.curr_data['yaxis'])
+        update_db = False
         scale_switch = 'index' if scale_switch is None else scale_switch
-        self.rating_mode = self.rating_mode if rating_mode is None else rating_mode
-        if reference is not None:
-            pass
-            # TODO only update self.curr_data['sub_database']
-            sub_database, self.boundaries, self.boundaries_real = rate_database(self.curr_data['sub_database'], self.boundaries, {self.curr_data['ds']: reference}, self.meta['properties'], self.unit_fmt)
+        if any(slider_args) and 'slider' in triggered_prop:
+            # check if sliders were updated from selecting axes, or if value was changed
+            if 'x' in triggered_prop:
+                axis = self.curr_data['xaxis']
+                values = slider_args[0]
+            else:
+                axis = self.curr_data['yaxis']
+                values = slider_args[1]
+            print(self.boundaries[axis])
+            print(self.boundaries['sMAPE'])
+            for sl_idx, sl_val in enumerate(values):
+                self.boundaries[axis][4 - sl_idx][0] = sl_val
+                self.boundaries[axis][3 - sl_idx][1] = sl_val
+            update_db = True
+        if rating_mode != self.rating_mode: # check if rating mode was changed
+            self.rating_mode = rating_mode
+            update_db = True
+        if update_db:
+            self.update_database(only_current=False)
         self.plot_data = {}
+        # assemble data for plotting
+        env_names = self.environments[self.curr_data['task']] if env_names is None else env_names
         for env in env_names:
             env_data = { 'names': [], 'ratings': [], 'x': [], 'y': [] }
             for _, log in find_sub_database(self.curr_data['sub_database'], environment=env).iterrows():
+                env_data['ratings'].append(log['compound'])
                 env_data['names'].append(log['model'])
-                env_data['ratings'].append(calculate_compound_rating(log, self.rating_mode))
-                if scale_switch == 'index':
-                    env_data['x'].append(log[self.curr_data['xaxis']]['index'] or 0)
-                    env_data['y'].append(log[self.curr_data['yaxis']]['index'] or 0)
-                else:
-                    env_data['x'].append(log[self.curr_data['xaxis']]['value'] or 0)
-                    env_data['y'].append(log[self.curr_data['yaxis']]['value'] or 0)
+                for xy_axis, metric in zip(['x', 'y'], [self.curr_data['xaxis'], self.curr_data['yaxis']]):
+                    if isinstance(log[metric], dict): # either take the value or the index of the metric
+                        env_data[xy_axis].append(log[metric][scale_switch])
+                    else: # error during value aggregation
+                        env_data[xy_axis].append(0)
             self.plot_data[env] = env_data
         axis_names = [f'{ax} {self.metric_units[ax]}' for ax in [self.curr_data['xaxis'], self.curr_data['yaxis']]] # TODO pretty print, use name of axis?
         if scale_switch == 'index':
             rating_pos = [self.boundaries[self.curr_data['xaxis']], self.boundaries[self.curr_data['yaxis']]]
             axis_names = [name.split('[')[0].strip() + ' Index' for name in axis_names]
         else:
-            rating_pos = [self.boundaries_real[self.curr_data['ds']][self.curr_data['task']][env_names[0]][self.curr_data['xaxis']], self.boundaries_real[self.curr_data['ds']][self.curr_data['task']][env_names[0]][self.curr_data['yaxis']]]
+            current = (self.curr_data['ds'], self.curr_data['task'], env_names[0])
+            rating_pos = [self.boundaries_real[current][self.curr_data['xaxis']], self.boundaries_real[current][self.curr_data['yaxis']]]
         scatter = create_scatter_graph(self.plot_data, axis_names, dark_mode=self.dark_mode)
         add_rating_background(scatter, rating_pos, self.rating_mode, dark_mode=self.dark_mode)
         return scatter
+    
+    def update_database(self, only_current=True):
+        if not only_current: # remark for making a full update when task / data set is changed
+            self.update_necessary = True
+        # update the data currently displayed to user
+        self.curr_data['sub_database'], self.boundaries, self.boundaries_real, self.references = rate_database(self.curr_data['sub_database'], self.boundaries, self.references, self.meta['properties'], self.unit_fmt, self.rating_mode)
+        self.database.loc[self.curr_data['sub_database'].index] = self.curr_data['sub_database']
 
     def update_bars_graph(self, scatter_graph=None, discard_y_axis=False):
         bars = create_bar_graph(self.plot_data, self.dark_mode, discard_y_axis)
         return bars
 
-    def update_boundary_sliders(self, xaxis=None, yaxis=None, uploaded_boundaries=None, calculated_boundaries=None):
+    def update_boundary_sliders(self, xaxis=None, yaxis=None, uploaded_boundaries=None, calculated_boundaries=None, reference=None):
         if uploaded_boundaries is not None:
             boundaries_dict = json.loads(base64.b64decode(uploaded_boundaries.split(',')[-1]))
             self.boundaries = load_boundaries(boundaries_dict)
-            self.summaries, self.boundaries, self.boundaries_real = rate_database(self.database, boundaries=self.boundaries)
+            self.update_database(only_current=False)
         if calculated_boundaries is not None and 'calc' in dash.callback_context.triggered[0]['prop_id']:
-            self.boundaries = calculate_optimal_boundaries(self.summaries, [0.8, 0.6, 0.4, 0.2])
-            self.summaries, self.boundaries, self.boundaries_real = rate_database(self.database, boundaries=self.boundaries)
-        self.xaxis = xaxis or self.xaxis
-        self.yaxis = yaxis or self.yaxis
+            self.boundaries = calculate_optimal_boundaries(self.database, [0.8, 0.6, 0.4, 0.2])
+        if reference is not None and reference != self.references[self.curr_data['ds']]:
+            # reference changed, so re-index the current sub database
+            self.references[self.curr_data['ds']] = reference
+            self.update_database()
+        self.curr_data['xaxis'] = xaxis or self.curr_data['xaxis']
+        self.curr_data['yaxis'] = yaxis or self.curr_data['yaxis']
         values = []
-        for axis in [self.xaxis, self.curr_data['yaxis']]:
-            all_ratings = [log['index'] for log in self.curr_data['sub_database'][axis]]
+        for axis in [self.curr_data['xaxis'], self.curr_data['yaxis']]:
+            all_ratings = [metric['index'] for metric in self.curr_data['sub_database'][axis].dropna()]
             min_v = min(all_ratings)
             max_v = max(all_ratings)
             value = [entry[0] for entry in reversed(self.boundaries[axis][1:])]
             marks={ val: {'label': str(val)} for val in np.round(np.linspace(min_v, max_v, 10), 2)}
             values.extend([min_v, max_v, value, marks])
         return values
-    
-    def update_boundaries(self, boundary_slider_values):
-        # check if sliders were updated from selecting axes, or if value was changed
-        update_necessary = False
-        for axis, values in zip([self.xaxis, self.curr_data['yaxis']], boundary_slider_values):
-            for sl_idx, sl_val in enumerate(values):
-                if self.boundaries[axis][4 - sl_idx][0] != sl_val:
-                    self.boundaries[axis][4 - sl_idx][0] = sl_val
-                    self.boundaries[axis][3 - sl_idx][1] = sl_val
-                    update_necessary = True
-        if update_necessary:
-            self.summaries, self.boundaries, self.boundaries_real = rate_database(self.database, boundaries=self.boundaries)
 
     def update_ds_changed(self, ds=None):
         self.curr_data['ds'] = ds or self.curr_data['ds']
         tasks = [{"label": task.capitalize(), "value": task} for task in self.tasks[self.curr_data['ds']]]
         return tasks, tasks[0]['value']
 
-    def update_task_changed(self, task=None):
+    def update_task_changed(self, task=None, find_optimal_ref=None):
+        if find_optimal_ref is not None:
+            self.references[self.curr_data['ds']] = find_optimal_reference(self.curr_data['sub_database'])
+            self.update_database()
+        if self.update_necessary:
+            self.database, self.boundaries, self.boundaries_real, self.references = rate_database(self.database, self.boundaries, self.references, self.meta['properties'], self.unit_fmt, self.rating_mode)
+            self.update_necessary = False
         self.curr_data['task'] = task or self.curr_data['task']
         avail_envs = [{"label": env, "value": env} for env in self.environments[(self.curr_data['ds'], self.curr_data['task'])]]
         axis_options = [{'label': metr, 'value': metr} for metr in self.metrics[(self.curr_data['ds'], self.curr_data['task'])]]
@@ -193,7 +213,7 @@ class Visualization(dash.Dash):
         self.curr_data['sub_database'] = find_sub_database(self.database, self.curr_data['ds'], self.curr_data['task'])
         models = self.curr_data['sub_database']['model'].values
         ref_options = [{'label': mod, 'value': mod} for mod in models]
-        return avail_envs, [avail_envs[0]['value']], axis_options, self.curr_data['xaxis'], axis_options, self.curr_data['yaxis'], ref_options, models[0]
+        return avail_envs, [avail_envs[0]['value']], axis_options, self.curr_data['xaxis'], axis_options, self.curr_data['yaxis'], ref_options, self.references[self.curr_data['ds']]
 
     def display_model(self, hover_data=None, env_names=None, rating_mode=None):
         if hover_data is None:
@@ -201,14 +221,14 @@ class Visualization(dash.Dash):
             self.curr_data['label'] = None
             model_table, metric_table,  enc_label, link, open = None, None, None, "/", True
         else:
-            self.rating_mode = self.rating_mode if rating_mode is None else rating_mode
+            print('RATING MODE', rating_mode)
             point = hover_data['points'][0]
             env_name = env_names[point['curveNumber']]
             model = find_sub_database(self.curr_data['sub_database'], environment=env_name).iloc[point['pointNumber']].to_dict()
             self.curr_data['model'] = fill_meta(model, self.meta)
-            self.curr_data['label'] = PropertyLabel(self.curr_data['model'], self.rating_mode)
+            self.curr_data['label'] = PropertyLabel(self.curr_data['model'])
 
-            model_table, metric_table = summary_to_html_tables(self.curr_data['model'], self.rating_mode)
+            model_table, metric_table = summary_to_html_tables(self.curr_data['model'])
             enc_label = self.curr_data['label'].to_encoded_image()
             link = self.curr_data['model']['model']['url']
             open = False

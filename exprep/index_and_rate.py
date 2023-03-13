@@ -5,17 +5,36 @@ import numpy as np
 import pandas as pd
 
 from exprep.unit_reformatting import CustomUnitReformater
+from exprep.load_experiment_logs import find_sub_database
 
 
-def calculate_compound_rating(ratings, mode, meanings=None):
+def calculate_compound_rating(ratings, mode='optimistic median', meanings=None):
+    if isinstance(ratings, pd.DataFrame): # full database to rate
+        for idx, log in ratings.iterrows():
+            try:
+                ratings.loc[idx,'compound'] = calculate_single_compound_rating(log, mode, meanings)
+            except RuntimeError:
+                ratings.loc[idx,'compound'] = -1
+        ratings['compound'] = ratings['compound'].astype(int)
+        return ratings
+    return calculate_single_compound_rating(ratings, mode, meanings)
+
+
+def calculate_single_compound_rating(ratings, mode, meanings=None):
     if isinstance(ratings, pd.Series):
         ratings = ratings.to_dict()
     if isinstance(ratings, dict): # model summary given instead of list of ratings
-        weights = [val['weight'] for val in ratings.values() if isinstance(val, dict) and 'rating' in val if val['weight'] > 0]
+        weights, ratings_gathered = [], []
+        for val in ratings.values():
+            if isinstance(val, dict) and 'weight' in val and val['weight'] > 0:
+                weights.append(val['weight'])
+                ratings_gathered.append(val['rating'])
         weights = [w / sum(weights) for w in weights]
-        ratings = [val['rating'] for val in ratings.values() if isinstance(val, dict) and 'rating' in val if val['weight'] > 0]
+        ratings = ratings_gathered
     else:
         weights = [1.0 / len(ratings) for _ in ratings]
+    if len(ratings) == 0:
+        raise RuntimeError
     if meanings is None:
         meanings = np.arange(np.max(ratings) + 1, dtype=int)
     round_m = np.ceil if 'pessimistic' in mode else np.floor # optimistic
@@ -77,42 +96,70 @@ def process_property(value, reference_value, meta, boundaries, higher_better, un
     return returned_dict
 
 
-def calculate_optimal_boundaries(summaries, quantiles):
-    boundaries = {}
-    for metric in METRICS_INFO.keys():
-        index_values = []
-        for sum_ds in summaries.values():
-            task = 'training' if 'training' in metric else 'inference'
-            for sum_env in sum_ds[task].values():
-                index_values += [ summary[metric]['index'] for summary in sum_env if metric in summary and summary[metric]['index'] is not None ]
-        try:
-            boundaries[metric] = np.quantile(index_values, quantiles)
-        except Exception as e:
-            print(e)
+def find_optimal_reference(database, pre_rating_use_meta=None):
+    model_names = database['model'].values
+    metric_values = {}
+    if pre_rating_use_meta is not None:
+        metrics = [col for col in pre_rating_use_meta.keys() if any([not np.isnan(entry) for entry in database[col]])]
+    else:
+        metrics = [col for col in database.columns if any([isinstance(entry, dict) for entry in database[col]])]
+    # aggregate index values for each metric
+    for metric in metrics:
+        if pre_rating_use_meta is not None:
+            meta = pre_rating_use_meta[metric]
+            higher_better = 'maximize' in meta and meta['maximize']
+            weight = meta['weight']
+            values = {model: val for _, (model, val) in database[['model', metric]].iterrows()}
+        else:
+            weight, values = 0, {}
+            for idx, entry in enumerate(database[metric]):
+                if isinstance(entry, dict):
+                    higher_better = 'maximize' in entry and entry['maximize']
+                    weight = max([entry['weight'], weight])
+                    values[model_names[idx]] = entry['value']
+        # assess the reference for each individual metric
+        ref = np.median(list(values.values())) # TODO allow to change the rating mode
+        values = {name: value_to_index(val, ref, higher_better) for name, val in values.items()}
+        metric_values[metric] = values, weight
+    # calculate model-specific scores based on metrix index values
+    scores = {}
+    for model in model_names:
+        scores[model] = 0
+        for values, weight in metric_values.values():
+            if model in values:
+                scores[model] += values[model] * weight
+    # take the most average scored model
+    ref_model_idx = np.argsort(list(scores.values()))[len(scores)//2]
+    return model_names[ref_model_idx]
+
+
+def calculate_optimal_boundaries(database, quantiles):
+    boundaries = {'default': [1.5, 1.0, 0.5, 0.25]}
+    for col in database.columns:
+        index_values = [ val['index'] for val in database[col] if isinstance(val, dict) and 'index' in val ]
+        if len(index_values) > 0:
+            try:
+                boundaries[col] = np.quantile(index_values, quantiles)
+            except Exception as e:
+                print(e)
     return load_boundaries(boundaries)
 
 
 def load_boundaries(content=None):
     if content is None:
         content = {'default': [1.5, 1.0, 0.5, 0.25]}
-    if isinstance(content, dict):
-        boundary_json = content
-    elif isinstance(content, str):
+    if isinstance(content, str):
         with open(content, "r") as file:
-            boundary_json = json.load(file)
+            content = json.load(file)
 
     # Convert boundaries to dictionary
-    max_value = 10000
-    min_value = 0
-
+    min_value, max_value = 0, 100000
     boundary_intervals = {}
-
-    for key, boundaries in boundary_json.items():
+    for key, boundaries in content.items():
         intervals = [[max_value, boundaries[0]]]
         for i in range(len(boundaries)-1):
             intervals.append([boundaries[i], boundaries[i+1]])
         intervals.append([boundaries[-1], min_value])
-        
         boundary_intervals[key] = intervals
 
     return boundary_intervals
@@ -122,7 +169,6 @@ def save_boundaries(boundary_intervals, output="boundaries.json"):
     scale = {}
     for key in boundary_intervals.keys():
         scale[key] = [sc[0] for sc in boundary_intervals[key][1:]]
-
     if output is not None:
         with open(output, 'w') as out:
             json.dump(scale, out, indent=4)
@@ -158,55 +204,91 @@ def update_weights(summaries, weights, axis=None):
     return summaries
 
 
-def rate_database(database, boundaries=None, references=None, properties_meta=None, unit_fmt=None):
-    
+def rate_database(database, boundaries=None, references=None, properties_meta=None, unit_fmt=None, rating_mode='optimistic median'):
     # load defaults
-    if boundaries is None:
-        boundaries = load_boundaries()
-    if references is None:
-        references = {}
-    if properties_meta is None:
-        properties_meta = {}
-    if unit_fmt is None:
-        unit_fmt = CustomUnitReformater()
+    boundaries = boundaries or load_boundaries()
+    references = references or {}
+    properties_meta = properties_meta or {}
+    unit_fmt = unit_fmt or CustomUnitReformater()
     real_boundaries = {}
 
     # group each dataset, task and environment combo
+    database['old_index'] = database.index # store index for mapping the groups later on
     fixed_fields = ['dataset', 'task', 'environment']
     grouped_by = database.groupby(fixed_fields)
 
     for group_field_vals, data in grouped_by:
+        real_boundaries[group_field_vals] = {}
         # get reference values
         group_fields = {field: val for (field, val) in zip(fixed_fields, group_field_vals)}
         if group_fields['dataset'] in references:
             reference_name = references[group_fields['dataset']]
-        else:
-            # TODO implement to take the most avg model
-            reference_name = data['model'].iloc[0]
+        else: # find optimal
+            reference_name = find_optimal_reference(data, properties_meta) # data['model'].iloc[0]
             references[group_fields['dataset']] = reference_name
         reference = data[data['model'] == reference_name]
-        real_boundaries[group_field_vals] = {}
+        if reference.shape[0] > 1:
+            raise RuntimeError(f'Found multiple results for reference {reference_name} in {group_field_vals} results!')
 
-        # rate metrics based on reference
+        # index and rate metrics based on reference
         for prop, meta in properties_meta.items():
-            higher_better = False # TODO encode higher better info in meta
+            # TODO currently this assumes that all metrics given in properties should be indexed and rated!
+            higher_better = 'maximize' in meta and meta['maximize']
             ref_val = reference[prop].values[0]
-            if isinstance(ref_val, dict): # re-indexing
+            if isinstance(ref_val, dict): # if database was already indexed before
                 ref_val = ref_val['value']
-            if prop in boundaries:
-                prop_boundaries = boundaries[prop]
-            else:
-                prop_boundaries = boundaries['default']
-                boundaries[prop] = prop_boundaries # store so that they can be changed in returned boundaries
+            prop_boundaries = boundaries[prop] if prop in boundaries else boundaries['default']
+            boundaries[prop] = [bound.copy() for bound in prop_boundaries] # not using explicit copies leads to problems on default!
+            # extract meta, project on index values and rate
             data[prop] = data[prop].map(lambda value: process_property(value, ref_val, meta, prop_boundaries, higher_better, unit_fmt))
             # calculate real boundary values
-            if 'unit' in meta: # TODO is this condition for indexable metrics 
-                real_boundaries[group_field_vals][prop] = [(index_to_value(start, ref_val, higher_better), index_to_value(stop, ref_val, higher_better)) for (start, stop) in prop_boundaries]
-        
+            real_boundaries[group_field_vals][prop] = [(index_to_value(start, ref_val, higher_better), index_to_value(stop, ref_val, higher_better)) for (start, stop) in prop_boundaries]
         # store results back to database
-        idc = grouped_by.indices[group_field_vals]
-        database.loc[idc] = data
-    return database, boundaries, real_boundaries
+        database.loc[data['old_index']] = data
+
+    # make certain model metrics available across all tasks
+    for prop, meta in properties_meta.items():
+        if 'independent_of_task' in meta and meta['independent_of_task']:
+            fixed_fields = ['dataset', 'environment', 'model']
+            grouped_by = database.groupby(fixed_fields)
+            for group_field_vals, data in grouped_by:
+                valid = data[prop].dropna()
+                if valid.shape[0] != 1:
+                    print(f'{valid.shape[0]} not-NA values found for {prop} across all tasks on {fixed_fields}!')
+                if valid.shape[0] > 0:
+                    data[prop] = [valid.values[0]] * data.shape[0]
+                    database.loc[data['old_index']] = data
+    
+    database.drop('old_index', axis=1, inplace=True) # drop the tmp index info
+    # calculate compound ratings
+    database = calculate_compound_rating(database, rating_mode)
+    return database, boundaries, real_boundaries, references
+
+
+def find_relevant_metrics(database):
+    all_metrics, metric_units = {}, {}
+    most_imp_res, most_imp_qual = {}, {}
+    for ds in pd.unique(database['dataset']):
+        for task in pd.unique(database[database['dataset'] == ds]['task']):
+            subd = find_sub_database(database, ds, task)
+            metrics = []
+            for col in subd.columns:
+                for val in subd[col]:
+                    if isinstance(val, dict):
+                        metrics.append(col)
+                        if col not in metric_units:
+                            metric_units[col] = val['unit']
+                        else:
+                            if not metric_units[col] == val['unit']:
+                                raise RuntimeError(f'Unit of metric {col} not consistent in database!')
+                        # set axis defaults for dataset / task combo
+                        if val['group'] == 'Resources' and (ds, task) not in most_imp_res:
+                            most_imp_res[(ds, task)] = col
+                        if val['group'] == 'Quality' and (ds, task) not in most_imp_qual:
+                            most_imp_qual[(ds, task)] = col
+                        break
+            all_metrics[(ds, task)] = metrics
+    return all_metrics, metric_units, most_imp_res, most_imp_qual
 
 
 if __name__ == '__main__':
