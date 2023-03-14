@@ -123,8 +123,6 @@ class Visualization(dash.Dash):
             else:
                 axis = self.curr_data['yaxis']
                 values = slider_args[1]
-            print(self.boundaries[axis])
-            print(self.boundaries['sMAPE'])
             for sl_idx, sl_val in enumerate(values):
                 self.boundaries[axis][4 - sl_idx][0] = sl_val
                 self.boundaries[axis][3 - sl_idx][1] = sl_val

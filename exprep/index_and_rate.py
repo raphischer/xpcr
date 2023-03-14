@@ -81,14 +81,15 @@ def index_to_rating(index, scale):
     return 4 # worst rating if index does not fall in boundaries
 
 
-def process_property(value, reference_value, meta, boundaries, higher_better, unit_fmt):
+def process_property(value, reference_value, meta, boundaries, unit_fmt):
     if isinstance(value, dict): # re-indexing
         value = value['value']
     returned_dict = meta.copy()
     if pd.isna(value):
         return value
     returned_dict['value'] = value
-    if 'unit' in returned_dict: # TODO is this condition for indexable metrics
+    if 'unit' in returned_dict: # TODO is this a good indicator for indexable metrics?
+        higher_better = 'maximize' in meta and meta['maximize']
         returned_dict['index'] = value_to_index(value, reference_value, higher_better)
         returned_dict['rating'] = index_to_rating(returned_dict['index'], boundaries)
         fmt_val, fmt_unit = unit_fmt.reformat_value(value, meta['unit'])
@@ -148,9 +149,13 @@ def calculate_optimal_boundaries(database, quantiles):
 def load_boundaries(content=None):
     if content is None:
         content = {'default': [1.5, 1.0, 0.5, 0.25]}
-    if isinstance(content, str):
+    elif os.path.isfile(content):
         with open(content, "r") as file:
             content = json.load(file)
+    elif isinstance(content, dict):
+        pass
+    else:
+        raise RuntimeError('Invalid boundary input', content)
 
     # Convert boundaries to dictionary
     min_value, max_value = 0, 100000
@@ -206,7 +211,7 @@ def update_weights(summaries, weights, axis=None):
 
 def rate_database(database, properties_meta, boundaries=None, references=None, unit_fmt=None, rating_mode='optimistic median'):
     # load defaults
-    boundaries = boundaries or load_boundaries()
+    boundaries = load_boundaries(boundaries)
     references = references or {}
     unit_fmt = unit_fmt or CustomUnitReformater()
     real_boundaries = {}
@@ -234,15 +239,15 @@ def rate_database(database, properties_meta, boundaries=None, references=None, u
         # index and rate metrics based on reference
         for prop, meta in properties_meta.items():
             # TODO currently this assumes that all metrics given in properties should be indexed and rated!
-            higher_better = 'maximize' in meta and meta['maximize']
             ref_val = reference[prop].values[0]
             if isinstance(ref_val, dict): # if database was already indexed before
                 ref_val = ref_val['value']
             prop_boundaries = boundaries[prop] if prop in boundaries else boundaries['default']
             boundaries[prop] = [bound.copy() for bound in prop_boundaries] # not using explicit copies leads to problems on default!
             # extract meta, project on index values and rate
-            data[prop] = data[prop].map(lambda value: process_property(value, ref_val, meta, prop_boundaries, higher_better, unit_fmt))
+            data[prop] = data[prop].map(lambda value: process_property(value, ref_val, meta, prop_boundaries, unit_fmt))
             # calculate real boundary values
+            higher_better = 'maximize' in meta and meta['maximize']
             real_boundaries[group_field_vals][prop] = [(index_to_value(start, ref_val, higher_better), index_to_value(stop, ref_val, higher_better)) for (start, stop) in prop_boundaries]
         # store results back to database
         database.loc[data['old_index']] = data

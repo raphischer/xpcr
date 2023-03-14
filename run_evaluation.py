@@ -19,8 +19,9 @@ if __name__ == '__main__':
     parser.add_argument("--output-logdir-merged", default="results/merged", type=str, help="directory where merged experiment logs (json format) are created")
     parser.add_argument("--property-extractors-module", default="properties", help="python file with PROPERTIES dictionary, which maps properties to executable extractor functions")
     parser.add_argument("--database-fname", default="results/database.pkl", help="filename for the database that shall be created")
+    parser.add_argument("--boundaries", default="boundaries.json")
     parser.add_argument("--clean", action="store_true", help="set to first delete all content in given output directories")
-    parser.add_argument("--mode", default='meta', choices=['meta', 'interactive', 'paper_results', 'label', 'stats'])
+    parser.add_argument("--mode", default='interactive', choices=['meta', 'interactive', 'paper_results', 'label', 'stats'])
     # interactive exploration
     parser.add_argument("--host", default='localhost', type=str, help="default host") # '0.0.0.0'
     parser.add_argument("--port", default=8888, type=int, help="default port")
@@ -36,7 +37,7 @@ if __name__ == '__main__':
         database = load_database(args.logdir_root, args.output_logdir_merged, None, args.property_extractors_module, args.clean)
         database.to_pickle(args.database_fname)
 
-    rated_database, boundaries, real_boundaries, references = rate_database(database, properties_meta=meta['properties'])
+    rated_database, boundaries, real_boundaries, references = rate_database(database, properties_meta=meta['properties'], boundaries=args.boundaries)
 
     print(f'Database constructed from logs has {rated_database.shape} entries')
 
