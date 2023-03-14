@@ -261,7 +261,7 @@ class MetricInferenceEarlyStopping(Callback):
             self.best_metric_value = current_metric_value
 
             if self.restore_best_network:
-                training_network.save_parameters("best_network.params")
+                training_network.save_parameters(os.path.join(os.getenv('TMPDIR'), "best_network.params"))
 
             self.n_stale_epochs = 0
         else:
@@ -276,6 +276,6 @@ class MetricInferenceEarlyStopping(Callback):
                     print(
                         f"Restoring best network from epoch {epoch_no - self.patience}."
                     )
-                    training_network.load_parameters("best_network.params")
+                    training_network.load_parameters(os.path.join(os.getenv('TMPDIR'), "best_network.params"))
 
         return should_continue
