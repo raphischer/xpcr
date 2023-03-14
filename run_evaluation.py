@@ -56,9 +56,12 @@ if __name__ == '__main__':
                 if data[col].dropna().size == 0:
                     data = data.drop(col, axis=1)
             runtime_field = "running_time" if task == "infer" else "train_running_time"
-            time = sum([val['value'] for val in data[runtime_field] if runtime_field in data and isinstance(val, dict)])
-            time_n_nan = sum([1 for val in data[runtime_field] if runtime_field not in data or not isinstance(val, dict)])
-            print(f'{idx:<2} {task:<5} {ds:<50} {str(data.shape):<10} {time / 3600:8.2f} {time_n_nan}')
+            if runtime_field in data.columns:
+                time = sum([val['value'] for val in data[runtime_field] if isinstance(val, dict)])
+                time_n_nan = sum([1 for val in data[runtime_field] if not isinstance(val, dict)])
+            else:
+                time, time_n_nan = -1, -1
+            print(f'{idx:<2} {task:<5} {ds:<45} {str(data.shape):<8} entries, processing time {time / 3600:6.2f} h ({time_n_nan} missing time infos)')
 
     if args.mode == 'paper_results':
         pass
