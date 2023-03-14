@@ -128,8 +128,5 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-mnt_data/results
-mnt_data/results_old
-mnt_data/data
-mnt_data/tmp
+mnt_data/*
 .vscode/*

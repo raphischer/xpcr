@@ -21,6 +21,10 @@ def read_monitoring(filepath):
     return aggregate_monitoring_log(filepath)
 
 
+def read_csv(filepath):
+    return pd.read_csv(filepath).to_dict()
+
+
 def read_log_directory(directory):
     reader_methods = {name: func for name, func in globals().items() if name.startswith('read_')}
     res = {'directory_name': basename(directory)}
@@ -76,8 +80,8 @@ def aggregate_log(log, property_extractors):
             for key, func in extractors.items():
                 try:
                     agg_log[key] = func(log)
-                except KeyError:
-                    print(f'Error in accessing {key} from {log_name}!')
+                except KeyError as e:
+                    print(f'Error in assessing {key} from {log_name} - {log["config"]["model"]} on {log["config"]["dataset"]}!')
                     agg_log[key] = np.nan
     return agg_log
 

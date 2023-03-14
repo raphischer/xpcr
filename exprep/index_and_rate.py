@@ -254,7 +254,7 @@ def rate_database(database, boundaries=None, references=None, properties_meta=No
             for group_field_vals, data in grouped_by:
                 valid = data[prop].dropna()
                 if valid.shape[0] != 1:
-                    print(f'{valid.shape[0]} not-NA values found for {prop} across all tasks on {fixed_fields}!')
+                    print(f'{valid.shape[0]} not-NA values found for {prop} across all tasks on {group_field_vals}!')
                 if valid.shape[0] > 0:
                     data[prop] = [valid.values[0]] * data.shape[0]
                     database.loc[data['old_index']] = data

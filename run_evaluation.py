@@ -16,11 +16,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--logdir-root", default="mnt_data/results", type=str, help="directory with experimental result sub directories")
-    parser.add_argument("--output-logdir-merged", default="mnt_data/results_merged", type=str, help="directory where merged experiment logs (json format) are created")
+    parser.add_argument("--output-logdir-merged", default="results/merged", type=str, help="directory where merged experiment logs (json format) are created")
     parser.add_argument("--property-extractors-module", default="properties", help="python file with PROPERTIES dictionary, which maps properties to executable extractor functions")
-    parser.add_argument("--database-fname", default="database.pkl", help="filename for the database that shall be created")
+    parser.add_argument("--database-fname", default="results/database.pkl", help="filename for the database that shall be created")
     parser.add_argument("--clean", action="store_true", help="set to first delete all content in given output directories")
-    parser.add_argument("--mode", default='interactive', choices=['interactive', 'paper_results', 'label', 'stats'])
+    parser.add_argument("--mode", default='stats', choices=['interactive', 'paper_results', 'label', 'stats'])
     # interactive exploration
     parser.add_argument("--host", default='localhost', type=str, help="default host") # '0.0.0.0'
     parser.add_argument("--port", default=8888, type=int, help="default port")
@@ -56,8 +56,8 @@ if __name__ == '__main__':
                 if data[col].dropna().size == 0:
                     data = data.drop(col, axis=1)
             runtime_field = "running_time" if task == "infer" else "train_running_time"
-            time = sum([val['value'] for val in data[runtime_field] if isinstance(val, dict)])
-            time_n_nan = sum([1 for val in data[runtime_field] if not isinstance(val, dict)])
+            time = sum([val['value'] for val in data[runtime_field] if runtime_field in data and isinstance(val, dict)])
+            time_n_nan = sum([1 for val in data[runtime_field] if runtime_field not in data or not isinstance(val, dict)])
             print(f'{idx:<2} {task:<5} {ds:<50} {str(data.shape):<10} {time / 3600:8.2f} {time_n_nan}')
 
     if args.mode == 'paper_results':
