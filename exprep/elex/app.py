@@ -163,7 +163,7 @@ class Visualization(dash.Dash):
         if not only_current: # remark for making a full update when task / data set is changed
             self.update_necessary = True
         # update the data currently displayed to user
-        self.curr_data['sub_database'], self.boundaries, self.boundaries_real, self.references = rate_database(self.curr_data['sub_database'], self.boundaries, self.references, self.meta['properties'], self.unit_fmt, self.rating_mode)
+        self.curr_data['sub_database'], self.boundaries, self.boundaries_real, self.references = rate_database(self.curr_data['sub_database'], self.meta['properties'], self.boundaries, self.references, self.unit_fmt, self.rating_mode)
         self.database.loc[self.curr_data['sub_database'].index] = self.curr_data['sub_database']
 
     def update_bars_graph(self, scatter_graph=None, discard_y_axis=False):
@@ -203,7 +203,7 @@ class Visualization(dash.Dash):
             self.references[self.curr_data['ds']] = find_optimal_reference(self.curr_data['sub_database'])
             self.update_database()
         if self.update_necessary:
-            self.database, self.boundaries, self.boundaries_real, self.references = rate_database(self.database, self.boundaries, self.references, self.meta['properties'], self.unit_fmt, self.rating_mode)
+            self.database, self.boundaries, self.boundaries_real, self.references = rate_database(self.database, self.meta['properties'], self.boundaries, self.references, self.unit_fmt, self.rating_mode)
             self.update_necessary = False
         self.curr_data['task'] = task or self.curr_data['task']
         avail_envs = [{"label": env, "value": env} for env in self.environments[(self.curr_data['ds'], self.curr_data['task'])]]

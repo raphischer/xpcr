@@ -100,7 +100,7 @@ def find_optimal_reference(database, pre_rating_use_meta=None):
     model_names = database['model'].values
     metric_values = {}
     if pre_rating_use_meta is not None:
-        metrics = [col for col in pre_rating_use_meta.keys() if any([not np.isnan(entry) for entry in database[col]])]
+        metrics = [col for col in pre_rating_use_meta.keys() if col in database and any([not np.isnan(entry) for entry in database[col]])]
     else:
         metrics = [col for col in database.columns if any([isinstance(entry, dict) for entry in database[col]])]
     # aggregate index values for each metric
@@ -204,13 +204,14 @@ def update_weights(summaries, weights, axis=None):
     return summaries
 
 
-def rate_database(database, boundaries=None, references=None, properties_meta=None, unit_fmt=None, rating_mode='optimistic median'):
+def rate_database(database, properties_meta, boundaries=None, references=None, unit_fmt=None, rating_mode='optimistic median'):
     # load defaults
     boundaries = boundaries or load_boundaries()
     references = references or {}
-    properties_meta = properties_meta or {}
     unit_fmt = unit_fmt or CustomUnitReformater()
     real_boundaries = {}
+    # limit properties to handle by available properties in database
+    properties_meta = {prop: meta for prop, meta in properties_meta.items() if prop in database.columns}
 
     # group each dataset, task and environment combo
     database['old_index'] = database.index # store index for mapping the groups later on

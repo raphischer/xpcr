@@ -20,7 +20,7 @@ if __name__ == '__main__':
     parser.add_argument("--property-extractors-module", default="properties", help="python file with PROPERTIES dictionary, which maps properties to executable extractor functions")
     parser.add_argument("--database-fname", default="results/database.pkl", help="filename for the database that shall be created")
     parser.add_argument("--clean", action="store_true", help="set to first delete all content in given output directories")
-    parser.add_argument("--mode", default='stats', choices=['interactive', 'paper_results', 'label', 'stats'])
+    parser.add_argument("--mode", default='meta', choices=['meta', 'interactive', 'paper_results', 'label', 'stats'])
     # interactive exploration
     parser.add_argument("--host", default='localhost', type=str, help="default host") # '0.0.0.0'
     parser.add_argument("--port", default=8888, type=int, help="default port")
@@ -62,6 +62,22 @@ if __name__ == '__main__':
             else:
                 time, time_n_nan = -1, -1
             print(f'{idx:<2} {task:<5} {ds:<45} {str(data.shape):<8} entries, processing time {time / 3600:6.2f} h ({time_n_nan} missing time infos)')
+
+    if args.mode == 'meta':
+        # only look at infer results
+        rated_database = rated_database.drop(rated_database[rated_database['task'] != 'infer'].index)
+        grouped_by = rated_database.groupby(['dataset'])
+        # check for completeness of results
+        max_shape = (0, 0)
+        for idx, ((ds), data) in enumerate(iter(grouped_by)):
+            shape = data.shape
+            if shape[0] > max_shape[0] or shape[1] > max_shape[1]:
+                max_shape = shape
+        for idx, ((ds), data) in enumerate(iter(grouped_by)):
+            if data.shape != max_shape:
+                print(f'Dropping {ds} - shape {data.shape} does not match expected {max_shape}')
+                rated_database = rated_database.drop(data.index)
+
 
     if args.mode == 'paper_results':
         pass
