@@ -136,7 +136,7 @@ def find_optimal_reference(database, pre_rating_use_meta=None):
 
 
 def calculate_optimal_boundaries(database, quantiles):
-    boundaries = {}
+    boundaries = {'default': [0.9, 0.8, 0.7, 0.6]}
     for col in database.columns:
         index_values = [ val['index'] for val in database[col] if isinstance(val, dict) and 'index' in val ]
         if len(index_values) > 0:
@@ -153,7 +153,7 @@ def load_boundaries(content=None):
             # this is already the boundary dict with interval format
             return content
     elif content is None:
-        content = {'default': [1.5, 1.0, 0.5, 0.25]}
+        content = {'default': [0.9, 0.8, 0.7, 0.6]}
     elif isinstance(content, str) and os.path.isfile(content):
         with open(content, "r") as file:
             content = json.load(file)
@@ -209,10 +209,9 @@ def update_weights(database, weights):
     return update_db
 
 
-def rate_database(database, properties_meta, boundaries=None, references=None, unit_fmt=None, rating_mode='optimistic median', indexmode='centered'):
+def rate_database(database, properties_meta, boundaries=None, indexmode='best', references=None, unit_fmt=None, rating_mode='optimistic median'):
     # load defaults
     boundaries = load_boundaries(boundaries)
-    references = references or {}
     unit_fmt = unit_fmt or CustomUnitReformater()
     real_boundaries = {}
     # limit properties to handle by available properties in database
@@ -234,6 +233,8 @@ def rate_database(database, properties_meta, boundaries=None, references=None, u
             boundaries[prop] = [bound.copy() for bound in prop_boundaries] # copies not references! otherwise changing a boundary affects multiple metrics
             
             if indexmode == 'centered': # one central reference model receives index 1, everything else in relation
+                if references is None:
+                    references = {}
                 reference_name = references[ds] if ds in references else find_optimal_reference(data, properties_meta)
                 references[ds] = reference_name # if using optimal, store this info for later use
                 reference = data[data['model'] == reference_name]
@@ -242,6 +243,7 @@ def rate_database(database, properties_meta, boundaries=None, references=None, u
                 # if database was already processed before, take the value from the dict
                 if isinstance(ref_val, dict):
                     ref_val = ref_val['value']
+
             elif indexmode == 'best': # the best perfoming model receives index 1, everything else in relation
                 # extract from dict when already processed before
                 all_values = [val['value'] if isinstance(val, dict) else val for val in data[prop].dropna()]

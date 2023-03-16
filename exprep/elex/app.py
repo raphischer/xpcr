@@ -20,7 +20,7 @@ from exprep.load_experiment_logs import find_sub_database
 
 class Visualization(dash.Dash):
 
-    def __init__(self, rated_database, boundaries, real_boundaries, meta, references, index_mode='centered', dark_mode=True, **kwargs):
+    def __init__(self, rated_database, boundaries, real_boundaries, meta, index_mode='best', references=None, dark_mode=True, **kwargs):
         self.dark_mode = dark_mode
         if dark_mode:
             kwargs['external_stylesheets'] = [dbc.themes.DARKLY]
@@ -148,7 +148,7 @@ class Visualization(dash.Dash):
         if not only_current: # remark for making a full update when task / data set is changed
             self.state['update_on_change'] = True
         # update the data currently displayed to user
-        self.state['sub_database'], self.boundaries, self.boundaries_real, self.references = rate_database(self.state['sub_database'], self.meta['properties'], self.boundaries, self.references, self.unit_fmt, self.state['rating_mode'], self.state['indexmode'])
+        self.state['sub_database'], self.boundaries, self.boundaries_real, self.references = rate_database(self.state['sub_database'], self.meta['properties'], self.boundaries, self.state['indexmode'], self.references, self.unit_fmt, self.state['rating_mode'])
         self.database.loc[self.state['sub_database'].index] = self.state['sub_database']
 
     def update_bars_graph(self, scatter_graph=None, discard_y_axis=False):
@@ -162,10 +162,10 @@ class Visualization(dash.Dash):
             self.update_database(only_current=False)
         if calculated_boundaries is not None and 'calc' in dash.callback_context.triggered[0]['prop_id']:
             if self.state['update_on_change']: # if the indexmode was changed, it is first necessary to update all index values
-                self.database, self.boundaries, self.boundaries_real, self.references = rate_database(self.database, self.meta['properties'], self.boundaries, self.references, self.unit_fmt, self.state['rating_mode'], self.state['indexmode'])
+                self.database, self.boundaries, self.boundaries_real, self.references = rate_database(self.database, self.meta['properties'], self.boundaries, self.state['indexmode'], self.references, self.unit_fmt, self.state['rating_mode'])
                 self.state['update_on_change'] = False
             self.boundaries = calculate_optimal_boundaries(self.database, [0.8, 0.6, 0.4, 0.2])
-        if reference is not None and reference != self.references[self.state['ds']]:
+        if self.references is not None and reference != self.references[self.state['ds']]:
             # reference changed, so re-index the current sub database
             self.references[self.state['ds']] = reference
             self.update_database()
@@ -191,7 +191,7 @@ class Visualization(dash.Dash):
             self.references[self.state['ds']] = find_optimal_reference(self.state['sub_database'])
             self.update_database()
         if self.state['update_on_change']:
-            self.database, self.boundaries, self.boundaries_real, self.references = rate_database(self.database, self.meta['properties'], self.boundaries, self.references, self.unit_fmt, self.state['rating_mode'], self.state['indexmode'])
+            self.database, self.boundaries, self.boundaries_real, self.references = rate_database(self.database, self.meta['properties'], self.boundaries, self.state['indexmode'], self.references, self.unit_fmt, self.state['rating_mode'])
             self.state['update_on_change'] = False
         self.state['task'] = task or self.state['task']
         avail_envs = [{"label": env, "value": env} for env in self.environments[(self.state['ds'], self.state['task'])]]
@@ -201,7 +201,8 @@ class Visualization(dash.Dash):
         self.state['sub_database'] = find_sub_database(self.database, self.state['ds'], self.state['task'])
         models = self.state['sub_database']['model'].values
         ref_options = [{'label': mod, 'value': mod} for mod in models]
-        return avail_envs, [avail_envs[0]['value']], axis_options, self.state['xaxis'], axis_options, self.state['yaxis'], ref_options, self.references[self.state['ds']]
+        curr_ref = self.references[self.state['ds']] if self.references is not None and self.state['ds'] in self.references else models[0]
+        return avail_envs, [avail_envs[0]['value']], axis_options, self.state['xaxis'], axis_options, self.state['yaxis'], ref_options, curr_ref
 
     def display_model(self, hover_data=None, env_names=None, rating_mode=None):
         if hover_data is None:
