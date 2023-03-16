@@ -10,6 +10,8 @@ from exprep.elex.util import fill_meta
 from exprep.elex.app import Visualization
 from exprep.labels.label_generation import PropertyLabel
 
+from data_loader import convert_tsf_to_dataframe as load_data
+
 
 if __name__ == '__main__':
 
@@ -21,7 +23,7 @@ if __name__ == '__main__':
     parser.add_argument("--database-fname", default="results/database.pkl", help="filename for the database that shall be created")
     parser.add_argument("--boundaries", default="boundaries.json")
     parser.add_argument("--clean", action="store_true", help="set to first delete all content in given output directories")
-    parser.add_argument("--mode", default='interactive', choices=['meta', 'interactive', 'paper_results', 'label', 'stats'])
+    parser.add_argument("--mode", default='meta', choices=['meta', 'interactive', 'paper_results', 'label', 'stats'])
     # interactive exploration
     parser.add_argument("--host", default='localhost', type=str, help="default host") # '0.0.0.0'
     parser.add_argument("--port", default=8888, type=int, help="default port")
@@ -78,6 +80,15 @@ if __name__ == '__main__':
             if data.shape != max_shape:
                 print(f'Dropping {ds} - shape {data.shape} does not match expected {max_shape}')
                 rated_database = rated_database.drop(data.index)
+            else:
+                full_path = os.path.join('mnt_data/data', ds + '.tsf')
+                _, freq, seasonality, forecast_horizon, contain_missing_values, contain_equal_length = load_data(full_path)
+                rated_database.loc[data.index,'seasonality'] = seasonality
+                rated_database.loc[data.index,'freq'] = freq
+                rated_database.loc[data.index,'forecast_horizon'] = forecast_horizon
+                rated_database.loc[data.index,'contain_missing_values'] = contain_missing_values
+                rated_database.loc[data.index,'contain_equal_length'] = contain_equal_length
+        rated_database.to_pickle('meta_learn.pkl')
 
 
     if args.mode == 'paper_results':

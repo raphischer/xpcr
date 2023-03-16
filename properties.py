@@ -13,12 +13,12 @@ PROPERTIES = {
 
     'train': {
         'train_running_time': lambda log: log['emissions']['duration']['0'],
-        'train_power_draw': lambda log: log['emissions']['energy_consumed']['0']
+        'train_power_draw': lambda log: log['emissions']['energy_consumed']['0'] * 3.6e6
     },
     
     'infer': {
         'running_time': lambda log: log['emissions']['duration']['0'] / log['validation_results']['num_samples'],
-        'power_draw': lambda log: log['emissions']['energy_consumed']['0'] / log['validation_results']['num_samples'],
+        'power_draw': lambda log: log['emissions']['energy_consumed']['0'] * 3.6e6 / log['validation_results']['num_samples'],
         'RMSE': lambda log: log['validation_results']['metrics']['aggregated']['RMSE'],
         'MAPE': lambda log: log['validation_results']['metrics']['aggregated']['MAPE'],
         'MASE': lambda log: log['validation_results']['metrics']['aggregated']['MASE'],

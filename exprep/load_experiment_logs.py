@@ -1,5 +1,4 @@
 import os
-import argparse
 import json
 import shutil
 import tarfile
@@ -22,7 +21,8 @@ def read_monitoring(filepath):
 
 
 def read_csv(filepath):
-    return pd.read_csv(filepath).to_dict()
+    # use dumps and loads to make sure the log can be used with json (all keys in dict should be strings!)
+    return json.loads(json.dumps(pd.read_csv(filepath).to_dict()))
 
 
 def read_log_directory(directory):
@@ -81,7 +81,7 @@ def aggregate_log(log, property_extractors):
                 try:
                     agg_log[key] = func(log)
                 except KeyError as e:
-                    print(f'Error in assessing {key} from {log_name} - {log["config"]["model"]} on {log["config"]["dataset"]}!')
+                    print(f'Error in assessing {key:<15} from {log_name} - {log["config"]["model"]} on {log["config"]["dataset"]}!')
                     agg_log[key] = np.nan
     return agg_log
 
