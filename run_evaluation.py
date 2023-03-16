@@ -95,6 +95,10 @@ if __name__ == '__main__':
                 rated_database.loc[data.index,'contain_missing_values'] = contain_missing_values
                 rated_database.loc[data.index,'contain_equal_length'] = contain_equal_length
         rated_database.to_pickle('meta_learn.pkl')
+        shape = rated_database.shape
+        ds = pd.unique(rated_database["dataset"])
+        models = pd.unique(rated_database["model"])
+        print(f'Meta learning to be run on {shape} database entries, with a total of {len(ds)} datasets and {len(models)} models!')
 
 
     if args.mode == 'paper_results':
