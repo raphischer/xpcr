@@ -209,7 +209,7 @@ def update_weights(database, weights):
     return update_db
 
 
-def rate_database(database, properties_meta, boundaries=None, references=None, unit_fmt=None, rating_mode='optimistic median'):
+def rate_database(database, properties_meta, boundaries=None, references=None, unit_fmt=None, rating_mode='optimistic median', indexmode='centered'):
     # load defaults
     boundaries = load_boundaries(boundaries)
     references = references or {}
@@ -223,34 +223,39 @@ def rate_database(database, properties_meta, boundaries=None, references=None, u
     fixed_fields = ['dataset', 'task', 'environment']
     grouped_by = database.groupby(fixed_fields)
 
-    for group_field_vals, data in grouped_by:
-        real_boundaries[group_field_vals] = {}
-        # get reference values
-        group_fields = {field: val for (field, val) in zip(fixed_fields, group_field_vals)}
-        if group_fields['dataset'] in references:
-            reference_name = references[group_fields['dataset']]
-        else: # find optimal
-            reference_name = find_optimal_reference(data, properties_meta) # data['model'].iloc[0]
-            references[group_fields['dataset']] = reference_name
-        reference = data[data['model'] == reference_name]
-        if reference.shape[0] > 1:
-            raise RuntimeError(f'Found multiple results for reference {reference_name} in {group_field_vals} results!')
+    if indexmode == 'centered':
+        for group_field_vals, data in grouped_by:
+            real_boundaries[group_field_vals] = {}
+            # get reference values
+            group_fields = {field: val for (field, val) in zip(fixed_fields, group_field_vals)}
+            if group_fields['dataset'] in references:
+                reference_name = references[group_fields['dataset']]
+            else: # find optimal
+                reference_name = find_optimal_reference(data, properties_meta)
+                references[group_fields['dataset']] = reference_name
+            reference = data[data['model'] == reference_name]
+            if reference.shape[0] > 1:
+                raise RuntimeError(f'Found multiple results for reference {reference_name} in {group_field_vals} results!')
 
-        # index and rate metrics based on reference
-        for prop, meta in properties_meta.items():
-            # TODO currently this assumes that all metrics given in properties should be indexed and rated!
-            ref_val = reference[prop].values[0]
-            if isinstance(ref_val, dict): # if database was already indexed before
-                ref_val = ref_val['value']
-            prop_boundaries = boundaries[prop] if prop in boundaries else boundaries['default']
-            boundaries[prop] = [bound.copy() for bound in prop_boundaries] # not using explicit copies leads to problems on default!
-            # extract meta, project on index values and rate
-            data[prop] = data[prop].map(lambda value: process_property(value, ref_val, meta, prop_boundaries, unit_fmt))
-            # calculate real boundary values
-            higher_better = 'maximize' in meta and meta['maximize']
-            real_boundaries[group_field_vals][prop] = [(index_to_value(start, ref_val, higher_better), index_to_value(stop, ref_val, higher_better)) for (start, stop) in prop_boundaries]
-        # store results back to database
-        database.loc[data['old_index']] = data
+            # index and rate metrics based on reference
+            for prop, meta in properties_meta.items():
+                # TODO currently this assumes that all metrics given in properties should be indexed and rated!
+                ref_val = reference[prop].values[0]
+                if isinstance(ref_val, dict): # if database was already indexed before
+                    ref_val = ref_val['value']
+                prop_boundaries = boundaries[prop] if prop in boundaries else boundaries['default']
+                boundaries[prop] = [bound.copy() for bound in prop_boundaries] # not using explicit copies leads to problems on default!
+                # extract meta, project on index values and rate
+                data[prop] = data[prop].map(lambda value: process_property(value, ref_val, meta, prop_boundaries, unit_fmt))
+                # calculate real boundary values
+                higher_better = 'maximize' in meta and meta['maximize']
+                real_boundaries[group_field_vals][prop] = [(index_to_value(start, ref_val, higher_better), index_to_value(stop, ref_val, higher_better)) for (start, stop) in prop_boundaries]
+            # store results back to database
+            database.loc[data['old_index']] = data
+    elif indexmode == 'best':
+        raise NotImplementedError
+    else:
+        raise RuntimeError(f'Invalid indexmode {indexmode}!')
 
     # make certain model metrics available across all tasks
     for prop, meta in properties_meta.items():

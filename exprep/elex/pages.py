@@ -10,10 +10,10 @@ def create_axis_option(x=True):
     content = [
         html.Div(children=[dbc.Select(id=f'{xy}axis')]),
         html.Label('Weight:'),
-        dcc.Input(id=f"{xy}-weight", type='number', min=0, max=1, step=0.1),
+        dcc.Input(id=f"{xy}-weight", type='number', min=0, max=1, step=0.05),
         html.Label('Boundaries:'),
         dcc.RangeSlider(id=f'boundary-slider-{xy}', min=0, max=1,
-            value=[.2, .4, .6, .8], step=.01, pushable=.01,
+            value=[.2, .4, .6, .8], step=.001, pushable=.001,
             tooltip={"placement": "bottom", "always_visible": True})  
     ]
 
@@ -31,7 +31,7 @@ style_upload = dict({
 }, **style_btn_cfg)
 
 
-def create_page(datasets, dataset_meta):
+def create_page(datasets, dataset_meta, indexmode):
 
     if isinstance(dataset_meta, str) and os.path.isfile(dataset_meta):
         dataset_meta = read_json(dataset_meta)
@@ -63,12 +63,20 @@ def create_page(datasets, dataset_meta):
             create_axis_option(),
             create_axis_option(False),
             dbc.AccordionItem([
-                html.H4('Scales'),
+                html.H4('Scale to Use'),
                 dbc.RadioItems(
                     id='scale-switch', value='index',
                     options=[
                         {'label': 'Index Scale', 'value': 'index'},
                         {'label': 'Value Scale', 'value': 'value'}
+                    ],
+                ),
+                html.H4('Index Mode'),
+                dbc.RadioItems(
+                    id='indexmode-switch', value=indexmode,
+                    options=[
+                        {'label': 'Centered', 'value': 'centered'},
+                        {'label': 'Best', 'value': 'best'}
                     ],
                 ),
                 html.H4('Reference Model'),
