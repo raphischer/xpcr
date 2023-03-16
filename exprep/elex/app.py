@@ -9,7 +9,7 @@ from dash.dependencies import Input, Output, State
 from dash import dcc
 import dash_bootstrap_components as dbc
 
-from exprep.index_and_rate import rate_database, load_boundaries, save_boundaries, calculate_optimal_boundaries, save_weights, update_weights, find_optimal_reference, find_relevant_metrics
+from exprep.index_and_rate import rate_database, load_boundaries, save_boundaries, calculate_optimal_boundaries, save_weights, find_optimal_reference, find_relevant_metrics, update_weights
 from exprep.elex.pages import create_page
 from exprep.elex.util import summary_to_html_tables, toggle_element_visibility, fill_meta
 from exprep.elex.graphs import create_scatter_graph, create_bar_graph, add_rating_background
@@ -46,27 +46,7 @@ class Visualization(dash.Dash):
         }
 
         # create a dict with all metrics for any dataset & task combination, and a map of metric unit symbols
-        self.metrics, self.metric_units, self.xaxis_default, self.yaxis_default = find_relevant_metrics(self.database)
-        for ds in self.datasets:
-            for task in self.tasks[ds]:
-                subd = find_sub_database(self.database, ds, task)
-                metrics = []
-                for col in subd.columns:
-                    for val in subd[col]:
-                        if isinstance(val, dict):
-                            metrics.append(col)
-                            if col not in self.metric_units:
-                                self.metric_units[col] = val['unit']
-                            else:
-                                if not self.metric_units[col] == val['unit']:
-                                    raise RuntimeError(f'Unit of metric {col} not consistent in database!')
-                            # set axis defaults for dataset / task combo
-                            if val['group'] == 'Resources' and (ds, task) not in self.xaxis_default:
-                                self.xaxis_default[(ds, task)] = col
-                            if val['group'] == 'Quality' and (ds, task) not in self.yaxis_default:
-                                self.yaxis_default[(ds, task)] = col
-                            break
-                self.metrics[(ds, task)] = metrics
+        self.metrics, self.xaxis_default, self.yaxis_default = find_relevant_metrics(self.database)
         
         # setup page and create callbacks
         self.layout = create_page(self.datasets, self.meta['dataset'])
@@ -108,32 +88,33 @@ class Visualization(dash.Dash):
 
 
     def update_scatter_graph(self, env_names=None, scale_switch=None, rating_mode=None, xweight=None, yweight=None, *slider_args):
-        triggered_prop = dash.callback_context.triggered[0]['prop_id']
-        if xweight is not None and 'x-weight' in triggered_prop:
-            self.summaries = update_weights(self.summaries, xweight, self.curr_data['xaxis'])
-        if yweight is not None and 'y-weight' in triggered_prop:
-            self.summaries = update_weights(self.summaries, yweight, self.curr_data['yaxis'])
         update_db = False
-        scale_switch = 'index' if scale_switch is None else scale_switch
+        triggered_prop = dash.callback_context.triggered[0]['prop_id']
+        # most input triggers affect one of the two axis
+        if 'x' in triggered_prop:
+            axis, slider_values, weight = self.curr_data['xaxis'],  slider_args[0],  xweight
+        else:
+            axis, slider_values, weight = self.curr_data['yaxis'],  slider_args[1],  yweight
+        # check if axis weight were updated
+        if any([xweight, yweight]) and 'weight' in triggered_prop:
+            update_db = update_db or update_weights(self.database, {axis: weight})
+            
+        # check if sliders were updated
         if any(slider_args) and 'slider' in triggered_prop:
-            # check if sliders were updated from selecting axes, or if value was changed
-            if 'x' in triggered_prop:
-                axis = self.curr_data['xaxis']
-                values = slider_args[0]
-            else:
-                axis = self.curr_data['yaxis']
-                values = slider_args[1]
-            for sl_idx, sl_val in enumerate(values):
+            for sl_idx, sl_val in enumerate(slider_values):
                 self.boundaries[axis][4 - sl_idx][0] = sl_val
                 self.boundaries[axis][3 - sl_idx][1] = sl_val
             update_db = True
-        if rating_mode != self.rating_mode: # check if rating mode was changed
+         # check if rating mode was changed
+        if rating_mode != self.rating_mode:
             self.rating_mode = rating_mode
             update_db = True
+        # update database if necessary
         if update_db:
             self.update_database(only_current=False)
-        self.plot_data = {}
         # assemble data for plotting
+        self.plot_data = {}
+        scale_switch = scale_switch or 'index'
         env_names = self.environments[self.curr_data['task']] if env_names is None else env_names
         for env in env_names:
             env_data = { 'names': [], 'ratings': [], 'x': [], 'y': [] }
@@ -146,7 +127,7 @@ class Visualization(dash.Dash):
                     else: # error during value aggregation
                         env_data[xy_axis].append(0)
             self.plot_data[env] = env_data
-        axis_names = [f'{ax} {self.metric_units[ax]}' for ax in [self.curr_data['xaxis'], self.curr_data['yaxis']]] # TODO pretty print, use name of axis?
+        axis_names = [self.meta['properties'][self.curr_data[ax]]['name'] for ax in ['xaxis', 'yaxis']] # TODO pretty print, use name of axis?
         if scale_switch == 'index':
             rating_pos = [self.boundaries[self.curr_data['xaxis']], self.boundaries[self.curr_data['yaxis']]]
             axis_names = [name.split('[')[0].strip() + ' Index' for name in axis_names]
@@ -205,7 +186,7 @@ class Visualization(dash.Dash):
             self.update_necessary = False
         self.curr_data['task'] = task or self.curr_data['task']
         avail_envs = [{"label": env, "value": env} for env in self.environments[(self.curr_data['ds'], self.curr_data['task'])]]
-        axis_options = [{'label': metr, 'value': metr} for metr in self.metrics[(self.curr_data['ds'], self.curr_data['task'])]]
+        axis_options = [{'label': self.meta['properties'][metr]['name'], 'value': metr} for metr in self.metrics[(self.curr_data['ds'], self.curr_data['task'])]]
         self.curr_data['xaxis'] = self.xaxis_default[(self.curr_data['ds'], self.curr_data['task'])]
         self.curr_data['yaxis'] = self.yaxis_default[(self.curr_data['ds'], self.curr_data['task'])]
         self.curr_data['sub_database'] = find_sub_database(self.database, self.curr_data['ds'], self.curr_data['task'])
@@ -219,7 +200,6 @@ class Visualization(dash.Dash):
             self.curr_data['label'] = None
             model_table, metric_table,  enc_label, link, open = None, None, None, "/", True
         else:
-            print('RATING MODE', rating_mode)
             point = hover_data['points'][0]
             env_name = env_names[point['curveNumber']]
             model = find_sub_database(self.curr_data['sub_database'], environment=env_name).iloc[point['pointNumber']].to_dict()
@@ -239,13 +219,17 @@ class Visualization(dash.Dash):
     def update_metric_fields(self, xaxis=None, yaxis=None, upload=None):
         if upload is not None:
             weights = json.loads(base64.b64decode(upload.split(',')[-1]))
-            self.summaries = update_weights(self.summaries, weights)
+            update_db = update_weights(self.database, weights)
+            if update_db:
+                self.update_database(only_current=False)
+        self.curr_data['xaxis'] = xaxis or self.curr_data['xaxis']
+        self.curr_data['yaxis'] = yaxis or self.curr_data['yaxis']
         any_summary = self.curr_data['sub_database'].iloc[0]
         return any_summary[self.curr_data['xaxis']]['weight'], any_summary[self.curr_data['yaxis']]['weight']
 
     def save_weights(self, save_weights_clicks=None):
         if save_weights_clicks is not None:
-            return dict(content=save_weights(self.summaries, None), filename='weights.json')
+            return dict(content=save_weights(self.database), filename='weights.json')
 
     def save_label(self, lbl_clicks=None, lbl_clicks2=None, sum_clicks=None, log_clicks=None):
         if (lbl_clicks is None and lbl_clicks2 is None and sum_clicks is None and log_clicks is None) or self.curr_data['model'] is None:

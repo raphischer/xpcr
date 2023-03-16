@@ -13,13 +13,13 @@
     },
     
     "power_draw": {
-        "name": "Power Draw per Sample",
+        "name": "Power Draw per Inference",
         "unit": "wattseconds",
         "group": "Resources",
         "weight": 0.6
     },
     "running_time": {
-        "name": "Evaluation Time per Sample",
+        "name": "Running Time per Inference",
         "unit": "seconds",
         "group": "Resources",
         "weight": 0.4

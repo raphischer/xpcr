@@ -83,17 +83,18 @@ def index_to_rating(index, scale):
 
 def process_property(value, reference_value, meta, boundaries, unit_fmt):
     if isinstance(value, dict): # re-indexing
-        value = value['value']
-    returned_dict = meta.copy()
-    if pd.isna(value):
-        return value
-    returned_dict['value'] = value
-    if 'unit' in returned_dict: # TODO is this a good indicator for indexable metrics?
-        higher_better = 'maximize' in meta and meta['maximize']
-        returned_dict['index'] = value_to_index(value, reference_value, higher_better)
-        returned_dict['rating'] = index_to_rating(returned_dict['index'], boundaries)
-        fmt_val, fmt_unit = unit_fmt.reformat_value(value, meta['unit'])
+        returned_dict = value
+    else:
+        returned_dict = meta.copy()
+        if pd.isna(value):
+            return value
+        returned_dict['value'] = value
+        fmt_val, fmt_unit = unit_fmt.reformat_value(value, returned_dict['unit'])
         returned_dict.update({'fmt_val': fmt_val, 'fmt_unit': fmt_unit})
+    if 'weight' in returned_dict: # TODO is this a good indicator for indexable metrics?
+        higher_better = 'maximize' in returned_dict and returned_dict['maximize']
+        returned_dict['index'] = value_to_index(returned_dict['value'], reference_value, higher_better)
+        returned_dict['rating'] = index_to_rating(returned_dict['index'], boundaries)
     return returned_dict
 
 
@@ -147,13 +148,15 @@ def calculate_optimal_boundaries(database, quantiles):
 
 
 def load_boundaries(content=None):
-    if content is None:
+    if isinstance(content, dict):
+        if isinstance(list(content.values())[0][0], list):
+            # this is already the boundary dict with interval format
+            return content
+    elif content is None:
         content = {'default': [1.5, 1.0, 0.5, 0.25]}
-    elif os.path.isfile(content):
+    elif isinstance(content, str) and os.path.isfile(content):
         with open(content, "r") as file:
             content = json.load(file)
-    elif isinstance(content, dict):
-        pass
     else:
         raise RuntimeError('Invalid boundary input', content)
 
@@ -181,32 +184,29 @@ def save_boundaries(boundary_intervals, output="boundaries.json"):
     return json.dumps(scale, indent=4)
 
 
-def save_weights(summaries, output="weights.json"):
+def save_weights(database, output_fname=None):
     weights = {}
-    for task_summaries in summaries.values():
-        any_summary = list(task_summaries.values())[0][0]
-        for key, vals in any_summary.items():
-            if isinstance(vals, dict) and 'weight' in vals:
-                weights[key] = vals['weight']
-    if output is not None:
-        with open(output, 'w') as out:
+    for col in database.columns:
+        any_result = database[col].dropna().iloc[0]
+        if isinstance(any_result, dict) and 'weight' in any_result:
+            weights[col] = any_result['weight']
+    # directly save to file or return string
+    if output_fname is not None:
+        with open(output_fname, 'w') as out:
             json.dump(weights, out, indent=4)
-    
     return json.dumps(weights, indent=4)
 
 
-def update_weights(summaries, weights, axis=None):
-    for task_summaries in summaries.values():
-        for env_summaries in task_summaries.values():
-            for model_sum in env_summaries:
-                if isinstance(weights, dict):
-                    for key, values in model_sum.items():
-                        if key in weights:
-                            values['weight'] = weights[key]
-                else: # only update a single metric weight
-                    if axis in model_sum:
-                        model_sum[axis]['weight'] = weights
-    return summaries
+def update_weights(database, weights):
+    update_db = False
+    for key, weight in weights.items():
+        axis_data_entries = database[key]
+        for data in axis_data_entries:
+            if isinstance(data, dict):
+                if data['weight'] != weight:
+                    update_db = True
+                    data['weight'] = weight
+    return update_db
 
 
 def rate_database(database, properties_meta, boundaries=None, references=None, unit_fmt=None, rating_mode='optimistic median'):
@@ -259,11 +259,14 @@ def rate_database(database, properties_meta, boundaries=None, references=None, u
             grouped_by = database.groupby(fixed_fields)
             for group_field_vals, data in grouped_by:
                 valid = data[prop].dropna()
-                if valid.shape[0] != 1:
-                    print(f'{valid.shape[0]} not-NA values found for {prop} across all tasks on {group_field_vals}!')
-                if valid.shape[0] > 0:
-                    data[prop] = [valid.values[0]] * data.shape[0]
-                    database.loc[data['old_index']] = data
+                # check if there even are nan rows in the database (otherwise metrics maybe have been made available already)
+                if valid.shape[0] != data[prop].shape[0]:
+                    if valid.shape[0] != 1:
+                        print(f'{valid.shape[0]} not-NA values found for {prop} across all tasks on {group_field_vals}!')
+                    if valid.shape[0] > 0:
+                        # multiply the available data and place in each row
+                        data[prop] = [valid.values[0]] * data.shape[0]
+                        database.loc[data['old_index']] = data
     
     database.drop('old_index', axis=1, inplace=True) # drop the tmp index info
     # calculate compound ratings
@@ -272,7 +275,7 @@ def rate_database(database, properties_meta, boundaries=None, references=None, u
 
 
 def find_relevant_metrics(database):
-    all_metrics, metric_units = {}, {}
+    all_metrics = {}
     most_imp_res, most_imp_qual = {}, {}
     for ds in pd.unique(database['dataset']):
         for task in pd.unique(database[database['dataset'] == ds]['task']):
@@ -282,11 +285,6 @@ def find_relevant_metrics(database):
                 for val in subd[col]:
                     if isinstance(val, dict):
                         metrics.append(col)
-                        if col not in metric_units:
-                            metric_units[col] = val['unit']
-                        else:
-                            if not metric_units[col] == val['unit']:
-                                raise RuntimeError(f'Unit of metric {col} not consistent in database!')
                         # set axis defaults for dataset / task combo
                         if val['group'] == 'Resources' and (ds, task) not in most_imp_res:
                             most_imp_res[(ds, task)] = col
@@ -294,7 +292,7 @@ def find_relevant_metrics(database):
                             most_imp_qual[(ds, task)] = col
                         break
             all_metrics[(ds, task)] = metrics
-    return all_metrics, metric_units, most_imp_res, most_imp_qual
+    return all_metrics, most_imp_res, most_imp_qual
 
 
 if __name__ == '__main__':

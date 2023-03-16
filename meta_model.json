@@ -131,7 +131,7 @@
         "module": "gluonts.mx.model.wavenet._estimator",
         "class": "WaveNetEstimator"
     },
-    "feed_forward": {
+    "feedforward": {
         "name": "SimpleFeedForward",
         "local/global": "Global",
         "data": "Univariate",

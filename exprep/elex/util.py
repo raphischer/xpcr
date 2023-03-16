@@ -39,7 +39,8 @@ def summary_to_html_tables(summary):
     ]
     
     task = f"{summary['task']} on {summary['dataset']['name']}"
-    info_row = [html.Tbody([html.Tr([html.Td(field) for field in [task, summary['model']['name'], summary['environment'], final_rating]])])]
+    mname = summary['model']['name'] if isinstance(summary['model'], dict) else summary['model']
+    info_row = [html.Tbody([html.Tr([html.Td(field) for field in [task, mname, summary['environment'], final_rating]])])]
 
     metrics_header = [
         html.Thead(html.Tr([html.Th("Metric"), html.Th("Value"), html.Th("Index"), html.Th("Rating")]))
