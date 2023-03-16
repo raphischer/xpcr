@@ -68,7 +68,7 @@ class Visualization(dash.Dash):
             [Input('xaxis', 'value'), Input('yaxis', 'value'), Input('boundaries-upload', 'contents'), Input('btn-calc-boundaries', 'n_clicks'), Input('select-reference', 'value')]
         ) (self.update_boundary_sliders)
         self.callback(
-            Output('graph-scatter', 'figure'),
+            [Output('graph-scatter', 'figure'), Output('select-reference', 'disabled'), Output('btn-optimize-reference', 'disabled')],
             [Input('environments', 'value'), Input('scale-switch', 'value'), Input('indexmode-switch', 'value'), Input('rating', 'value'), Input('x-weight', 'value'), Input('y-weight', 'value'), Input('boundary-slider-x', 'value'), Input('boundary-slider-y', 'value')]
         ) (self.update_scatter_graph)
         self.callback(
@@ -114,6 +114,7 @@ class Visualization(dash.Dash):
         if indexmode_switch != self.state['indexmode']:
             self.state['indexmode'] = indexmode_switch
             update_db = True
+        reference_select_disabled = self.state['indexmode'] != 'centered'
         # update database if necessary
         if update_db:
             self.update_database(only_current=False)
@@ -141,7 +142,7 @@ class Visualization(dash.Dash):
             rating_pos = [self.boundaries_real[current][self.state['xaxis']], self.boundaries_real[current][self.state['yaxis']]]
         scatter = create_scatter_graph(self.plot_data, axis_names, dark_mode=self.dark_mode)
         add_rating_background(scatter, rating_pos, self.state['rating_mode'], dark_mode=self.dark_mode)
-        return scatter
+        return scatter, reference_select_disabled, reference_select_disabled
     
     def update_database(self, only_current=True):
         if not only_current: # remark for making a full update when task / data set is changed
@@ -160,6 +161,9 @@ class Visualization(dash.Dash):
             self.boundaries = load_boundaries(boundaries_dict)
             self.update_database(only_current=False)
         if calculated_boundaries is not None and 'calc' in dash.callback_context.triggered[0]['prop_id']:
+            if self.state['update_on_change']: # if the indexmode was changed, it is first necessary to update all index values
+                self.database, self.boundaries, self.boundaries_real, self.references = rate_database(self.database, self.meta['properties'], self.boundaries, self.references, self.unit_fmt, self.state['rating_mode'], self.state['indexmode'])
+                self.state['update_on_change'] = False
             self.boundaries = calculate_optimal_boundaries(self.database, [0.8, 0.6, 0.4, 0.2])
         if reference is not None and reference != self.references[self.state['ds']]:
             # reference changed, so re-index the current sub database
@@ -187,7 +191,7 @@ class Visualization(dash.Dash):
             self.references[self.state['ds']] = find_optimal_reference(self.state['sub_database'])
             self.update_database()
         if self.state['update_on_change']:
-            self.database, self.boundaries, self.boundaries_real, self.references = rate_database(self.database, self.meta['properties'], self.boundaries, self.references, self.unit_fmt, self.state['rating_mode'])
+            self.database, self.boundaries, self.boundaries_real, self.references = rate_database(self.database, self.meta['properties'], self.boundaries, self.references, self.unit_fmt, self.state['rating_mode'], self.state['indexmode'])
             self.state['update_on_change'] = False
         self.state['task'] = task or self.state['task']
         avail_envs = [{"label": env, "value": env} for env in self.environments[(self.state['ds'], self.state['task'])]]

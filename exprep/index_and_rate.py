@@ -136,7 +136,7 @@ def find_optimal_reference(database, pre_rating_use_meta=None):
 
 
 def calculate_optimal_boundaries(database, quantiles):
-    boundaries = {'default': [1.5, 1.0, 0.5, 0.25]}
+    boundaries = {}
     for col in database.columns:
         index_values = [ val['index'] for val in database[col] if isinstance(val, dict) and 'index' in val ]
         if len(index_values) > 0:
