@@ -223,39 +223,40 @@ def rate_database(database, properties_meta, boundaries=None, references=None, u
     fixed_fields = ['dataset', 'task', 'environment']
     grouped_by = database.groupby(fixed_fields)
 
-    if indexmode == 'centered':
-        for group_field_vals, data in grouped_by:
-            real_boundaries[group_field_vals] = {}
-            # get reference values
-            group_fields = {field: val for (field, val) in zip(fixed_fields, group_field_vals)}
-            if group_fields['dataset'] in references:
-                reference_name = references[group_fields['dataset']]
-            else: # find optimal
-                reference_name = find_optimal_reference(data, properties_meta)
-                references[group_fields['dataset']] = reference_name
-            reference = data[data['model'] == reference_name]
-            if reference.shape[0] > 1:
-                raise RuntimeError(f'Found multiple results for reference {reference_name} in {group_field_vals} results!')
-
-            # index and rate metrics based on reference
-            for prop, meta in properties_meta.items():
-                # TODO currently this assumes that all metrics given in properties should be indexed and rated!
+    for group_field_vals, data in grouped_by:
+        real_boundaries[group_field_vals] = {}
+        ds = group_field_vals[fixed_fields.index('dataset')]
+        # process per metric
+        for prop, meta in properties_meta.items():
+            higher_better = 'maximize' in meta and meta['maximize']
+            # extract rating boundaries per metric
+            prop_boundaries = boundaries[prop] if prop in boundaries else boundaries['default']
+            boundaries[prop] = [bound.copy() for bound in prop_boundaries] # copies not references! otherwise changing a boundary affects multiple metrics
+            
+            if indexmode == 'centered': # one central reference model receives index 1, everything else in relation
+                reference_name = references[ds] if ds in references else find_optimal_reference(data, properties_meta)
+                references[ds] = reference_name # if using optimal, store this info for later use
+                reference = data[data['model'] == reference_name]
+                assert reference.shape[0] == 1, f'Found multiple results for reference {reference_name} in {group_field_vals} results!'
                 ref_val = reference[prop].values[0]
-                if isinstance(ref_val, dict): # if database was already indexed before
+                # if database was already processed before, take the value from the dict
+                if isinstance(ref_val, dict):
                     ref_val = ref_val['value']
-                prop_boundaries = boundaries[prop] if prop in boundaries else boundaries['default']
-                boundaries[prop] = [bound.copy() for bound in prop_boundaries] # not using explicit copies leads to problems on default!
-                # extract meta, project on index values and rate
-                data[prop] = data[prop].map(lambda value: process_property(value, ref_val, meta, prop_boundaries, unit_fmt))
-                # calculate real boundary values
-                higher_better = 'maximize' in meta and meta['maximize']
-                real_boundaries[group_field_vals][prop] = [(index_to_value(start, ref_val, higher_better), index_to_value(stop, ref_val, higher_better)) for (start, stop) in prop_boundaries]
+            elif indexmode == 'best': # the best perfoming model receives index 1, everything else in relation
+                # extract from dict when already processed before
+                all_values = [val['value'] if isinstance(val, dict) else val for val in data[prop].dropna()]
+                if len(all_values) == 0:
+                    ref_val = data[prop].iloc[0]
+                else:
+                    ref_val = max(all_values) if higher_better else min(all_values)
+            else:
+                raise RuntimeError(f'Invalid indexmode {indexmode}!')
+            # extract meta, project on index values and rate
+            data[prop] = data[prop].map( lambda value: process_property(value, ref_val, meta, prop_boundaries, unit_fmt) )
+            # calculate real boundary values
+            real_boundaries[group_field_vals][prop] = [(index_to_value(start, ref_val, higher_better), index_to_value(stop, ref_val, higher_better)) for (start, stop) in prop_boundaries]
             # store results back to database
             database.loc[data['old_index']] = data
-    elif indexmode == 'best':
-        raise NotImplementedError
-    else:
-        raise RuntimeError(f'Invalid indexmode {indexmode}!')
 
     # make certain model metrics available across all tasks
     for prop, meta in properties_meta.items():
