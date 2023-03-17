@@ -1,7 +1,14 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from distutils.util import strtobool
 
+from exprep.util import fix_seed
+
+import numpy as np
 import pandas as pd
+
+
+# most of this code, except for the CUSTOM SUBSAMPLING of datasets, is taken from the original TSForecast repository
+# https://github.com/rakshitha123/TSForecasting/blob/master/utils/data_loader.py
 
 
 # Seasonality values corresponding with the frequencies: minutely, 10_minutes, half_hourly, hourly, daily, weekly, monthly, quarterly and yearly
@@ -31,6 +38,17 @@ FREQUENCY_MAP = {
    "yearly": "1Y"
 }
 
+TIMEDELTA_MAP = {   
+    "minutely": timedelta(minutes=1),
+    "10_minutes": timedelta(minutes=10),
+    "half_hourly": timedelta(minutes=30),
+    "hourly": timedelta(hours=1),
+    "daily": timedelta(days=1),
+    "weekly": timedelta(days=7),
+    "monthly": timedelta(days=365.25 / 12),
+    "quarterly": timedelta(days=365.25 / 4),
+    "yearly": timedelta(days=365.25 )
+}
 
 # Converts the contents in a .tsf file into a dataframe and returns it along with other meta-data of the dataset: frequency, horizon, whether the dataset contains missing values and whether the series have equal lengths
 #
@@ -42,6 +60,9 @@ def convert_tsf_to_dataframe(
     full_file_path_and_name,
     replace_missing_vals_with="NaN",
     value_column_name="series_value",
+    ds_sample_seed=-1,
+    amount_of_series=0.5,
+    amount_of_length=0.5
 ):
     col_names = []
     col_types = []
@@ -172,16 +193,59 @@ def convert_tsf_to_dataframe(
             raise Exception("Missing series information under data section.")
 
         all_data[value_column_name] = all_series
-        loaded_data = pd.DataFrame(all_data)
 
         if frequency is not None:
             freq = FREQUENCY_MAP[frequency]
             seasonality = SEASONALITY_MAP[frequency]
             if isinstance(seasonality, list):
                 seasonality = min(seasonality)
+            timedelta_val = TIMEDELTA_MAP[frequency]
         else:
             freq = "1Y"
+            timedelta_val = TIMEDELTA_MAP['yearly']
             seasonality = 1
+
+        # CUSTOM SUBSAMPLING
+        if ds_sample_seed != -1:
+            assert amount_of_length <= 1 and amount_of_length > 0, "please pass valid amount_of_length (0 < amt <= 1)"
+            assert amount_of_series <= 1 and amount_of_series > 0, "please pass valid amount_of_series (0 < amt <= 1)"
+            fix_seed(ds_sample_seed)
+
+            # sanity check the end dates
+            end_dates = []
+            series_names = []
+            for idx, key in enumerate(all_data['series_name']):
+                start = all_data['start_timestamp'][idx]
+                len_ts = len(all_data['series_value'][idx])
+                end = start + timedelta_val * len_ts
+                series_names.append(key)
+                end_dates.append(end)
+            for edate, key in zip(end_dates, series_names):
+                if edate != end_dates[0]:
+                    raise Warning(f'Not all time series end dates are the same in {full_file_path_and_name}\n{key} end date is {edate}, {series_names[0]} end date is {str(end_dates[0])}')
+                    break
+            
+            # fill new dict with sampled parts of TS data
+            sampled_data = {key: [] for key in all_data.keys()}
+            no_series = len(all_data['series_name'])
+            selected_series = np.random.choice(np.arange(no_series), int(no_series * amount_of_series), replace=False)
+            for s_idx in selected_series:
+                name, start, values = all_data['series_name'][s_idx], all_data['start_timestamp'][s_idx], all_data['series_value'][s_idx]
+                sampled_data['series_name'].append(name)
+                ts_new_len = int(len(values) * amount_of_length)
+                start_offset = np.random.randint(0, len(values) - ts_new_len, 1)[0]
+                sampled_data['start_timestamp'].append(start + timedelta_val * start_offset)
+                sampled_data['series_value'].append(values[start_offset:(start_offset + ts_new_len)])
+                assert len(sampled_data['series_value'][-1]) == ts_new_len
+
+            # print summary
+            no_values_new = sum([len(vals) for vals in sampled_data['series_value']])
+            no_values_old = sum([len(vals) for vals in all_data['series_value']])
+            print(f'Sampled to {no_values_new / no_values_old:4.3f} of original data ({amount_of_series:3.2f} of series with {amount_of_length:3.2f} of their original length)!')
+
+            loaded_data = pd.DataFrame(sampled_data)
+        else:
+            loaded_data = pd.DataFrame(all_data)
 
         return (
             loaded_data,
