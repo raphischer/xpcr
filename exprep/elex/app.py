@@ -244,7 +244,7 @@ class Visualization(dash.Dash):
     def save_label(self, lbl_clicks=None, lbl_clicks2=None, sum_clicks=None, log_clicks=None):
         if (lbl_clicks is None and lbl_clicks2 is None and sum_clicks is None and log_clicks is None) or self.state['model'] is None:
             return # callback init
-        f_id = f'{self.state["summary"]["name"]}_{self.state["summary"]["environment"]}'
+        f_id = f'{self.state["model"]["model"]["name"]}_{self.state["model"]["environment"]}'.replace(' ', '_')
         if 'label' in dash.callback_context.triggered[0]['prop_id']:
             return dcc.send_bytes(self.state['label'].write(), filename=f'energy_label_{f_id}.pdf')
         elif 'sum' in dash.callback_context.triggered[0]['prop_id']:

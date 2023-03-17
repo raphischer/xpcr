@@ -60,6 +60,8 @@ def calculate_single_compound_rating(ratings, mode, meanings=None):
 
 
 def value_to_index(value, ref, higher_better):
+    if np.isinf(value):
+        return np.inf if higher_better else 0
     #      i = v / r                     OR                i = r / v
     try:
         return value / ref if higher_better else ref / value
