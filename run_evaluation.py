@@ -1,6 +1,7 @@
 import argparse
 import os
 import pandas as pd
+import numpy as np
 
 from exprep.load_experiment_logs import load_database
 from exprep.index_and_rate import rate_database
@@ -23,7 +24,7 @@ if __name__ == '__main__':
     parser.add_argument("--database-fname", default="results/database.pkl", help="filename for the database that shall be created")
     parser.add_argument("--boundaries", default="boundaries.json")
     parser.add_argument("--clean", action="store_true", help="set to first delete all content in given output directories")
-    parser.add_argument("--mode", default='interactive', choices=['meta', 'interactive', 'paper_results', 'label', 'stats'])
+    parser.add_argument("--mode", default='meta', choices=['meta', 'interactive', 'paper_results', 'label', 'stats'])
     # interactive exploration
     parser.add_argument("--host", default='localhost', type=str, help="default host") # '0.0.0.0'
     parser.add_argument("--port", default=8888, type=int, help="default port")
@@ -82,13 +83,22 @@ if __name__ == '__main__':
                 rated_database = rated_database.drop(data.index)
             else:
                 full_path = os.path.join('mnt_data/data', ds + '.tsf')
-                _, freq, seasonality, forecast_horizon, contain_missing_values, contain_equal_length = load_data(full_path)
+                ts_data, freq, seasonality, forecast_horizon, contain_missing_values, contain_equal_length = load_data(full_path)
+                rated_database.loc[data.index,'num_ts'] = ts_data.shape[0]
+                rated_database.loc[data.index,'avg_ts_len'] = ts_data['series_value'].map(lambda ts: len(ts)).mean()
+                rated_database.loc[data.index,'avg_ts_val'] = ts_data['series_value'].map(lambda ts: np.mean(ts)).mean()
+                rated_database.loc[data.index,'avg_ts_min'] = ts_data['series_value'].map(lambda ts: np.min(ts)).mean()
+                rated_database.loc[data.index,'avg_ts_max'] = ts_data['series_value'].map(lambda ts: np.max(ts)).mean()
                 rated_database.loc[data.index,'seasonality'] = seasonality
                 rated_database.loc[data.index,'freq'] = freq
                 rated_database.loc[data.index,'forecast_horizon'] = forecast_horizon
                 rated_database.loc[data.index,'contain_missing_values'] = contain_missing_values
                 rated_database.loc[data.index,'contain_equal_length'] = contain_equal_length
         rated_database.to_pickle('meta_learn.pkl')
+        shape = rated_database.shape
+        ds = pd.unique(rated_database["dataset"])
+        models = pd.unique(rated_database["model"])
+        print(f'Meta learning to be run on {shape} database entries, with a total of {len(ds)} datasets and {len(models)} models!')
 
 
     if args.mode == 'paper_results':

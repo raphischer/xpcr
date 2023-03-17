@@ -46,7 +46,7 @@
         "weight": 0.4,
         "independent_of_task": true
     },
-    "paramaters": {
+    "parameters": {
         "name": "Number of Parameters",
         "unit": "number",
         "group": "Complexity",

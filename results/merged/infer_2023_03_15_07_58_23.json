@@ -1,0 +1,514 @@
+{
+    "directory_name": "infer_2023_03_15_07_58_23",
+    "execution_platform": {
+        "System": "Linux",
+        "Node Name": "ls8ws022",
+        "Release": "5.4.0-137-generic",
+        "Version": "#154-Ubuntu SMP Thu Jan 5 17:03:22 UTC 2023",
+        "Machine": "x86_64",
+        "Processor": "Intel(R) Xeon(R) W-2155 CPU @ 3.30GHz",
+        "Physical cores": 10,
+        "Total cores": 20,
+        "Max Frequency": 4500.0,
+        "Min Frequency": 1200.0,
+        "Current Frequency": 1204.6949,
+        "Total": 67103240192,
+        "Available": 64053981184,
+        "Used": 2307055616
+    },
+    "input_transform": {
+        "__kind__": "instance",
+        "args": [],
+        "class": "gluonts.transform._base.Chain",
+        "kwargs": {
+            "trans": [
+                {
+                    "__kind__": "instance",
+                    "args": [],
+                    "class": "gluonts.transform._base.Chain",
+                    "kwargs": {
+                        "trans": [
+                            {
+                                "__kind__": "instance",
+                                "args": [],
+                                "class": "gluonts.transform.field.RemoveFields",
+                                "kwargs": {
+                                    "field_names": [
+                                        "feat_dynamic_cat",
+                                        "feat_static_real",
+                                        "past_feat_dynamic_real",
+                                        "feat_dynamic_real",
+                                        "feat_static_cat"
+                                    ]
+                                }
+                            },
+                            {
+                                "__kind__": "instance",
+                                "args": [],
+                                "class": "gluonts.transform.feature.AddObservedValuesIndicator",
+                                "kwargs": {
+                                    "dtype": {
+                                        "__kind__": "type",
+                                        "class": "numpy.float32"
+                                    },
+                                    "imputation_method": {
+                                        "__kind__": "instance",
+                                        "args": [],
+                                        "class": "gluonts.transform.feature.DummyValueImputation",
+                                        "kwargs": {
+                                            "dummy_value": 0.0
+                                        }
+                                    },
+                                    "output_field": "observed_values",
+                                    "target_field": "target"
+                                }
+                            },
+                            {
+                                "__kind__": "instance",
+                                "args": [],
+                                "class": "gluonts.transform.feature.AddTimeFeatures",
+                                "kwargs": {
+                                    "dtype": {
+                                        "__kind__": "type",
+                                        "class": "numpy.float32"
+                                    },
+                                    "output_field": "time_feat",
+                                    "pred_length": 8,
+                                    "start_field": "start",
+                                    "target_field": "target",
+                                    "time_features": [
+                                        {
+                                            "__kind__": "type",
+                                            "class": "gluonts.time_feature._base.day_of_month"
+                                        },
+                                        {
+                                            "__kind__": "type",
+                                            "class": "gluonts.time_feature._base.week_of_year"
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "__kind__": "instance",
+                                "args": [],
+                                "class": "gluonts.transform.field.RenameFields",
+                                "kwargs": {
+                                    "mapping": {
+                                        "time_feat": "feat_dynamic"
+                                    }
+                                }
+                            },
+                            {
+                                "__kind__": "instance",
+                                "args": [],
+                                "class": "gluonts.transform.field.SetField",
+                                "kwargs": {
+                                    "output_field": "feat_static_cat",
+                                    "value": {
+                                        "__kind__": "instance",
+                                        "args": [
+                                            [
+                                                0
+                                            ],
+                                            {
+                                                "__kind__": "instance",
+                                                "args": [
+                                                    "int32"
+                                                ],
+                                                "class": "numpy.dtype"
+                                            }
+                                        ],
+                                        "class": "numpy.array"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "__kind__": "instance",
+                    "args": [],
+                    "class": "gluonts.transform._base.Chain",
+                    "kwargs": {
+                        "trans": [
+                            {
+                                "__kind__": "instance",
+                                "args": [],
+                                "class": "gluonts.mx.model.seq2seq._transform.ForkingSequenceSplitter",
+                                "kwargs": {
+                                    "dec_len": 8,
+                                    "decoder_disabled_fields": [],
+                                    "decoder_series_fields": [
+                                        "feat_dynamic"
+                                    ],
+                                    "enc_len": 10,
+                                    "encoder_disabled_fields": [],
+                                    "encoder_series_fields": [
+                                        "observed_values",
+                                        "feat_dynamic"
+                                    ],
+                                    "instance_sampler": {
+                                        "__kind__": "instance",
+                                        "class": "gluonts.transform.sampler.PredictionSplitSampler",
+                                        "kwargs": {
+                                            "allow_empty_interval": false,
+                                            "axis": -1,
+                                            "min_future": 0,
+                                            "min_past": 0
+                                        }
+                                    },
+                                    "is_pad_out": "is_pad",
+                                    "num_forking": 10,
+                                    "prediction_time_decoder_exclude": [
+                                        "observed_values"
+                                    ],
+                                    "start_input_field": "start",
+                                    "target_field": "target"
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    },
+    "config": {
+        "dataset": "kaggle_web_traffic_weekly_dataset",
+        "model": "mqrnn",
+        "output_dir": "mnt_data/results",
+        "epochs": 100,
+        "datadir": "mnt_data/data",
+        "cpu_monitor_interval": 0.5,
+        "seed": 42,
+        "timestamp": "2023_03_15_07_58_23",
+        "lag": 10,
+        "external_forecast_horizon": 8,
+        "integer_conversion": true,
+        "train_logdir": "mnt_data/results/train_2023_03_15_03_58_18"
+    },
+    "type": [
+        "gluonts.mx.model.predictor.RepresentableBlockPredictor"
+    ],
+    "version": {
+        "model": "0.11.8",
+        "gluonts": "0.11.8"
+    },
+    "emissions": {
+        "timestamp": {
+            "0": "2023-03-15T07:58:24"
+        },
+        "project_name": {
+            "0": "codecarbon"
+        },
+        "run_id": {
+            "0": "b1241d3e-6674-45b3-be26-14be250596fb"
+        },
+        "duration": {
+            "0": 0.0070362091064453
+        },
+        "emissions": {
+            "0": 1.776225905890493e-08
+        },
+        "emissions_rate": {
+            "0": 0.002524407502704
+        },
+        "cpu_power": {
+            "0": 27.921111890126703
+        },
+        "gpu_power": {
+            "0": 1.137
+        },
+        "ram_power": {
+            "0": 23.43553590774536
+        },
+        "cpu_energy": {
+            "0": 5.096420743755382e-08
+        },
+        "gpu_energy": {
+            "0": 6.277052561442056e-10
+        },
+        "ram_energy": {
+            "0": 7.418914744524348e-09
+        },
+        "energy_consumed": {
+            "0": 5.901082743822237e-08
+        },
+        "country_name": {
+            "0": "Germany"
+        },
+        "country_iso_code": {
+            "0": "DEU"
+        },
+        "region": {
+            "0": NaN
+        },
+        "cloud_provider": {
+            "0": NaN
+        },
+        "cloud_region": {
+            "0": NaN
+        },
+        "os": {
+            "0": "Linux-5.4.0-137-generic-x86_64-with-debian-bullseye-sid"
+        },
+        "python_version": {
+            "0": "3.7.7"
+        },
+        "cpu_count": {
+            "0": 20
+        },
+        "cpu_model": {
+            "0": "Intel(R) Xeon(R) W-2155 CPU @ 3.30GHz"
+        },
+        "gpu_count": {
+            "0": 1
+        },
+        "gpu_model": {
+            "0": "1 x Quadro RTX 5000"
+        },
+        "longitude": {
+            "0": NaN
+        },
+        "latitude": {
+            "0": NaN
+        },
+        "ram_total_size": {
+            "0": 62.4947624206543
+        },
+        "tracking_mode": {
+            "0": "machine"
+        },
+        "on_cloud": {
+            "0": "N"
+        }
+    },
+    "validation_results": {
+        "metrics": {
+            "aggregated": {
+                "MSE": 163808952742.71524,
+                "abs_error": 8054817758.21055,
+                "abs_target_sum": 8146529314.0,
+                "abs_target_mean": 7019.820107470548,
+                "seasonal_error": 2523.4895236650873,
+                "MASE": Infinity,
+                "MAPE": 0.8173809545861376,
+                "sMAPE": 1.3242579920803719,
+                "MSIS": Infinity,
+                "QuantileLoss[0.1]": 1619418775.9991899,
+                "Coverage[0.1]": 0.04997742360215906,
+                "QuantileLoss[0.5]": 8054817803.750545,
+                "Coverage[0.5]": 0.15718429234194797,
+                "QuantileLoss[0.9]": 14333839598.257954,
+                "Coverage[0.9]": 0.2974018185202291,
+                "RMSE": 404733.18710320164,
+                "NRMSE": 57.65577762776021,
+                "ND": 0.9887422542466224,
+                "wQuantileLoss[0.1]": 0.1987863436784277,
+                "wQuantileLoss[0.5]": 0.9887422598367323,
+                "wQuantileLoss[0.9]": 1.7595026109615683,
+                "mean_absolute_QuantileLoss": 8002692059.3358965,
+                "mean_wQuantileLoss": 0.9823437381589094,
+                "MAE_Coverage": 0.33181215517855467,
+                "OWA": NaN
+            }
+        },
+        "start": 1678863503.1954129,
+        "end": 1678863504.6898003,
+        "num_samples": 100,
+        "model": {
+            "params": 45822,
+            "fsize": 188778
+        }
+    },
+    "parameters": {
+        "batch_size": 32,
+        "ctx": {
+            "__kind__": "instance",
+            "args": [
+                "cpu",
+                0
+            ],
+            "class": "mxnet.context.Context"
+        },
+        "dtype": {
+            "__kind__": "type",
+            "class": "numpy.float32"
+        },
+        "forecast_generator": {
+            "__kind__": "instance",
+            "args": [],
+            "class": "gluonts.model.forecast_generator.QuantileForecastGenerator",
+            "kwargs": {
+                "quantiles": [
+                    "0.025",
+                    "0.1",
+                    "0.2",
+                    "0.3",
+                    "0.4",
+                    "0.5",
+                    "0.6",
+                    "0.7",
+                    "0.8",
+                    "0.9",
+                    "0.975"
+                ]
+            }
+        },
+        "input_names": [
+            "past_target",
+            "past_feat_dynamic",
+            "future_feat_dynamic",
+            "feat_static_cat",
+            "past_observed_values"
+        ],
+        "lead_time": 0,
+        "prediction_length": 8
+    },
+    "requirements": [
+        "# 3.7.7 (default, Mar 23 2020, 22:36:06)",
+        "# [GCC 7.3.0]",
+        "wrapt==1.11.2",
+        "typed-ast==1.4.0",
+        "six==1.12.0",
+        "setuptools==41.6.0",
+        "pytz==2019.3",
+        "python-dateutil==2.8.0",
+        "pyparsing==2.4.2",
+        "pylint==2.4.3",
+        "numpy==1.17.3",
+        "mccabe==0.6.1",
+        "matplotlib==3.1.1",
+        "lazy-object-proxy==1.4.3",
+        "kiwisolver==1.1.0",
+        "isort==4.3.21",
+        "cycler==0.10.0",
+        "astroid==2.3.2",
+        "zipp==3.14.0",
+        "xgboost==1.6.2",
+        "wheel==0.37.1",
+        "werkzeug==2.2.3",
+        "urllib3==1.26.14",
+        "typing-extensions==4.4.0",
+        "tqdm==4.64.1",
+        "toolz==0.12.0",
+        "threadpoolctl==3.1.0",
+        "tenacity==8.2.2",
+        "scipy==1.7.3",
+        "scikit-learn==1.0.2",
+        "rpy2==2.9.4",
+        "requests==2.28.2",
+        "reportlab==3.6.12",
+        "qrcode==7.4.2",
+        "pypng==0.20220715.0",
+        "pynvml==11.4.1",
+        "pymupdf==1.21.1",
+        "pydantic==1.10.4",
+        "pyarrow==8.0.0",
+        "py-rapl==0.1",
+        "py-cpuinfo==9.0.0",
+        "psutil==5.9.4",
+        "plotly==5.13.1",
+        "pip==22.3.1",
+        "pint==0.18",
+        "pillow==9.4.0",
+        "pandas==1.3.5",
+        "packaging==23.0",
+        "orjson==3.8.5",
+        "mxnet==1.9.1",
+        "markupsafe==2.1.1",
+        "joblib==1.2.0",
+        "jinja2==3.1.2",
+        "itsdangerous==2.1.2",
+        "importlib-metadata==6.0.0",
+        "idna==3.4",
+        "graphviz==0.8.4",
+        "gluonts==0.11.8",
+        "fuzzywuzzy==0.18.0",
+        "flask==2.2.3",
+        "dash==2.8.1",
+        "dash-table==5.0.0",
+        "dash-html-components==2.0.0",
+        "dash-core-components==2.0.0",
+        "dash-bootstrap-components==1.4.0",
+        "codecarbon==2.1.4",
+        "click==8.1.3",
+        "charset-normalizer==3.0.1",
+        "certifi==2022.12.7",
+        "arrow==1.2.3"
+    ],
+    "prediction_net-network": {
+        "__kind__": "instance",
+        "args": [],
+        "class": "gluonts.mx.model.seq2seq._forking_network.ForkingSeq2SeqPredictionNetwork",
+        "kwargs": {
+            "cardinality": [
+                1
+            ],
+            "context_length": 10,
+            "decoder": {
+                "__kind__": "instance",
+                "args": [],
+                "class": "gluonts.mx.block.decoder.ForkingMLPDecoder",
+                "kwargs": {
+                    "dec_len": 8,
+                    "final_dim": 30,
+                    "hidden_dimension_sequence": [],
+                    "prefix": "decoder_"
+                }
+            },
+            "distr_output": null,
+            "dtype": {
+                "__kind__": "type",
+                "class": "numpy.float32"
+            },
+            "embedding_dimension": [
+                1
+            ],
+            "enc2dec": {
+                "__kind__": "instance",
+                "args": [],
+                "class": "gluonts.mx.block.enc2dec.FutureFeatIntegratorEnc2Dec",
+                "kwargs": {}
+            },
+            "encoder": {
+                "__kind__": "instance",
+                "args": [],
+                "class": "gluonts.mx.block.encoder.RNNEncoder",
+                "kwargs": {
+                    "bidirectional": true,
+                    "hidden_size": 50,
+                    "mode": "gru",
+                    "num_layers": 1,
+                    "prefix": "encoder_",
+                    "use_dynamic_feat": true,
+                    "use_static_feat": true
+                }
+            },
+            "num_forking": 10,
+            "quantile_output": {
+                "__kind__": "instance",
+                "args": [],
+                "class": "gluonts.mx.block.quantile_output.IncrementalQuantileOutput",
+                "kwargs": {
+                    "quantile_weights": null,
+                    "quantiles": [
+                        0.025,
+                        0.1,
+                        0.2,
+                        0.3,
+                        0.4,
+                        0.5,
+                        0.6,
+                        0.7,
+                        0.8,
+                        0.9,
+                        0.975
+                    ]
+                }
+            },
+            "scaling": false,
+            "scaling_decoder_dynamic_feature": false
+        }
+    },
+    "full_log": "results/merged/infer_2023_03_15_07_58_23.tar.gz"
+}

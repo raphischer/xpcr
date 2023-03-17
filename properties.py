@@ -22,7 +22,7 @@ PROPERTIES = {
         'RMSE': lambda log: log['validation_results']['metrics']['aggregated']['RMSE'],
         'MAPE': lambda log: log['validation_results']['metrics']['aggregated']['MAPE'],
         'MASE': lambda log: log['validation_results']['metrics']['aggregated']['MASE'],
-        'paramaters': lambda log: log['validation_results']['model']['params'],
+        'parameters': lambda log: log['validation_results']['model']['params'],
         'fsize': lambda log: log['validation_results']['model']['fsize'],
     }
 }

@@ -9,7 +9,6 @@ from pathlib import Path
 from methods import init_model_and_data, run_validation, evaluate
 from exprep.util import fix_seed, create_output_dir, Logger, PatchedJSONEncoder
 from codecarbon import OfflineEmissionsTracker
-from exprep.monitoring import monitor_flops_papi # Monitoring
 
 
 def main(args):
@@ -85,12 +84,10 @@ def main(args):
             # model is a GluonTS estimator, that upon calling 'train' returns a predictor
             emissions_tracker = OfflineEmissionsTracker(measure_power_secs=args.cpu_monitor_interval, log_level='warning', country_iso_code="DEU", save_to_file=True, output_dir=output_dir)
             emissions_tracker.start()
-            # monitoring = Monitoring(args.gpu_monitor_interval, args.cpu_monitor_interval, output_dir)
             start_time = time.time()
             model = model.train(training_data=ts_train)
             end_time = time.time()
             emissions_tracker.stop()
-            # monitoring.stop()
 
             results = {
                 'history': {
