@@ -137,10 +137,16 @@ def evaluate(forecast, groundtruth):
     groundtruth = list(groundtruth)
     
     # evaluate
-    evaluator = Evaluator(quantiles=[0.1, 0.5, 0.9])
-    agg_metrics, item_metrics = evaluator(groundtruth, forecast)
+    try:
+        evaluator = Evaluator(quantiles=[0.1, 0.5, 0.9])
+        agg_metrics, item_metrics = evaluator(groundtruth, forecast)
+        contained_nan = False
+    except ValueError:
+        evaluator = Evaluator(quantiles=[0.1, 0.5, 0.9], allow_nan_forecast=True) # nan can happen for tempfus
+        agg_metrics, item_metrics = evaluator(groundtruth, forecast)
+        contained_nan = True
 
-    return {'aggregated': agg_metrics} # , 'item': item_metrics}
+    return {'aggregated': agg_metrics, "contained_nan": contained_nan}
 
 
 
@@ -190,7 +196,7 @@ class MetricInferenceEarlyStopping(Callback):
         self,
         validation_dataset: Dataset,
         estimator: Estimator,
-        evaluator: Evaluator = Evaluator(num_workers=None),
+        evaluator: Evaluator = Evaluator(num_workers=None, allow_nan_forecast=True), # nan can happen for tempfus
         metric: str = "MSE",
         patience: int = 10,
         min_delta: float = 0.0,
