@@ -52,7 +52,7 @@ if __name__ == '__main__':
 
         if args.mode == 'interactive':
             app = Visualization(rated_database, boundaries, real_boundaries, meta)
-            app.run_server()#debug=args.debug, host=args.host, port=args.port)
+            app.run_server(debug=args.debug, host=args.host, port=args.port)
 
         if args.mode == 'label':
             summary = fill_meta(rated_database.iloc[0].to_dict(), meta)
@@ -71,25 +71,20 @@ if __name__ == '__main__':
                 stats['entries'] = data.shape
                 if data.shape[0] > max_shape[0] or data.shape[1] > max_shape[1]:
                     max_shape = [data.shape[0], data.shape[1]]
-                if "running_time" in data:
-                    stats['time_infer'] = sum([val['value'] for val in data["running_time"] if isinstance(val, dict)])
-                else:
-                    stats['time_infer'] = np.inf
-                if "train_running_time" in data:
-                    stats['time_train'] = sum([val['value'] for val in data["train_running_time"] if isinstance(val, dict)]) / 2 * 40 # TODO remove the epoch hack
-                else:
-                    stats['time_train'] = np.inf
+                stats['time_infer'] = sum([val['value'] for val in data["running_time"] if isinstance(val, dict)])
+                stats['time_train'] = sum([val['value'] for val in data["train_running_time"] if isinstance(val, dict)])
                 stats['time_total'] = stats['time_train'] + stats['time_infer']
                 ds_stats.append(stats)
             print(max_shape)
             sorted_ds_stats = sorted(ds_stats, key=lambda d: d['time_total'])
             to_rerun = []
             for idx, ds_stat in enumerate(sorted_ds_stats):
-                if ds_stat["entries"][0] >= max_shape[0] - 1 and ds_stat["entries"][1] == max_shape[1]: # TODO remove -1
+                if ds_stat["entries"][0] == max_shape[0] and ds_stat["entries"][1] == max_shape[1]: # TODO remove -1
                     to_rerun.append(ds_stat["ds"])
-                    print(f'SUCCESS ON {idx:<2} {ds_stat["ds"]:<45} {str(ds_stat["entries"]):<8} entries, time total {ds_stat["time_total"] / 60:6.2f} m (train {ds_stat["time_train"] / 60:6.2f} m, infer {ds_stat["time_infer"] / 60:6.2f} m)')
-                # else:
-                #     print(f'ERRORS ON  {idx:<2} {ds_stat["ds"]:<45} {str(ds_stat["entries"]):<8} entries, time total {ds_stat["time_total"] / 3600:6.2f} h (train {ds_stat["time_train"] / 3600:6.2f} h, infer {ds_stat["time_infer"] / 3600:6.2f} h)')
+                    success = 'FULL RESULTS ON   '
+                else:
+                    success = 'MISSING RESULTS ON'
+                print(f'{idx:<2} {success} {ds_stat["ds"]:<40} {str(ds_stat["entries"]):<8} entries, time total {ds_stat["time_total"] / 3600:6.2f} h (train {ds_stat["time_train"] / 3600:6.2f} h, infer {ds_stat["time_infer"] / 3600:6.2f} h)')
             print('"' + '" "'.join(to_rerun) + '"')
 
         if args.mode == 'paper_results':
@@ -130,7 +125,7 @@ if __name__ == '__main__':
         
     if args.mode == 'meta':
 
-        from meta_learn import run_meta_learn
+        from run_model_recommendation import evaluate_recommendation
 
         models = pd.unique(meta_learn_data["model"])
         shape = meta_learn_data.shape
@@ -138,4 +133,4 @@ if __name__ == '__main__':
         print(f'Meta learning to be run on {shape} database entries, with a total of {len(ds)} datasets and {len(models)} models!')
         print('Available datasets:', ' '.join(ds))
         
-        run_meta_learn(meta_learn_data)
+        evaluate_recommendation(meta_learn_data)
