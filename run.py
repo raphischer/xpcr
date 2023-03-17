@@ -162,16 +162,16 @@ def main(args):
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dataset',    default='bitcoin_dataset_without_missing_values')
-    parser.add_argument('--model',      default='deepar')
-    parser.add_argument('--output-dir', default='mnt_data/results')
-    parser.add_argument('--ds-seed',    default=42)
-    parser.add_argument('--epochs',     default=100)
-    parser.add_argument('--datadir',    default='mnt_data/data')
+    parser.add_argument('--dataset',                            default='bitcoin_dataset_without_missing_values')
+    parser.add_argument('--model',                              default='deepar')
+    parser.add_argument('--output-dir',                         default='mnt_data/results')
+    parser.add_argument('--ds-seed', type=int,                  default=42)
+    parser.add_argument('--epochs', type=int,                   default=100)
+    parser.add_argument('--datadir',                            default='mnt_data/data')
 
     # randomization and hardware profiling
-    parser.add_argument("--cpu-monitor-interval", default=0.5, type=float, help="Setting to > 0 activates CPU profiling every X seconds")
-    parser.add_argument("--seed", type=int, default=42, help="Seed to use (if -1, uses and logs random seed)")
+    parser.add_argument("--cpu-monitor-interval", type=float,   default=0.5, help="Setting to > 0 activates CPU profiling every X seconds")
+    parser.add_argument("--seed", type=int,                     default=42, help="Seed to use (if -1, uses and logs random seed)")
 
     args = parser.parse_args()
 

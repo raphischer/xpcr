@@ -3,7 +3,7 @@ for d in "m1_quarterly_dataset" "cif_2016_dataset" "solar_weekly_dataset" "touri
 do
     for m in "deepar" "deepstate" "deepfactor" "deeprenewal" "gpforecaster" "mqcnn" "mqrnn" "nbeats" "tempfus" "wavenet" "feedforward"
     do
-        for s in 42 135 468 129 124
+        for s in "42" "135" "468" "129" "124"
         do
             python run.py --dataset $d --model $m --ds-seed $s
         done

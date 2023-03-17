@@ -222,7 +222,7 @@ def convert_tsf_to_dataframe(
                 end_dates.append(end)
             for edate, key in zip(end_dates, series_names):
                 if edate != end_dates[0]:
-                    raise Warning(f'Not all time series end dates are the same in {full_file_path_and_name}\n{key} end date is {edate}, {series_names[0]} end date is {str(end_dates[0])}')
+                    print(f'WARNING! During subsampling {full_file_path_and_name}, some time series were found to have differing end timestamps\n{key} end date is {edate}, {series_names[0]} end date is {str(end_dates[0])}')
                     break
             
             # fill new dict with sampled parts of TS data
