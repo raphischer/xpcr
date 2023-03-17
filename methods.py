@@ -53,10 +53,14 @@ def init_model_and_data(args):
         else:
             model_cls = globals()[model_props['class']]
     else:
-        model_cls = getattr(importlib.import_module(model_props['module']), model_props['class'])
+        module = importlib.import_module(model_props['module'])
+        # bugfix for deepstate model frequency map
+        if hasattr(module, "FREQ_LONGEST_PERIOD_DICT") and 'Q' not in module.FREQ_LONGEST_PERIOD_DICT:
+            module.FREQ_LONGEST_PERIOD_DICT['Q'] = 4
+        model_cls = getattr(module, model_props['class'])
 
     full_path = os.path.join(args.datadir, dataset + '.tsf')
-    ds, freq, seasonality, forecast_horizon, contain_missing_values, contain_equal_length = load_data(full_path)
+    ds, freq, seasonality, forecast_horizon, contain_missing_values, contain_equal_length = load_data(full_path, ds_sample_seed=args.ds_seed)
 
     # forecast horizon might not be available from tsf
     if forecast_horizon is None:
@@ -107,7 +111,7 @@ def init_model_and_data(args):
         args['num_layers'] = 1
         args['num_cells'] = 10
 
-    if model in ['rotbaum', 'naiveseasonal']: # for some reason the args are not in 
+    if model in ['rotbaum', 'naiveseasonal']: # for some reason the args are not included in sugnature of these methods
         args['freq'] = freq
         args['prediction_length'] = forecast_horizon
 
