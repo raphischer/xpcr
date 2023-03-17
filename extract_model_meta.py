@@ -38,7 +38,7 @@ MODELS = {
     "arima": ARIMAWrapper
 }
 
-csv = pd.read_csv('models.csv', sep=';')
+csv = pd.read_csv('gluonts_models.csv', sep=';')
 
 meta = {}
 
@@ -56,5 +56,5 @@ for (_, row) in csv.iterrows():
         info['class'] = MODELS[key].__name__
     meta[key] = info
 
-with open('meta.json', 'w') as mf:
+with open('meta_model2.json', 'w') as mf:
     json.dump(meta, mf, indent=4)

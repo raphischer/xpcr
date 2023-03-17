@@ -136,8 +136,7 @@ def split_y(y_train, y_test=None, quantile=None):
     return y_train, y_test
 
 
-def run_meta_learn(database, only_print_better_than_random=False):
-
+def evaluate_recommendation(database, only_print_better_than_random=False):
     # load features and prepare ML pipeline
     X, fnames, fitted_transform = prepare_features(database, FEATURES)
     group_info = LabelEncoder().fit_transform(database[GROUP_BY].values)
