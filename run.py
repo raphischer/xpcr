@@ -14,7 +14,6 @@ from codecarbon import OfflineEmissionsTracker
 def main(args):
     print(f'Running evaluation on {args.dataset} for {args.model}')
     t0 = time.time()
-    args.seed = fix_seed(args.seed)
 
     ############## TRAINING ##############
     output_dir = create_output_dir(args.output_dir, 'train', args.__dict__)
@@ -75,6 +74,8 @@ def main(args):
         # sys.stdout = Logger(os.path.join(output_dir, f'logfile.txt')),
 
         ts_train, history, ts_test, model = init_model_and_data(args)
+        # set global seed only after data loading, because this uses an internal ds subsampling seed!
+        args.seed = fix_seed(args.seed)
 
         if not hasattr(model, 'train'):
             # no global training needed, model is only a predictor
@@ -164,6 +165,7 @@ if __name__ == "__main__":
     parser.add_argument('--dataset',    default='bitcoin_dataset_without_missing_values')
     parser.add_argument('--model',      default='deepar')
     parser.add_argument('--output-dir', default='mnt_data/results')
+    parser.add_argument('--ds-seed',    default=42)
     parser.add_argument('--epochs',     default=100)
     parser.add_argument('--datadir',    default='mnt_data/data')
 
