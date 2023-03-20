@@ -74,7 +74,7 @@ def init_model_and_data(args):
 
     for _, row in ds.iterrows():
 
-        ts_start = row["start_timestamp"] if "start_timestamp" in ds.columns else datetime(1900, 1, 1, 0, 0, 0)
+        ts_start = row["start_timestamp"]
         ts_data = row["series_value"]
 
         # use gluonts data format

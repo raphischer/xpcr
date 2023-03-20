@@ -205,6 +205,9 @@ def convert_tsf_to_dataframe(
             timedelta_val = TIMEDELTA_MAP['yearly']
             seasonality = 1
 
+        if "start_timestamp" not in all_data:
+            all_data["start_timestamp"] = [datetime(1900, 1, 1, 0, 0, 0) for _ in range(len(all_data['series_name']))]
+
         # CUSTOM SUBSAMPLING
         if ds_sample_seed != -1:
             assert amount_of_length <= 1 and amount_of_length > 0, "please pass valid amount_of_length (0 < amt <= 1)"
@@ -230,6 +233,9 @@ def convert_tsf_to_dataframe(
             no_series = len(all_data['series_name'])
             selected_series = np.random.choice(np.arange(no_series), int(no_series * amount_of_series), replace=False)
             for s_idx in selected_series:
+                for key in ['horizon', 'type', 'base_name', 'base_number']:
+                    if key in all_data:
+                        sampled_data[key].append(all_data[key][idx])
                 name, start, values = all_data['series_name'][s_idx], all_data['start_timestamp'][s_idx], all_data['series_value'][s_idx]
                 sampled_data['series_name'].append(name)
                 ts_new_len = int(len(values) * amount_of_length)

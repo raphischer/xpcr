@@ -71,21 +71,24 @@ if __name__ == '__main__':
                 stats['entries'] = data.shape
                 if data.shape[0] > max_shape[0] or data.shape[1] > max_shape[1]:
                     max_shape = [data.shape[0], data.shape[1]]
-                stats['time_infer'] = sum([val['value'] for val in data["running_time"] if isinstance(val, dict)])
-                stats['time_train'] = sum([val['value'] for val in data["train_running_time"] if isinstance(val, dict)])
+                if "running_time" in data:
+                    stats['time_infer'] = sum([val['value'] for val in data["running_time"] if isinstance(val, dict)])
+                else:
+                    stats['time_infer'] = -1
+                if "train_running_time" in data:
+                    stats['time_train'] = sum([val['value'] for val in data["train_running_time"] if isinstance(val, dict)])
+                else:
+                    stats['time_train'] = -1
                 stats['time_total'] = stats['time_train'] + stats['time_infer']
                 ds_stats.append(stats)
             print(max_shape)
             sorted_ds_stats = sorted(ds_stats, key=lambda d: d['time_total'])
-            to_rerun = []
             for idx, ds_stat in enumerate(sorted_ds_stats):
                 if ds_stat["entries"][0] == max_shape[0] and ds_stat["entries"][1] == max_shape[1]: # TODO remove -1
-                    to_rerun.append(ds_stat["ds"])
                     success = 'FULL RESULTS ON   '
                 else:
                     success = 'MISSING RESULTS ON'
-                print(f'{idx:<2} {success} {ds_stat["ds"]:<40} {str(ds_stat["entries"]):<8} entries, time total {ds_stat["time_total"] / 3600:6.2f} h (train {ds_stat["time_train"] / 3600:6.2f} h, infer {ds_stat["time_infer"] / 3600:6.2f} h)')
-            print('"' + '" "'.join(to_rerun) + '"')
+                print(f'{idx:<2} {success} {ds_stat["ds"]:<45} {str(ds_stat["entries"]):<8} entries, time total {ds_stat["time_total"] / 3600:6.2f} h (train {ds_stat["time_train"] / 3600:6.2f} h, infer {ds_stat["time_infer"] / 3600:6.2f} h)')
 
         if args.mode == 'paper_results':
             pass

@@ -165,7 +165,7 @@ if __name__ == "__main__":
     parser.add_argument('--dataset',                            default='bitcoin_dataset_without_missing_values')
     parser.add_argument('--model',                              default='deepar')
     parser.add_argument('--output-dir',                         default='mnt_data/results')
-    parser.add_argument('--ds-seed', type=int,                  default=42)
+    parser.add_argument('--ds-seed', type=int,                  default=-1)
     parser.add_argument('--epochs', type=int,                   default=100)
     parser.add_argument('--datadir',                            default='mnt_data/data')
 
@@ -175,6 +175,9 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    os.environ['TMPDIR'] = "mnt_data/tmp"
+    tmpdir = os.path.join(os.path.dirname(args.output_dir), "tmp", os.path.basename(args.output_dir))
+    if not os.path.isdir(tmpdir):
+        os.makedirs(tmpdir)
+    os.environ['TMPDIR'] = tmpdir
 
     main(args)
