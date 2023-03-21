@@ -8,55 +8,68 @@ from exprep.unit_reformatting import CustomUnitReformater
 from exprep.load_experiment_logs import find_sub_database
 
 
-def calculate_compound_rating(ratings, mode='optimistic median', meanings=None):
+def calculate_compound_rating(ratings, mode='optimistic median'):
     if isinstance(ratings, pd.DataFrame): # full database to rate
         for idx, log in ratings.iterrows():
             try:
-                ratings.loc[idx,'compound'] = calculate_single_compound_rating(log, mode, meanings)
+                compound = calculate_single_compound_rating(log, mode)
+                ratings.loc[idx,'compound_index'] = compound['index']
+                ratings.loc[idx,'compound_rating'] = compound['rating']
             except RuntimeError:
                 ratings.loc[idx,'compound'] = -1
-        ratings['compound'] = ratings['compound'].astype(int)
+        ratings['compound_rating'] = ratings['compound_rating'].astype(int)
         return ratings
-    return calculate_single_compound_rating(ratings, mode, meanings)
+    return calculate_single_compound_rating(ratings, mode)
 
 
-def calculate_single_compound_rating(ratings, mode, meanings=None):
-    if isinstance(ratings, pd.Series):
-        ratings = ratings.to_dict()
-    if isinstance(ratings, dict): # model summary given instead of list of ratings
-        weights, ratings_gathered = [], []
-        for val in ratings.values():
+def weighted_median(values, weights):
+    assert np.isclose(weights.sum(), 1), "Weights for weighted median should sum up to one"
+    cumw = np.cumsum(weights)
+    for i, (cw, v) in enumerate(zip(cumw, values)):
+        if cw == 0.5:
+            return np.average([v, values[i + 1]])
+        if cw > 0.5 or (cw < 0.5 and cumw[i + 1] > 0.5):
+            return v
+    raise RuntimeError
+
+
+def calculate_single_compound_rating(input, mode):
+    # extract lists of values
+    if isinstance(input, pd.Series):
+        input = input.to_dict()
+    if isinstance(input, dict): # model summary given instead of list of ratings
+        weights, ratings, index_vals = [], [], []
+        for val in input.values():
             if isinstance(val, dict) and 'weight' in val and val['weight'] > 0:
                 weights.append(val['weight'])
-                ratings_gathered.append(val['rating'])
-        weights = [w / sum(weights) for w in weights]
-        ratings = ratings_gathered
+                ratings.append(val['rating'])
+                index_vals.append(val['index'])
     else:
-        weights = [1.0 / len(ratings) for _ in ratings]
+        raise NotImplementedError()
+    weights = [w / sum(weights) for w in weights] # normalize so that weights sum up to one
     if len(ratings) == 0:
         raise RuntimeError
-    if meanings is None:
-        meanings = np.arange(np.max(ratings) + 1, dtype=int)
-    round_m = np.ceil if 'pessimistic' in mode else np.floor # optimistic
-    if mode == 'best':
-        return meanings[min(ratings)] # TODO no weighting here
-    if mode == 'worst':
-        return meanings[max(ratings)] # TODO no weighting here
-    if 'median' in mode:
-        asort = np.argsort(ratings)
+    # calculate compound index and rating
+    results = {}
+    for name, values in zip(['rating', 'index'], (ratings, index_vals)):
+        asort = np.argsort(values)
+        if name == 'index': # bigger index provides smaller (better) rating!
+            asort = np.flip(asort)
         weights = np.array(weights)[asort]
-        ratings = np.array(ratings)[asort]
-        cumw = np.cumsum(weights)
-        for i, (cw, r) in enumerate(zip(cumw, ratings)):
-            if cw == 0.5:
-                return meanings[int(round_m(np.average([r, ratings[i + 1]])))]
-            if cw > 0.5 or (cw < 0.5 and cumw[i + 1] > 0.5):
-                return meanings[r]
-    if 'mean' in mode:
-        return meanings[int(round_m(np.average(ratings, weights=weights)))]
-    if mode == 'majority':
-        return meanings[np.argmax(np.bincount(ratings))]
-    raise NotImplementedError('Rating Mode not implemented!', mode)
+        values = np.array(values)[asort]
+        if mode == 'best':
+            results[name] = values[0]
+        if mode == 'worst':
+            results[name] = values[-1]
+        if 'median' in mode:
+            results[name] = weighted_median(values, weights)
+        if 'mean' in mode:
+            results[name] = np.average(ratings, weights=weights)
+    if len(results) < 2:
+        raise NotImplementedError('Rating Mode not implemented!', mode)
+    round_m = np.ceil if 'pessimistic' in mode else np.floor # compound rating needs to be rounded to int depending on mode
+    results['rating'] = int(round_m(results['rating']))
+    return results
 
 
 def value_to_index(value, ref, higher_better):
