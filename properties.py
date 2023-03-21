@@ -5,7 +5,7 @@ import json
 PROPERTIES = {
     'meta': {
         'task': lambda log: log['directory_name'].split('_')[0],
-        'dataset': lambda log: log['config']['dataset'],
+        'dataset': lambda log: log['config']['dataset'] + '_' + str(log['config']['ds_seed']),
         'model': lambda log: log['config']['model'],
         'architecture': lambda log: extract_architecture(log),
         'software': lambda log: extract_software(log),
