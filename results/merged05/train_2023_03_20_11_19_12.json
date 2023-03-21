@@ -1,0 +1,263 @@
+{
+    "directory_name": "train_2023_03_20_11_19_12",
+    "emissions": {
+        "timestamp": {
+            "0": "2023-03-20T11:20:35"
+        },
+        "project_name": {
+            "0": "codecarbon"
+        },
+        "run_id": {
+            "0": "3467834a-7e44-4808-b774-e7c5c3e7387a"
+        },
+        "duration": {
+            "0": 80.54259872436523
+        },
+        "emissions": {
+            "0": 0.0002841757802552
+        },
+        "emissions_rate": {
+            "0": 0.0035282668396101
+        },
+        "cpu_power": {
+            "0": 1.4863820905232072
+        },
+        "gpu_power": {
+            "0": 0.0
+        },
+        "ram_power": {
+            "0": 11.68178415298462
+        },
+        "cpu_energy": {
+            "0": 0.000697937478905
+        },
+        "gpu_energy": {
+            "0": 0
+        },
+        "ram_energy": {
+            "0": 0.0002461681033381
+        },
+        "energy_consumed": {
+            "0": 0.0009441055822432
+        },
+        "country_name": {
+            "0": "Germany"
+        },
+        "country_iso_code": {
+            "0": "DEU"
+        },
+        "region": {
+            "0": NaN
+        },
+        "cloud_provider": {
+            "0": NaN
+        },
+        "cloud_region": {
+            "0": NaN
+        },
+        "os": {
+            "0": "Linux-5.19.0-35-generic-x86_64-with-debian-bookworm-sid"
+        },
+        "python_version": {
+            "0": "3.7.7"
+        },
+        "cpu_count": {
+            "0": 12
+        },
+        "cpu_model": {
+            "0": "Intel(R) Core(TM) i7-8700 CPU @ 3.20GHz"
+        },
+        "gpu_count": {
+            "0": NaN
+        },
+        "gpu_model": {
+            "0": NaN
+        },
+        "longitude": {
+            "0": NaN
+        },
+        "latitude": {
+            "0": NaN
+        },
+        "ram_total_size": {
+            "0": 31.151424407958984
+        },
+        "tracking_mode": {
+            "0": "machine"
+        },
+        "on_cloud": {
+            "0": "N"
+        }
+    },
+    "execution_platform": {
+        "System": "Linux",
+        "Node Name": "lamarrws05",
+        "Release": "5.19.0-35-generic",
+        "Version": "#36~22.04.1-Ubuntu SMP PREEMPT_DYNAMIC Fri Feb 17 15:17:25 UTC 2",
+        "Machine": "x86_64",
+        "Processor": "Intel(R) Core(TM) i7-8700 CPU @ 3.20GHz",
+        "Physical cores": 6,
+        "Total cores": 12,
+        "Max Frequency": 4600.0,
+        "Min Frequency": 800.0,
+        "Current Frequency": 3545.918916666667,
+        "Total": 33448587264,
+        "Available": 31619280896,
+        "Used": 1188651008
+    },
+    "results": {
+        "history": {
+            "loss": [
+                1748.5636853027345,
+                1761.7795776367188,
+                1760.185574951172,
+                1755.20130859375,
+                1714.3029089355468,
+                1730.9863677978515,
+                1676.065028076172,
+                1694.618240966797,
+                1684.39779296875,
+                1683.8856866455078,
+                1645.4670581054688,
+                1628.6409796142577,
+                1646.3655059814453,
+                1644.4247198486328,
+                1638.5517236328126,
+                1640.2272644042969,
+                1605.8864123535157,
+                1605.4273876953125,
+                1621.5110070800781,
+                1623.3453576660156,
+                1626.053659057617,
+                1595.0778131103516,
+                1631.888207397461,
+                1591.924058227539,
+                1621.9071881103516,
+                1614.0972875976563,
+                1611.9134686279297,
+                1591.1153509521484,
+                1591.369307861328,
+                1617.5209643554688,
+                1609.5110064697265,
+                1615.164091796875,
+                1627.6886743164061,
+                1590.7281500244142,
+                1581.427682495117,
+                1604.4164135742187,
+                1603.2105895996094,
+                1602.517315673828,
+                1585.9855322265626,
+                1622.645776977539,
+                1592.6600646972656,
+                1604.3561120605468,
+                1603.1410247802735,
+                1615.8967639160155,
+                1581.7526654052735,
+                1565.4649670410156,
+                1580.521964111328,
+                1584.5173321533202,
+                1580.8440777587891,
+                1582.3523974609375,
+                1554.4697607421874,
+                1543.9572204589845,
+                1554.8934033203125,
+                1567.7440417480468,
+                1571.0977606201172,
+                1542.1927325439453,
+                1586.133369140625,
+                1544.3847784423829,
+                1587.2426824951172,
+                1581.0867626953125,
+                1588.1558819580077,
+                1550.1871203613282
+            ]
+        },
+        "start": 1679307554.969594,
+        "end": 1679307635.509987,
+        "model": null
+    },
+    "requirements": [
+        "# 3.7.7 (default, Mar 23 2020, 22:36:06)",
+        "# [GCC 7.3.0]",
+        "wrapt==1.11.2",
+        "typed-ast==1.4.0",
+        "six==1.12.0",
+        "setuptools==41.6.0",
+        "pytz==2019.3",
+        "python-dateutil==2.8.0",
+        "pyparsing==2.4.2",
+        "pylint==2.4.3",
+        "numpy==1.17.3",
+        "mccabe==0.6.1",
+        "matplotlib==3.1.1",
+        "lazy-object-proxy==1.4.3",
+        "kiwisolver==1.1.0",
+        "isort==4.3.21",
+        "cycler==0.10.0",
+        "astroid==2.3.2",
+        "zipp==3.14.0",
+        "xgboost==1.6.2",
+        "wheel==0.37.1",
+        "werkzeug==2.2.3",
+        "urllib3==1.26.14",
+        "typing-extensions==4.4.0",
+        "tqdm==4.64.1",
+        "toolz==0.12.0",
+        "threadpoolctl==3.1.0",
+        "tenacity==8.2.2",
+        "scipy==1.7.3",
+        "scikit-learn==1.0.2",
+        "rpy2==2.9.4",
+        "requests==2.28.2",
+        "reportlab==3.6.12",
+        "qrcode==7.4.2",
+        "pypng==0.20220715.0",
+        "pynvml==11.4.1",
+        "pymupdf==1.21.1",
+        "pydantic==1.10.4",
+        "pyarrow==8.0.0",
+        "py-rapl==0.1",
+        "py-cpuinfo==9.0.0",
+        "psutil==5.9.4",
+        "plotly==5.13.1",
+        "pip==22.3.1",
+        "pint==0.18",
+        "pillow==9.4.0",
+        "pandas==1.3.5",
+        "packaging==23.0",
+        "orjson==3.8.5",
+        "mxnet==1.9.1",
+        "markupsafe==2.1.1",
+        "joblib==1.2.0",
+        "jinja2==3.1.2",
+        "itsdangerous==2.1.2",
+        "importlib-metadata==6.0.0",
+        "idna==3.4",
+        "graphviz==0.8.4",
+        "gluonts==0.11.8",
+        "fuzzywuzzy==0.18.0",
+        "flask==2.2.3",
+        "dash==2.8.1",
+        "dash-table==5.0.0",
+        "dash-html-components==2.0.0",
+        "dash-core-components==2.0.0",
+        "dash-bootstrap-components==1.4.0",
+        "codecarbon==2.1.4",
+        "click==8.1.3",
+        "charset-normalizer==3.0.1",
+        "certifi==2022.12.7",
+        "arrow==1.2.3"
+    ],
+    "config": {
+        "dataset": "m1_quarterly_dataset",
+        "model": "mqrnn",
+        "output_dir": "mnt_data/results05",
+        "ds_seed": 124,
+        "epochs": 100,
+        "datadir": "mnt_data/data",
+        "cpu_monitor_interval": 0.5,
+        "seed": 42,
+        "timestamp": "2023_03_20_11_19_12"
+    },
+    "full_log": "results/merged05/train_2023_03_20_11_19_12.tar.gz"
+}

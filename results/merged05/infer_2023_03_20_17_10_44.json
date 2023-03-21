@@ -1,0 +1,532 @@
+{
+    "directory_name": "infer_2023_03_20_17_10_44",
+    "execution_platform": {
+        "System": "Linux",
+        "Node Name": "lamarrws05",
+        "Release": "5.19.0-35-generic",
+        "Version": "#36~22.04.1-Ubuntu SMP PREEMPT_DYNAMIC Fri Feb 17 15:17:25 UTC 2",
+        "Machine": "x86_64",
+        "Processor": "Intel(R) Core(TM) i7-8700 CPU @ 3.20GHz",
+        "Physical cores": 6,
+        "Total cores": 12,
+        "Max Frequency": 4600.0,
+        "Min Frequency": 800.0,
+        "Current Frequency": 4199.174166666667,
+        "Total": 33448587264,
+        "Available": 30990827520,
+        "Used": 1806200832
+    },
+    "type": [
+        "gluonts.mx.model.predictor.RepresentableBlockPredictor"
+    ],
+    "input_transform": {
+        "__kind__": "instance",
+        "args": [],
+        "class": "gluonts.transform._base.Chain",
+        "kwargs": {
+            "trans": [
+                {
+                    "__kind__": "instance",
+                    "args": [],
+                    "class": "gluonts.transform.feature.AddObservedValuesIndicator",
+                    "kwargs": {
+                        "dtype": {
+                            "__kind__": "type",
+                            "class": "numpy.float32"
+                        },
+                        "imputation_method": {
+                            "__kind__": "instance",
+                            "args": [],
+                            "class": "gluonts.transform.feature.DummyValueImputation",
+                            "kwargs": {
+                                "dummy_value": 0.0
+                            }
+                        },
+                        "output_field": "observed_values",
+                        "target_field": "target"
+                    }
+                },
+                {
+                    "__kind__": "instance",
+                    "args": [],
+                    "class": "gluonts.transform.split.InstanceSplitter",
+                    "kwargs": {
+                        "dummy_value": 0.0,
+                        "forecast_start_field": "forecast_start",
+                        "future_length": 12,
+                        "instance_sampler": {
+                            "__kind__": "instance",
+                            "class": "gluonts.transform.sampler.PredictionSplitSampler",
+                            "kwargs": {
+                                "allow_empty_interval": false,
+                                "axis": -1,
+                                "min_future": 0,
+                                "min_past": 0
+                            }
+                        },
+                        "is_pad_field": "is_pad",
+                        "lead_time": 0,
+                        "output_NTC": true,
+                        "past_length": 15,
+                        "start_field": "start",
+                        "target_field": "target",
+                        "time_series_fields": [
+                            "observed_values"
+                        ]
+                    }
+                }
+            ]
+        }
+    },
+    "parameters": {
+        "batch_size": 32,
+        "ctx": {
+            "__kind__": "instance",
+            "args": [
+                "cpu",
+                0
+            ],
+            "class": "mxnet.context.Context"
+        },
+        "dtype": {
+            "__kind__": "type",
+            "class": "numpy.float32"
+        },
+        "forecast_generator": {
+            "__kind__": "instance",
+            "args": [],
+            "class": "gluonts.model.forecast_generator.SampleForecastGenerator",
+            "kwargs": {}
+        },
+        "input_names": [
+            "past_target",
+            "past_observed_values",
+            "future_target",
+            "future_observed_values"
+        ],
+        "lead_time": 0,
+        "prediction_length": 12
+    },
+    "emissions": {
+        "timestamp": {
+            "0": "2023-03-20T17:10:47"
+        },
+        "project_name": {
+            "0": "codecarbon"
+        },
+        "run_id": {
+            "0": "e40bfa22-5f79-44c4-8500-b35cb6260ecc"
+        },
+        "duration": {
+            "0": 0.0009400844573974
+        },
+        "emissions": {
+            "0": 2.105064282688573e-09
+        },
+        "emissions_rate": {
+            "0": 0.0022392288970676
+        },
+        "cpu_power": {
+            "0": 26.796592948848645
+        },
+        "gpu_power": {
+            "0": 0.0
+        },
+        "ram_power": {
+            "0": 11.68178415298462
+        },
+        "cpu_energy": {
+            "0": 5.577782236088069e-09
+        },
+        "gpu_energy": {
+            "0": 0
+        },
+        "ram_energy": {
+            "0": 1.415786809388919e-09
+        },
+        "energy_consumed": {
+            "0": 6.993569045476988e-09
+        },
+        "country_name": {
+            "0": "Germany"
+        },
+        "country_iso_code": {
+            "0": "DEU"
+        },
+        "region": {
+            "0": NaN
+        },
+        "cloud_provider": {
+            "0": NaN
+        },
+        "cloud_region": {
+            "0": NaN
+        },
+        "os": {
+            "0": "Linux-5.19.0-35-generic-x86_64-with-debian-bookworm-sid"
+        },
+        "python_version": {
+            "0": "3.7.7"
+        },
+        "cpu_count": {
+            "0": 12
+        },
+        "cpu_model": {
+            "0": "Intel(R) Core(TM) i7-8700 CPU @ 3.20GHz"
+        },
+        "gpu_count": {
+            "0": NaN
+        },
+        "gpu_model": {
+            "0": NaN
+        },
+        "longitude": {
+            "0": NaN
+        },
+        "latitude": {
+            "0": NaN
+        },
+        "ram_total_size": {
+            "0": 31.151424407958984
+        },
+        "tracking_mode": {
+            "0": "machine"
+        },
+        "on_cloud": {
+            "0": "N"
+        }
+    },
+    "config": {
+        "dataset": "fred_md_dataset",
+        "model": "nbeats",
+        "output_dir": "mnt_data/results05",
+        "ds_seed": 468,
+        "epochs": 100,
+        "datadir": "mnt_data/data",
+        "cpu_monitor_interval": 0.5,
+        "seed": 42,
+        "timestamp": "2023_03_20_17_10_44",
+        "lag": 15,
+        "external_forecast_horizon": 12,
+        "train_logdir": "mnt_data/results05/train_2023_03_20_17_06_09"
+    },
+    "validation_results": {
+        "metrics": {
+            "aggregated": {
+                "MSE": 29963894.45233106,
+                "abs_error": 630572.3141365051,
+                "abs_target_sum": 13212895.813979805,
+                "abs_target_mean": 20774.993418207243,
+                "seasonal_error": 744.0360790570224,
+                "MASE": 2.895042127500187,
+                "MAPE": 0.3431208228727556,
+                "sMAPE": 0.1686597097219911,
+                "MSIS": 115.80168493496734,
+                "QuantileLoss[0.1]": 154245.2189066831,
+                "Coverage[0.1]": 0.12421383647798742,
+                "QuantileLoss[0.5]": 630572.3142153043,
+                "Coverage[0.5]": 0.12421383647798742,
+                "QuantileLoss[0.9]": 1106899.4095239255,
+                "Coverage[0.9]": 0.12421383647798742,
+                "RMSE": 5473.928612279398,
+                "NRMSE": 0.2634864186037256,
+                "ND": 0.04772400562406107,
+                "wQuantileLoss[0.1]": 0.011673839034096151,
+                "wQuantileLoss[0.5]": 0.04772400563002488,
+                "wQuantileLoss[0.9]": 0.0837741722259536,
+                "mean_absolute_QuantileLoss": 630572.3142153043,
+                "mean_wQuantileLoss": 0.04772400563002488,
+                "MAE_Coverage": 0.3919287211740042,
+                "OWA": NaN
+            },
+            "contained_nan": false
+        },
+        "start": 1679328644.349888,
+        "end": 1679328649.309783,
+        "num_samples": 100,
+        "model": {
+            "params": 24879579,
+            "fsize": 99554924
+        }
+    },
+    "requirements": [
+        "# 3.7.7 (default, Mar 23 2020, 22:36:06)",
+        "# [GCC 7.3.0]",
+        "wrapt==1.11.2",
+        "typed-ast==1.4.0",
+        "six==1.12.0",
+        "setuptools==41.6.0",
+        "pytz==2019.3",
+        "python-dateutil==2.8.0",
+        "pyparsing==2.4.2",
+        "pylint==2.4.3",
+        "numpy==1.17.3",
+        "mccabe==0.6.1",
+        "matplotlib==3.1.1",
+        "lazy-object-proxy==1.4.3",
+        "kiwisolver==1.1.0",
+        "isort==4.3.21",
+        "cycler==0.10.0",
+        "astroid==2.3.2",
+        "zipp==3.14.0",
+        "xgboost==1.6.2",
+        "wheel==0.37.1",
+        "werkzeug==2.2.3",
+        "urllib3==1.26.14",
+        "typing-extensions==4.4.0",
+        "tqdm==4.64.1",
+        "toolz==0.12.0",
+        "threadpoolctl==3.1.0",
+        "tenacity==8.2.2",
+        "scipy==1.7.3",
+        "scikit-learn==1.0.2",
+        "rpy2==2.9.4",
+        "requests==2.28.2",
+        "reportlab==3.6.12",
+        "qrcode==7.4.2",
+        "pypng==0.20220715.0",
+        "pynvml==11.4.1",
+        "pymupdf==1.21.1",
+        "pydantic==1.10.4",
+        "pyarrow==8.0.0",
+        "py-rapl==0.1",
+        "py-cpuinfo==9.0.0",
+        "psutil==5.9.4",
+        "plotly==5.13.1",
+        "pip==22.3.1",
+        "pint==0.18",
+        "pillow==9.4.0",
+        "pandas==1.3.5",
+        "packaging==23.0",
+        "orjson==3.8.5",
+        "mxnet==1.9.1",
+        "markupsafe==2.1.1",
+        "joblib==1.2.0",
+        "jinja2==3.1.2",
+        "itsdangerous==2.1.2",
+        "importlib-metadata==6.0.0",
+        "idna==3.4",
+        "graphviz==0.8.4",
+        "gluonts==0.11.8",
+        "fuzzywuzzy==0.18.0",
+        "flask==2.2.3",
+        "dash==2.8.1",
+        "dash-table==5.0.0",
+        "dash-html-components==2.0.0",
+        "dash-core-components==2.0.0",
+        "dash-bootstrap-components==1.4.0",
+        "codecarbon==2.1.4",
+        "click==8.1.3",
+        "charset-normalizer==3.0.1",
+        "certifi==2022.12.7",
+        "arrow==1.2.3"
+    ],
+    "version": {
+        "model": "0.11.8",
+        "gluonts": "0.11.8"
+    },
+    "prediction_net-network": {
+        "__kind__": "instance",
+        "args": [],
+        "class": "gluonts.mx.model.n_beats._network.NBEATSPredictionNetwork",
+        "kwargs": {
+            "context_length": 15,
+            "expansion_coefficient_lengths": [
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32
+            ],
+            "num_block_layers": [
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4
+            ],
+            "num_blocks": [
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1
+            ],
+            "num_stacks": 30,
+            "prediction_length": 12,
+            "scale": false,
+            "sharing": [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            "stack_types": [
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G"
+            ],
+            "widths": [
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512
+            ]
+        }
+    },
+    "full_log": "results/merged05/infer_2023_03_20_17_10_44.tar.gz"
+}
