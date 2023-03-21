@@ -2,6 +2,7 @@ import argparse
 import os
 import pandas as pd
 import numpy as np
+import re
 
 from exprep.load_experiment_logs import load_database
 from exprep.index_and_rate import rate_database
@@ -111,8 +112,14 @@ if __name__ == '__main__':
                     rated_database = rated_database.drop(data.index)
                 else:
                     # store dataset specific meta features
-                    full_path = os.path.join('mnt_data/data', ds + '.tsf')
-                    ts_data, freq, seasonality, forecast_horizon, contain_missing_values, contain_equal_length = load_data(full_path)
+                    match = re.match(r'(.*)_(\d*)', ds)
+                    if match is None:
+                        ds_name, ds_seed = ds, -1
+                    else:
+                        ds_name, ds_seed = match.group(1), int(match.group(2))
+                    full_path = os.path.join('mnt_data/data', ds_name + '.tsf')
+                    ts_data, freq, seasonality, forecast_horizon, contain_missing_values, contain_equal_length = load_data(full_path, ds_sample_seed=ds_seed)
+                    rated_database.loc[data.index,'orig_dataset'] = ds_name # ensure no bleeding across subsampled datasets in cross-validation
                     rated_database.loc[data.index,'num_ts'] = ts_data.shape[0]
                     rated_database.loc[data.index,'avg_ts_len'] = ts_data['series_value'].map(lambda ts: len(ts)).mean()
                     rated_database.loc[data.index,'avg_ts_mean'] = ts_data['series_value'].map(lambda ts: np.mean(ts)).mean()
