@@ -16,7 +16,8 @@ def calculate_compound_rating(ratings, mode='optimistic median'):
                 ratings.loc[idx,'compound_index'] = compound['index']
                 ratings.loc[idx,'compound_rating'] = compound['rating']
             except RuntimeError:
-                ratings.loc[idx,'compound'] = -1
+                ratings.loc[idx,'compound_index'] = -1
+                ratings.loc[idx,'compound_rating'] = -1
         ratings['compound_rating'] = ratings['compound_rating'].astype(int)
         return ratings
     return calculate_single_compound_rating(ratings, mode)
