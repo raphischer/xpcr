@@ -4,7 +4,6 @@ import pandas as pd
 import numpy as np
 import re
 
-from exprep.load_experiment_logs import load_database
 from exprep.index_and_rate import rate_database
 from exprep.util import load_meta
 
@@ -19,35 +18,32 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--logdir-root", default="mnt_data/results", type=str, help="directory with experimental result sub directories")
-    parser.add_argument("--output-logdir-merged", default="results/merged", type=str, help="directory where merged experiment logs (json format) are created")
-    parser.add_argument("--property-extractors-module", default="properties", help="python file with PROPERTIES dictionary, which maps properties to executable extractor functions")
-    parser.add_argument("--database-fname", default="results/database.pkl", help="filename for the database that shall be created")
-    parser.add_argument("--boundaries", default="boundaries.json")
-    parser.add_argument("--clean", action="store_true", help="set to first delete all content in given output directories")
     parser.add_argument("--mode", default='stats', choices=['meta', 'interactive', 'paper_results', 'label', 'stats'])
-    # interactive exploration
+    parser.add_argument("--property-extractors-module", default="properties", help="python file with PROPERTIES dictionary, which maps properties to executable extractor functions")
+    parser.add_argument("--database-path", default="results", help="filename for database, or directories with databases inside")
+    parser.add_argument("--boundaries", default="boundaries.json")
+    # interactive exploration params
     parser.add_argument("--host", default='localhost', type=str, help="default host") # '0.0.0.0'
     parser.add_argument("--port", default=8888, type=int, help="default port")
     parser.add_argument("--debug", default=False, type=bool, help="debugging")
 
     args = parser.parse_args()
 
-    meta_learn_data_fname = 'meta_learn.pkl'
+    if os.path.isfile(args.database_path): # read just the single database
+        database = pd.read_pickle(args.database_path)
+    elif os.path.isdir(args.database_path): # directory with multiple databases
+        databases = []
+        for fname in os.listdir(args.database_path):
+            if 'pkl' in fname:
+                databases.append(pd.read_pickle(os.path.join(args.database_path, fname)))
+        database = pd.concat(databases)
 
     # load meta learn data if already processed!
+    meta_learn_data_fname = 'meta_learn.pkl'
     if args.mode == 'meta' and os.path.isfile(meta_learn_data_fname):
-            meta_learn_data = pd.read_pickle(meta_learn_data_fname)
-
+        meta_learn_data = pd.read_pickle(meta_learn_data_fname)
     else:
-
         meta = load_meta()
-        if os.path.isfile(args.database_fname): # if available, read from disc
-            database = pd.read_pickle(args.database_fname)
-        else:
-            database = load_database(args.logdir_root, args.output_logdir_merged, None, args.property_extractors_module, args.clean)
-            database.to_pickle(args.database_fname)
-
         rated_database, boundaries, real_boundaries, _ = rate_database(database, properties_meta=meta['properties'], boundaries=args.boundaries)
         print(f'Database constructed from logs has {rated_database.shape} entries')
 
@@ -95,7 +91,7 @@ if __name__ == '__main__':
             pass
         
         if args.mode == 'meta':
-            # only look at infer results
+            # only look at inference results
             rated_database = rated_database.drop(rated_database[rated_database['task'] != 'infer'].index)
             grouped_by = rated_database.groupby(['dataset'])
             # check for completeness of results
@@ -136,7 +132,6 @@ if __name__ == '__main__':
     if args.mode == 'meta':
 
         from run_model_recommendation import evaluate_recommendation
-
         models = pd.unique(meta_learn_data["model"])
         shape = meta_learn_data.shape
         ds = pd.unique(meta_learn_data["dataset"])
