@@ -245,7 +245,8 @@ class MetricInferenceEarlyStopping(Callback):
         should_continue = True
         
         transformation = self.estimator.create_transformation()
-        predictor = self.estimator.create_predictor(transformation=transformation, trained_network=training_network)
+        with self.estimator.trainer.ctx:
+            predictor = self.estimator.create_predictor(transformation=transformation, trained_network=training_network)
 
         from gluonts.evaluation.backtest import make_evaluation_predictions
 
