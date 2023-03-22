@@ -45,6 +45,10 @@ def calculate_single_compound_rating(input, mode):
                 weights.append(val['weight'])
                 ratings.append(val['rating'])
                 index_vals.append(val['index'])
+    elif isinstance(input, list):
+        weights = [1] * len(input)
+        ratings = input
+        index_vals = input
     else:
         raise NotImplementedError()
     weights = [w / sum(weights) for w in weights] # normalize so that weights sum up to one

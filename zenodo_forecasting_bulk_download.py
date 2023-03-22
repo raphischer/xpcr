@@ -30,7 +30,7 @@ for hit in resp['hits']['hits']:
     if os.path.isfile(full_path):
         print('SUCCESS   ', ds_name)
         dataset_meta[ds_name] = {
-            'name': hit['metadata']['title'],
+            'name': hit['metadata']['title'].replace(' Dataset', ''),
             'doi': hit['metadata']['doi'],
             'license': hit['metadata']['license'],
             'publication_date': hit['metadata']['publication_date']
