@@ -121,7 +121,7 @@ class PropertyLabel(fitz.Document):
         # background
         place_relatively(canvas, 0.5, 0.5, 'drawInlineImage', os.path.join(PARTS_DIR, f"bg.png"))
         # rating & QR
-        frate = 'ABCDE'[summary['compound']]
+        frate = 'ABCDE'[summary['compound_rating']]
         pos = POS_RATINGS[frate]
         place_relatively(canvas, pos[0], pos[1], 'drawInlineImage', os.path.join(PARTS_DIR, f"rating_{frate}.png"))
         if 'url' in summary['model']:

@@ -125,7 +125,7 @@ class Visualization(dash.Dash):
         for env in env_names:
             env_data = { 'names': [], 'ratings': [], 'x': [], 'y': [] }
             for _, log in find_sub_database(self.state['sub_database'], environment=env).iterrows():
-                env_data['ratings'].append(log['compound'])
+                env_data['ratings'].append(log['compound_rating'])
                 env_data['names'].append(log['model'])
                 for xy_axis, metric in zip(['x', 'y'], [self.state['xaxis'], self.state['yaxis']]):
                     if isinstance(log[metric], dict): # either take the value or the index of the metric

@@ -7,6 +7,7 @@ ENV_SYMBOLS = [SymbolValidator().values[i] for i in range(0, len(SymbolValidator
 RATING_COLOR_SCALE = colors.make_colorscale(['rgb(0,255,0)', 'rgb(255,255,0)', 'rgb(255,0,0))'])
 RATING_COLORS = ['rgb(99,155,48)', 'rgb(184,172,43)', 'rgb(248,184,48)', 'rgb(239,125,41)', 'rgb(229,36,33)', 'rgb(36,36,36)']
 PATTERNS = ["", "/", ".", "x", "-", "\\", "|", "+", "."]
+RATING_MEANINGS = 'ABCDE'
 
 
 # def summary_to_str(summary, rating_mode):
@@ -33,7 +34,7 @@ def fill_meta(summary, meta):
 
 
 def summary_to_html_tables(summary):
-    final_rating = summary['compound']
+    final_rating = f"{summary['compound_index']:5.3f} ({RATING_MEANINGS[summary['compound_rating']]})"
     info_header = [
         html.Thead(html.Tr([html.Th("Task"), html.Th("Model Name"), html.Th("Environment"), html.Th("Final Rating")]))
     ]
