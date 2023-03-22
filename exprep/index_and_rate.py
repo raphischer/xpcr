@@ -307,6 +307,7 @@ def find_relevant_metrics(database):
     most_imp_res, most_imp_qual = {}, {}
     for ds in pd.unique(database['dataset']):
         for task in pd.unique(database[database['dataset'] == ds]['task']):
+            lookup = (ds, task)
             subd = find_sub_database(database, ds, task)
             metrics = []
             for col in subd.columns:
@@ -314,12 +315,16 @@ def find_relevant_metrics(database):
                     if isinstance(val, dict):
                         metrics.append(col)
                         # set axis defaults for dataset / task combo
-                        if val['group'] == 'Resources' and (ds, task) not in most_imp_res:
-                            most_imp_res[(ds, task)] = col
-                        if val['group'] == 'Quality' and (ds, task) not in most_imp_qual:
-                            most_imp_qual[(ds, task)] = col
+                        if val['group'] == 'Resources' and (lookup not in most_imp_res or most_imp_res[lookup][1] < val['weight']):
+                            most_imp_res[lookup] = (col, val['weight'])
+                        if val['group'] == 'Quality' and (lookup not in most_imp_qual or most_imp_qual[lookup][1] < val['weight']):
+                            most_imp_qual[lookup] = (col, val['weight'])
                         break
-            all_metrics[(ds, task)] = metrics
+            all_metrics[lookup] = metrics
+    for lookup, val in most_imp_res.items():
+        most_imp_res[lookup] = val[0]
+    for lookup, val in most_imp_qual.items():
+        most_imp_qual[lookup] = val[0]
     return all_metrics, most_imp_res, most_imp_qual
 
 

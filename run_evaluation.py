@@ -23,7 +23,7 @@ if __name__ == '__main__':
     parser.add_argument("--property-extractors-module", default="properties", help="python file with PROPERTIES dictionary, which maps properties to executable extractor functions")
     parser.add_argument("--database-path", default="results", help="filename for database, or directories with databases inside")
     parser.add_argument("--boundaries", default="boundaries.json")
-    parser.add_argument("--drop-subsampled", default=False, type=bool)
+    parser.add_argument("--drop-subsampled", default=True, type=bool)
     # interactive exploration params
     parser.add_argument("--host", default='localhost', type=str, help="default host") # '0.0.0.0'
     parser.add_argument("--port", default=8888, type=int, help="default port")
@@ -39,26 +39,27 @@ if __name__ == '__main__':
             if 'pkl' in fname:
                 databases.append(pd.read_pickle(os.path.join(args.database_path, fname)))
         database = pd.concat(databases)
-        database.reset_index()
     # merge infer and train tasks
     merged_database = []
     for group_field_vals, data in database.groupby(['dataset', 'environment', 'model']):
         assert data.shape[0] < 3, "found too many values"
         merged = data.fillna(method='bfill').head(1)
-        merged['task'] = 'Train and Test'
+        merged.loc[:,'task'] = 'Train and Test'
         merged_database.append(merged)
     database = pd.concat(merged_database)
     # # retrieve original dataset from all subsampled versions, and recalculate the configuration
-    database['dataset_orig'] = database['dataset'].map(lambda ds: re.match(r'(.*)_(\d*)', ds).group(1) if re.match(r'(.*)_(\d*)', ds) else ds)
+    database['dataset_orig'] = database['dataset'].map(lambda ds: re.match(r'(.*)_(\d+)', ds).group(1) if re.match(r'(.*)_(\d+)', ds) else ds)
     database['configuration'] = database.aggregate(lambda row: ' - '.join([row['task'], row['dataset'], row['model']]), axis=1)
+    database.reset_index()
 
     meta = load_meta()
-    if args.drop_subsampled:
-        raise NotImplementedError
-    else: # store meta information for all subsampled datasets!
-        for ds in pd.unique(database['dataset']):
-            if ds not in meta['dataset']:
-                orig = database[database['dataset'] == ds]['dataset_orig'].iloc[0]
+    for ds in pd.unique(database['dataset']):
+        rows = database[database['dataset'] == ds]
+        if ds not in meta['dataset']:
+            if args.drop_subsampled:
+                database = database[database['dataset'] != ds]
+            else: # store meta information for all subsampled datasets!
+                orig = rows['dataset_orig'].iloc[0]
                 meta['dataset'][ds] = meta['dataset'][orig].copy()
                 meta['dataset'][ds]['name'] = meta['dataset'][ds]['name'] + ds.replace(orig + '_', '') # append the ds seed to name
 
@@ -136,14 +137,13 @@ if __name__ == '__main__':
                     rated_database = rated_database.drop(data.index)
                 else:
                     # store dataset specific meta features
-                    match = re.match(r'(.*)_(\d*)', ds)
+                    match = re.match(r'(.*)_(\d+)', ds)
                     if match is None:
                         ds_name, ds_seed = ds, -1
                     else:
                         ds_name, ds_seed = match.group(1), int(match.group(2))
                     full_path = os.path.join('mnt_data/data', ds_name + '.tsf')
                     ts_data, freq, seasonality, forecast_horizon, contain_missing_values, contain_equal_length = load_data(full_path, ds_sample_seed=ds_seed)
-                    rated_database.loc[data.index,'orig_dataset'] = ds_name # ensure no bleeding across subsampled datasets in cross-validation
                     rated_database.loc[data.index,'num_ts'] = ts_data.shape[0]
                     rated_database.loc[data.index,'avg_ts_len'] = ts_data['series_value'].map(lambda ts: len(ts)).mean()
                     rated_database.loc[data.index,'avg_ts_mean'] = ts_data['series_value'].map(lambda ts: np.mean(ts)).mean()

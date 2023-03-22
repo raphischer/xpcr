@@ -3,33 +3,31 @@
         "name": "Training Power Draw",
         "unit": "wattseconds",
         "group": "Resources",
-        "weight": 0.6
+        "weight": 0.3
     },
     "train_running_time": {
         "name": "Training Time",
         "unit": "seconds",
         "group": "Resources",
-        "weight": 0.4
+        "weight": 0.2
     },
-    
     "power_draw": {
         "name": "Power Draw per Inference",
         "unit": "wattseconds",
         "group": "Resources",
-        "weight": 0.6
+        "weight": 0.3
     },
     "running_time": {
         "name": "Running Time per Inference",
         "unit": "seconds",
         "group": "Resources",
-        "weight": 0.4
+        "weight": 0.2
     },
-
     "RMSE": {
         "name": "Test RMSE",
         "unit": "number",
         "group": "Quality",
-        "weight": 0.3,
+        "weight": 0.4,
         "independent_of_task": true
     },
     "MAPE": {
@@ -43,21 +41,21 @@
         "name": "Test MASE",
         "unit": "number",
         "group": "Quality",
-        "weight": 0.4,
+        "weight": 0.3,
         "independent_of_task": true
     },
     "parameters": {
         "name": "Number of Parameters",
         "unit": "number",
         "group": "Complexity",
-        "weight": 0.7,
+        "weight": 0.6,
         "independent_of_task": true
     },
     "fsize": {
         "name": "Model Size on Disc",
         "unit": "byte",
         "group": "Complexity",
-        "weight": 0.3,
+        "weight": 0.4,
         "independent_of_task": true
     }
 }
