@@ -12,16 +12,18 @@ from exprep.elex.app import Visualization
 from exprep.labels.label_generation import PropertyLabel
 
 from data_loader import convert_tsf_to_dataframe as load_data
+from create_paper_results import create_all
 
 
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--mode", default='stats', choices=['meta', 'interactive', 'paper_results', 'label', 'stats'])
+    parser.add_argument("--mode", default='stats', choices=['meta', 'interactive', 'paper', 'label', 'stats'])
     parser.add_argument("--property-extractors-module", default="properties", help="python file with PROPERTIES dictionary, which maps properties to executable extractor functions")
     parser.add_argument("--database-path", default="results", help="filename for database, or directories with databases inside")
     parser.add_argument("--boundaries", default="boundaries.json")
+    parser.add_argument("--drop-subsampled", default=False, type=bool)
     # interactive exploration params
     parser.add_argument("--host", default='localhost', type=str, help="default host") # '0.0.0.0'
     parser.add_argument("--port", default=8888, type=int, help="default port")
@@ -37,19 +39,48 @@ if __name__ == '__main__':
             if 'pkl' in fname:
                 databases.append(pd.read_pickle(os.path.join(args.database_path, fname)))
         database = pd.concat(databases)
+        database.reset_index()
+    # merge infer and train tasks
+    merged_database = []
+    for group_field_vals, data in database.groupby(['dataset', 'environment', 'model']):
+        assert data.shape[0] < 3, "found too many values"
+        merged = data.fillna(method='bfill').head(1)
+        merged['task'] = 'Train and Test'
+        merged_database.append(merged)
+    database = pd.concat(merged_database)
+    # # retrieve original dataset from all subsampled versions, and recalculate the configuration
+    database['dataset_orig'] = database['dataset'].map(lambda ds: re.match(r'(.*)_(\d*)', ds).group(1) if re.match(r'(.*)_(\d*)', ds) else ds)
+    database['configuration'] = database.aggregate(lambda row: ' - '.join([row['task'], row['dataset'], row['model']]), axis=1)
+
+    meta = load_meta()
+    if args.drop_subsampled:
+        raise NotImplementedError
+    else: # store meta information for all subsampled datasets!
+        for ds in pd.unique(database['dataset']):
+            if ds not in meta['dataset']:
+                orig = database[database['dataset'] == ds]['dataset_orig'].iloc[0]
+                meta['dataset'][ds] = meta['dataset'][orig].copy()
+                meta['dataset'][ds]['name'] = meta['dataset'][ds]['name'] + ds.replace(orig + '_', '') # append the ds seed to name
 
     # load meta learn data if already processed!
+    # TODO rename
     meta_learn_data_fname = 'meta_learn.pkl'
     if args.mode == 'meta' and os.path.isfile(meta_learn_data_fname):
         meta_learn_data = pd.read_pickle(meta_learn_data_fname)
-    else:
-        meta = load_meta()
+    else:        
+
+        if args.mode == 'paper': # TODO REMOVE LATER
+            create_all(None, meta)
+
         rated_database, boundaries, real_boundaries, _ = rate_database(database, properties_meta=meta['properties'], boundaries=args.boundaries)
         print(f'Database constructed from logs has {rated_database.shape} entries')
 
         if args.mode == 'interactive':
             app = Visualization(rated_database, boundaries, real_boundaries, meta)
             app.run_server(debug=args.debug, host=args.host, port=args.port)
+
+        if args.mode == 'paper':
+            create_all(rated_database, meta)
 
         if args.mode == 'label':
             summary = fill_meta(rated_database.iloc[0].to_dict(), meta)
@@ -86,9 +117,6 @@ if __name__ == '__main__':
                 else:
                     success = 'MISSING RESULTS ON'
                 print(f'{idx:<2} {success} {ds_stat["ds"]:<45} {str(ds_stat["entries"]):<8} entries, time total {ds_stat["time_total"] / 3600:6.2f} h (train {ds_stat["time_train"] / 3600:6.2f} h, infer {ds_stat["time_infer"] / 3600:6.2f} h)')
-
-        if args.mode == 'paper_results':
-            pass
         
         if args.mode == 'meta':
             # only look at inference results
