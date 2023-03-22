@@ -1,0 +1,260 @@
+{
+    "directory_name": "train_2023_03_18_14_59_02",
+    "config": {
+        "dataset": "hospital_dataset",
+        "model": "mqrnn",
+        "output_dir": "mnt_data/results",
+        "ds_seed": 129,
+        "epochs": 100,
+        "datadir": "mnt_data/data",
+        "cpu_monitor_interval": 0.5,
+        "seed": 42,
+        "timestamp": "2023_03_18_14_59_02"
+    },
+    "execution_platform": {
+        "System": "Linux",
+        "Node Name": "ls8ws022",
+        "Release": "5.4.0-137-generic",
+        "Version": "#154-Ubuntu SMP Thu Jan 5 17:03:22 UTC 2023",
+        "Machine": "x86_64",
+        "Processor": "Intel(R) Xeon(R) W-2155 CPU @ 3.30GHz",
+        "Physical cores": 10,
+        "Total cores": 20,
+        "Max Frequency": 4500.0,
+        "Min Frequency": 1200.0,
+        "Current Frequency": 1200.36535,
+        "Total": 67103240192,
+        "Available": 64867082240,
+        "Used": 1493958656
+    },
+    "requirements": [
+        "# 3.7.7 (default, Mar 23 2020, 22:36:06)",
+        "# [GCC 7.3.0]",
+        "wrapt==1.11.2",
+        "typed-ast==1.4.0",
+        "six==1.12.0",
+        "setuptools==41.6.0",
+        "pytz==2019.3",
+        "python-dateutil==2.8.0",
+        "pyparsing==2.4.2",
+        "pylint==2.4.3",
+        "numpy==1.17.3",
+        "mccabe==0.6.1",
+        "matplotlib==3.1.1",
+        "lazy-object-proxy==1.4.3",
+        "kiwisolver==1.1.0",
+        "isort==4.3.21",
+        "cycler==0.10.0",
+        "astroid==2.3.2",
+        "zipp==3.14.0",
+        "xgboost==1.6.2",
+        "wheel==0.37.1",
+        "werkzeug==2.2.3",
+        "urllib3==1.26.14",
+        "typing-extensions==4.4.0",
+        "tqdm==4.64.1",
+        "toolz==0.12.0",
+        "threadpoolctl==3.1.0",
+        "tenacity==8.2.2",
+        "scipy==1.7.3",
+        "scikit-learn==1.0.2",
+        "rpy2==2.9.4",
+        "requests==2.28.2",
+        "reportlab==3.6.12",
+        "qrcode==7.4.2",
+        "pypng==0.20220715.0",
+        "pynvml==11.4.1",
+        "pymupdf==1.21.1",
+        "pydantic==1.10.4",
+        "pyarrow==8.0.0",
+        "py-rapl==0.1",
+        "py-cpuinfo==9.0.0",
+        "psutil==5.9.4",
+        "plotly==5.13.1",
+        "pip==22.3.1",
+        "pint==0.18",
+        "pillow==9.4.0",
+        "pandas==1.3.5",
+        "packaging==23.0",
+        "orjson==3.8.5",
+        "mxnet==1.9.1",
+        "markupsafe==2.1.1",
+        "joblib==1.2.0",
+        "jinja2==3.1.2",
+        "itsdangerous==2.1.2",
+        "importlib-metadata==6.0.0",
+        "idna==3.4",
+        "graphviz==0.8.4",
+        "gluonts==0.11.8",
+        "fuzzywuzzy==0.18.0",
+        "flask==2.2.3",
+        "dash==2.8.1",
+        "dash-table==5.0.0",
+        "dash-html-components==2.0.0",
+        "dash-core-components==2.0.0",
+        "dash-bootstrap-components==1.4.0",
+        "codecarbon==2.1.4",
+        "click==8.1.3",
+        "charset-normalizer==3.0.1",
+        "certifi==2022.12.7",
+        "arrow==1.2.3"
+    ],
+    "emissions": {
+        "timestamp": {
+            "0": "2023-03-18T15:02:07"
+        },
+        "project_name": {
+            "0": "codecarbon"
+        },
+        "run_id": {
+            "0": "821a29d6-b31f-4835-a267-193367899326"
+        },
+        "duration": {
+            "0": 183.5926489830017
+        },
+        "emissions": {
+            "0": 0.001112524174374
+        },
+        "emissions_rate": {
+            "0": 0.006059742481721
+        },
+        "cpu_power": {
+            "0": 19.320162176781665
+        },
+        "gpu_power": {
+            "0": 1.164
+        },
+        "ram_power": {
+            "0": 23.43553590774536
+        },
+        "cpu_energy": {
+            "0": 0.0027586357899624
+        },
+        "gpu_energy": {
+            "0": 4.734424711916181e-05
+        },
+        "ram_energy": {
+            "0": 0.0008901135654898
+        },
+        "energy_consumed": {
+            "0": 0.0036960936025714
+        },
+        "country_name": {
+            "0": "Germany"
+        },
+        "country_iso_code": {
+            "0": "DEU"
+        },
+        "region": {
+            "0": NaN
+        },
+        "cloud_provider": {
+            "0": NaN
+        },
+        "cloud_region": {
+            "0": NaN
+        },
+        "os": {
+            "0": "Linux-5.4.0-137-generic-x86_64-with-debian-bullseye-sid"
+        },
+        "python_version": {
+            "0": "3.7.7"
+        },
+        "cpu_count": {
+            "0": 20
+        },
+        "cpu_model": {
+            "0": "Intel(R) Xeon(R) W-2155 CPU @ 3.30GHz"
+        },
+        "gpu_count": {
+            "0": 1
+        },
+        "gpu_model": {
+            "0": "1 x Quadro RTX 5000"
+        },
+        "longitude": {
+            "0": NaN
+        },
+        "latitude": {
+            "0": NaN
+        },
+        "ram_total_size": {
+            "0": 62.4947624206543
+        },
+        "tracking_mode": {
+            "0": "machine"
+        },
+        "on_cloud": {
+            "0": "N"
+        }
+    },
+    "results": {
+        "history": {
+            "loss": [
+                20.684929243723552,
+                18.726941502888998,
+                15.961735436121623,
+                13.667904009819031,
+                12.033855679829916,
+                10.637843565940857,
+                8.98826063632965,
+                8.384542857805888,
+                7.629104598363241,
+                7.213120543162028,
+                7.266429403622945,
+                6.280520008405049,
+                6.081099455356598,
+                6.354491608937582,
+                6.491905016899109,
+                6.629445923169454,
+                5.978092608451843,
+                5.773444137573242,
+                5.9273273483912154,
+                5.641874102751414,
+                5.538176341056824,
+                6.476606545448303,
+                6.082957212130228,
+                5.702714546521505,
+                5.699515363375346,
+                5.490976095199585,
+                5.720055216153463,
+                6.016140819390615,
+                5.3589189306894935,
+                5.65764032681783,
+                5.58650881767273,
+                5.59320008913676,
+                5.684703249931335,
+                5.615345226923624,
+                5.1681170916557315,
+                5.525075999895732,
+                5.153682077725728,
+                5.6111504809061685,
+                5.627176530361176,
+                5.4621218029658,
+                5.93471150080363,
+                5.1592272837956745,
+                5.623358114560445,
+                5.5461481602986655,
+                5.676400624910991,
+                5.146504559516907,
+                4.978433928489685,
+                5.320532064437867,
+                5.044188041687011,
+                5.45077400525411,
+                5.298927313486735,
+                5.094123996098836,
+                5.493218932151795,
+                5.26164033571879,
+                5.266611633300781,
+                5.847057922681173,
+                5.419704038302104,
+                4.824085638523102,
+                4.624188203016917
+            ]
+        },
+        "start": 1679147944.2949517,
+        "end": 1679148127.8806884,
+        "model": null
+    },
+    "full_log": "results/merged22/train_2023_03_18_14_59_02.tar.gz"
+}

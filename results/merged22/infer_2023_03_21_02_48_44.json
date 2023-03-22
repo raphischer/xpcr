@@ -1,0 +1,372 @@
+{
+    "directory_name": "infer_2023_03_21_02_48_44",
+    "input_transform": {
+        "__kind__": "instance",
+        "args": [],
+        "class": "gluonts.transform._base.Chain",
+        "kwargs": {
+            "trans": [
+                {
+                    "__kind__": "instance",
+                    "args": [],
+                    "class": "gluonts.transform._base.Chain",
+                    "kwargs": {
+                        "trans": [
+                            {
+                                "__kind__": "instance",
+                                "args": [],
+                                "class": "gluonts.transform.field.SelectFields",
+                                "kwargs": {
+                                    "allow_missing": true,
+                                    "input_fields": [
+                                        "item_id",
+                                        "info",
+                                        "start",
+                                        "target"
+                                    ]
+                                }
+                            },
+                            {
+                                "__kind__": "instance",
+                                "args": [],
+                                "class": "gluonts.transform.feature.AddObservedValuesIndicator",
+                                "kwargs": {
+                                    "dtype": {
+                                        "__kind__": "type",
+                                        "class": "numpy.float32"
+                                    },
+                                    "imputation_method": {
+                                        "__kind__": "instance",
+                                        "args": [],
+                                        "class": "gluonts.transform.feature.DummyValueImputation",
+                                        "kwargs": {
+                                            "dummy_value": 0.0
+                                        }
+                                    },
+                                    "output_field": "observed_values",
+                                    "target_field": "target"
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "__kind__": "instance",
+                    "args": [],
+                    "class": "gluonts.transform.split.InstanceSplitter",
+                    "kwargs": {
+                        "dummy_value": 0.0,
+                        "forecast_start_field": "forecast_start",
+                        "future_length": 24,
+                        "instance_sampler": {
+                            "__kind__": "instance",
+                            "class": "gluonts.transform.sampler.PredictionSplitSampler",
+                            "kwargs": {
+                                "allow_empty_interval": false,
+                                "axis": -1,
+                                "min_future": 0,
+                                "min_past": 0
+                            }
+                        },
+                        "is_pad_field": "is_pad",
+                        "lead_time": 0,
+                        "output_NTC": true,
+                        "past_length": 210,
+                        "start_field": "start",
+                        "target_field": "target",
+                        "time_series_fields": [
+                            "observed_values"
+                        ]
+                    }
+                }
+            ]
+        }
+    },
+    "emissions": {
+        "timestamp": {
+            "0": "2023-03-21T02:48:46"
+        },
+        "project_name": {
+            "0": "codecarbon"
+        },
+        "run_id": {
+            "0": "64e26983-641a-4927-90bd-86d08bb341ec"
+        },
+        "duration": {
+            "0": 0.0067930221557617
+        },
+        "emissions": {
+            "0": 1.7731088067926193e-08
+        },
+        "emissions_rate": {
+            "0": 0.0026101914083832
+        },
+        "cpu_power": {
+            "0": 29.63230842409333
+        },
+        "gpu_power": {
+            "0": 1.139
+        },
+        "ram_power": {
+            "0": 23.43553590774536
+        },
+        "cpu_energy": {
+            "0": 5.2201708428123446e-08
+        },
+        "gpu_energy": {
+            "0": 5.562428633371988e-10
+        },
+        "ram_energy": {
+            "0": 6.1493180371977974e-09
+        },
+        "energy_consumed": {
+            "0": 5.8907269328658434e-08
+        },
+        "country_name": {
+            "0": "Germany"
+        },
+        "country_iso_code": {
+            "0": "DEU"
+        },
+        "region": {
+            "0": NaN
+        },
+        "cloud_provider": {
+            "0": NaN
+        },
+        "cloud_region": {
+            "0": NaN
+        },
+        "os": {
+            "0": "Linux-5.4.0-137-generic-x86_64-with-debian-bullseye-sid"
+        },
+        "python_version": {
+            "0": "3.7.7"
+        },
+        "cpu_count": {
+            "0": 20
+        },
+        "cpu_model": {
+            "0": "Intel(R) Xeon(R) W-2155 CPU @ 3.30GHz"
+        },
+        "gpu_count": {
+            "0": 1
+        },
+        "gpu_model": {
+            "0": "1 x Quadro RTX 5000"
+        },
+        "longitude": {
+            "0": NaN
+        },
+        "latitude": {
+            "0": NaN
+        },
+        "ram_total_size": {
+            "0": 62.4947624206543
+        },
+        "tracking_mode": {
+            "0": "machine"
+        },
+        "on_cloud": {
+            "0": "N"
+        }
+    },
+    "type": [
+        "gluonts.mx.model.predictor.RepresentableBlockPredictor"
+    ],
+    "execution_platform": {
+        "System": "Linux",
+        "Node Name": "ls8ws022",
+        "Release": "5.4.0-137-generic",
+        "Version": "#154-Ubuntu SMP Thu Jan 5 17:03:22 UTC 2023",
+        "Machine": "x86_64",
+        "Processor": "Intel(R) Xeon(R) W-2155 CPU @ 3.30GHz",
+        "Physical cores": 10,
+        "Total cores": 20,
+        "Max Frequency": 4500.0,
+        "Min Frequency": 1200.0,
+        "Current Frequency": 1200.4215000000002,
+        "Total": 67103240192,
+        "Available": 64807632896,
+        "Used": 1553911808
+    },
+    "requirements": [
+        "# 3.7.7 (default, Mar 23 2020, 22:36:06)",
+        "# [GCC 7.3.0]",
+        "wrapt==1.11.2",
+        "typed-ast==1.4.0",
+        "six==1.12.0",
+        "setuptools==41.6.0",
+        "pytz==2019.3",
+        "python-dateutil==2.8.0",
+        "pyparsing==2.4.2",
+        "pylint==2.4.3",
+        "numpy==1.17.3",
+        "mccabe==0.6.1",
+        "matplotlib==3.1.1",
+        "lazy-object-proxy==1.4.3",
+        "kiwisolver==1.1.0",
+        "isort==4.3.21",
+        "cycler==0.10.0",
+        "astroid==2.3.2",
+        "zipp==3.14.0",
+        "xgboost==1.6.2",
+        "wheel==0.37.1",
+        "werkzeug==2.2.3",
+        "urllib3==1.26.14",
+        "typing-extensions==4.4.0",
+        "tqdm==4.64.1",
+        "toolz==0.12.0",
+        "threadpoolctl==3.1.0",
+        "tenacity==8.2.2",
+        "scipy==1.7.3",
+        "scikit-learn==1.0.2",
+        "rpy2==2.9.4",
+        "requests==2.28.2",
+        "reportlab==3.6.12",
+        "qrcode==7.4.2",
+        "pypng==0.20220715.0",
+        "pynvml==11.4.1",
+        "pymupdf==1.21.1",
+        "pydantic==1.10.4",
+        "pyarrow==8.0.0",
+        "py-rapl==0.1",
+        "py-cpuinfo==9.0.0",
+        "psutil==5.9.4",
+        "plotly==5.13.1",
+        "pip==22.3.1",
+        "pint==0.18",
+        "pillow==9.4.0",
+        "pandas==1.3.5",
+        "packaging==23.0",
+        "orjson==3.8.5",
+        "mxnet==1.9.1",
+        "markupsafe==2.1.1",
+        "joblib==1.2.0",
+        "jinja2==3.1.2",
+        "itsdangerous==2.1.2",
+        "importlib-metadata==6.0.0",
+        "idna==3.4",
+        "graphviz==0.8.4",
+        "gluonts==0.11.8",
+        "fuzzywuzzy==0.18.0",
+        "flask==2.2.3",
+        "dash==2.8.1",
+        "dash-table==5.0.0",
+        "dash-html-components==2.0.0",
+        "dash-core-components==2.0.0",
+        "dash-bootstrap-components==1.4.0",
+        "codecarbon==2.1.4",
+        "click==8.1.3",
+        "charset-normalizer==3.0.1",
+        "certifi==2022.12.7",
+        "arrow==1.2.3"
+    ],
+    "prediction_net-network": {
+        "__kind__": "instance",
+        "args": [],
+        "class": "gluonts.mx.model.simple_feedforward._network.SimpleFeedForwardSamplingNetwork",
+        "kwargs": {
+            "batch_normalization": false,
+            "context_length": 210,
+            "distr_output": {
+                "__kind__": "instance",
+                "args": [],
+                "class": "gluonts.mx.distribution.student_t.StudentTOutput",
+                "kwargs": {}
+            },
+            "mean_scaling": true,
+            "num_hidden_dimensions": [
+                40,
+                40
+            ],
+            "num_parallel_samples": 100,
+            "prediction_length": 24
+        }
+    },
+    "config": {
+        "dataset": "pedestrian_counts_dataset",
+        "model": "feedforward",
+        "output_dir": "mnt_data/results",
+        "ds_seed": 135,
+        "epochs": 100,
+        "datadir": "mnt_data/data",
+        "cpu_monitor_interval": 0.5,
+        "seed": 42,
+        "timestamp": "2023_03_21_02_48_44",
+        "lag": 210,
+        "external_forecast_horizon": 24,
+        "integer_conversion": true,
+        "train_logdir": "mnt_data/results/train_2023_03_21_02_48_23"
+    },
+    "version": {
+        "model": "0.11.8",
+        "gluonts": "0.11.8"
+    },
+    "parameters": {
+        "batch_size": 32,
+        "ctx": {
+            "__kind__": "instance",
+            "args": [
+                "cpu",
+                0
+            ],
+            "class": "mxnet.context.Context"
+        },
+        "dtype": {
+            "__kind__": "type",
+            "class": "numpy.float32"
+        },
+        "forecast_generator": {
+            "__kind__": "instance",
+            "args": [],
+            "class": "gluonts.model.forecast_generator.SampleForecastGenerator",
+            "kwargs": {}
+        },
+        "input_names": [
+            "past_target"
+        ],
+        "lead_time": 0,
+        "prediction_length": 24
+    },
+    "validation_results": {
+        "metrics": {
+            "aggregated": {
+                "MSE": 107702.67660553286,
+                "abs_error": 118950.84225463867,
+                "abs_target_sum": 513444.0,
+                "abs_target_mean": 648.2878787878788,
+                "seasonal_error": 143.71649935000667,
+                "MASE": 0.9515131188305326,
+                "MAPE": 0.5764468100360339,
+                "sMAPE": 0.4102558903019837,
+                "MSIS": 8.678950656094027,
+                "QuantileLoss[0.1]": 52542.32657535076,
+                "Coverage[0.1]": 0.09090909090909091,
+                "QuantileLoss[0.5]": 118950.84347653389,
+                "Coverage[0.5]": 0.44065656565656564,
+                "QuantileLoss[0.9]": 73148.65810403823,
+                "Coverage[0.9]": 0.8093434343434344,
+                "RMSE": 328.18085959655366,
+                "NRMSE": 0.5062270487150897,
+                "ND": 0.23167247500143867,
+                "wQuantileLoss[0.1]": 0.10233312021437733,
+                "wQuantileLoss[0.5]": 0.23167247738124097,
+                "wQuantileLoss[0.9]": 0.14246667232266466,
+                "mean_absolute_QuantileLoss": 81547.27605197429,
+                "mean_wQuantileLoss": 0.15882408997276098,
+                "MAE_Coverage": 0.05303030303030304,
+                "OWA": NaN
+            },
+            "contained_nan": false
+        },
+        "start": 1679363324.9386585,
+        "end": 1679363326.385913,
+        "num_samples": 100,
+        "model": {
+            "params": 47923,
+            "fsize": 194572
+        }
+    },
+    "full_log": "results/merged22/infer_2023_03_21_02_48_44.tar.gz"
+}

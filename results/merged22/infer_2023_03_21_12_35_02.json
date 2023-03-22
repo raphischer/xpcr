@@ -1,0 +1,533 @@
+{
+    "directory_name": "infer_2023_03_21_12_35_02",
+    "requirements": [
+        "# 3.7.7 (default, Mar 23 2020, 22:36:06)",
+        "# [GCC 7.3.0]",
+        "wrapt==1.11.2",
+        "typed-ast==1.4.0",
+        "six==1.12.0",
+        "setuptools==41.6.0",
+        "pytz==2019.3",
+        "python-dateutil==2.8.0",
+        "pyparsing==2.4.2",
+        "pylint==2.4.3",
+        "numpy==1.17.3",
+        "mccabe==0.6.1",
+        "matplotlib==3.1.1",
+        "lazy-object-proxy==1.4.3",
+        "kiwisolver==1.1.0",
+        "isort==4.3.21",
+        "cycler==0.10.0",
+        "astroid==2.3.2",
+        "zipp==3.14.0",
+        "xgboost==1.6.2",
+        "wheel==0.37.1",
+        "werkzeug==2.2.3",
+        "urllib3==1.26.14",
+        "typing-extensions==4.4.0",
+        "tqdm==4.64.1",
+        "toolz==0.12.0",
+        "threadpoolctl==3.1.0",
+        "tenacity==8.2.2",
+        "scipy==1.7.3",
+        "scikit-learn==1.0.2",
+        "rpy2==2.9.4",
+        "requests==2.28.2",
+        "reportlab==3.6.12",
+        "qrcode==7.4.2",
+        "pypng==0.20220715.0",
+        "pynvml==11.4.1",
+        "pymupdf==1.21.1",
+        "pydantic==1.10.4",
+        "pyarrow==8.0.0",
+        "py-rapl==0.1",
+        "py-cpuinfo==9.0.0",
+        "psutil==5.9.4",
+        "plotly==5.13.1",
+        "pip==22.3.1",
+        "pint==0.18",
+        "pillow==9.4.0",
+        "pandas==1.3.5",
+        "packaging==23.0",
+        "orjson==3.8.5",
+        "mxnet==1.9.1",
+        "markupsafe==2.1.1",
+        "joblib==1.2.0",
+        "jinja2==3.1.2",
+        "itsdangerous==2.1.2",
+        "importlib-metadata==6.0.0",
+        "idna==3.4",
+        "graphviz==0.8.4",
+        "gluonts==0.11.8",
+        "fuzzywuzzy==0.18.0",
+        "flask==2.2.3",
+        "dash==2.8.1",
+        "dash-table==5.0.0",
+        "dash-html-components==2.0.0",
+        "dash-core-components==2.0.0",
+        "dash-bootstrap-components==1.4.0",
+        "codecarbon==2.1.4",
+        "click==8.1.3",
+        "charset-normalizer==3.0.1",
+        "certifi==2022.12.7",
+        "arrow==1.2.3"
+    ],
+    "input_transform": {
+        "__kind__": "instance",
+        "args": [],
+        "class": "gluonts.transform._base.Chain",
+        "kwargs": {
+            "trans": [
+                {
+                    "__kind__": "instance",
+                    "args": [],
+                    "class": "gluonts.transform.feature.AddObservedValuesIndicator",
+                    "kwargs": {
+                        "dtype": {
+                            "__kind__": "type",
+                            "class": "numpy.float32"
+                        },
+                        "imputation_method": {
+                            "__kind__": "instance",
+                            "args": [],
+                            "class": "gluonts.transform.feature.DummyValueImputation",
+                            "kwargs": {
+                                "dummy_value": 0.0
+                            }
+                        },
+                        "output_field": "observed_values",
+                        "target_field": "target"
+                    }
+                },
+                {
+                    "__kind__": "instance",
+                    "args": [],
+                    "class": "gluonts.transform.split.InstanceSplitter",
+                    "kwargs": {
+                        "dummy_value": 0.0,
+                        "forecast_start_field": "forecast_start",
+                        "future_length": 30,
+                        "instance_sampler": {
+                            "__kind__": "instance",
+                            "class": "gluonts.transform.sampler.PredictionSplitSampler",
+                            "kwargs": {
+                                "allow_empty_interval": false,
+                                "axis": -1,
+                                "min_future": 0,
+                                "min_past": 0
+                            }
+                        },
+                        "is_pad_field": "is_pad",
+                        "lead_time": 0,
+                        "output_NTC": true,
+                        "past_length": 9,
+                        "start_field": "start",
+                        "target_field": "target",
+                        "time_series_fields": [
+                            "observed_values"
+                        ]
+                    }
+                }
+            ]
+        }
+    },
+    "prediction_net-network": {
+        "__kind__": "instance",
+        "args": [],
+        "class": "gluonts.mx.model.n_beats._network.NBEATSPredictionNetwork",
+        "kwargs": {
+            "context_length": 9,
+            "expansion_coefficient_lengths": [
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32,
+                32
+            ],
+            "num_block_layers": [
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4,
+                4
+            ],
+            "num_blocks": [
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1,
+                1
+            ],
+            "num_stacks": 30,
+            "prediction_length": 30,
+            "scale": false,
+            "sharing": [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+            ],
+            "stack_types": [
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G",
+                "G"
+            ],
+            "widths": [
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512,
+                512
+            ]
+        }
+    },
+    "validation_results": {
+        "metrics": {
+            "aggregated": {
+                "MSE": 39388.325205694375,
+                "abs_error": 412151.36165332794,
+                "abs_target_sum": 479737.0,
+                "abs_target_mean": 97.50752032520325,
+                "seasonal_error": 12.973979708332571,
+                "MASE": Infinity,
+                "MAPE": 0.703741912628577,
+                "sMAPE": 0.9196362001624533,
+                "MSIS": Infinity,
+                "QuantileLoss[0.1]": 86394.91872985364,
+                "Coverage[0.1]": 0.21829268292682924,
+                "QuantileLoss[0.5]": 412151.36534917355,
+                "Coverage[0.5]": 0.21829268292682924,
+                "QuantileLoss[0.9]": 737907.8119684935,
+                "Coverage[0.9]": 0.21829268292682924,
+                "RMSE": 198.46492185193426,
+                "NRMSE": 2.03538066797332,
+                "ND": 0.8591193959467958,
+                "wQuantileLoss[0.1]": 0.18008808728502002,
+                "wQuantileLoss[0.5]": 0.8591194036506952,
+                "wQuantileLoss[0.9]": 1.5381507200163704,
+                "mean_absolute_QuantileLoss": 412151.36534917355,
+                "mean_wQuantileLoss": 0.8591194036506952,
+                "MAE_Coverage": 0.36056910569105693,
+                "OWA": NaN
+            },
+            "contained_nan": false
+        },
+        "start": 1679398503.0923023,
+        "end": 1679398506.8293924,
+        "num_samples": 100,
+        "model": {
+            "params": 24799497,
+            "fsize": 99234594
+        }
+    },
+    "type": [
+        "gluonts.mx.model.predictor.RepresentableBlockPredictor"
+    ],
+    "emissions": {
+        "timestamp": {
+            "0": "2023-03-21T12:35:04"
+        },
+        "project_name": {
+            "0": "codecarbon"
+        },
+        "run_id": {
+            "0": "1a8f4055-c4ac-4227-957a-327dde2a22ef"
+        },
+        "duration": {
+            "0": 0.0069570541381835
+        },
+        "emissions": {
+            "0": 1.7267060490556972e-08
+        },
+        "emissions_rate": {
+            "0": 0.0024819499960173
+        },
+        "cpu_power": {
+            "0": 27.81696584211567
+        },
+        "gpu_power": {
+            "0": 0.994
+        },
+        "ram_power": {
+            "0": 23.43553590774536
+        },
+        "cpu_energy": {
+            "0": 5.0116428982477374e-08
+        },
+        "gpu_energy": {
+            "0": 5.209787686665854e-10
+        },
+        "ram_energy": {
+            "0": 6.728241719144988e-09
+        },
+        "energy_consumed": {
+            "0": 5.736564947028895e-08
+        },
+        "country_name": {
+            "0": "Germany"
+        },
+        "country_iso_code": {
+            "0": "DEU"
+        },
+        "region": {
+            "0": NaN
+        },
+        "cloud_provider": {
+            "0": NaN
+        },
+        "cloud_region": {
+            "0": NaN
+        },
+        "os": {
+            "0": "Linux-5.4.0-137-generic-x86_64-with-debian-bullseye-sid"
+        },
+        "python_version": {
+            "0": "3.7.7"
+        },
+        "cpu_count": {
+            "0": 20
+        },
+        "cpu_model": {
+            "0": "Intel(R) Xeon(R) W-2155 CPU @ 3.30GHz"
+        },
+        "gpu_count": {
+            "0": 1
+        },
+        "gpu_model": {
+            "0": "1 x Quadro RTX 5000"
+        },
+        "longitude": {
+            "0": NaN
+        },
+        "latitude": {
+            "0": NaN
+        },
+        "ram_total_size": {
+            "0": 62.4947624206543
+        },
+        "tracking_mode": {
+            "0": "machine"
+        },
+        "on_cloud": {
+            "0": "N"
+        }
+    },
+    "version": {
+        "model": "0.11.8",
+        "gluonts": "0.11.8"
+    },
+    "parameters": {
+        "batch_size": 32,
+        "ctx": {
+            "__kind__": "instance",
+            "args": [
+                "cpu",
+                0
+            ],
+            "class": "mxnet.context.Context"
+        },
+        "dtype": {
+            "__kind__": "type",
+            "class": "numpy.float32"
+        },
+        "forecast_generator": {
+            "__kind__": "instance",
+            "args": [],
+            "class": "gluonts.model.forecast_generator.SampleForecastGenerator",
+            "kwargs": {}
+        },
+        "input_names": [
+            "past_target",
+            "past_observed_values",
+            "future_target",
+            "future_observed_values"
+        ],
+        "lead_time": 0,
+        "prediction_length": 30
+    },
+    "execution_platform": {
+        "System": "Linux",
+        "Node Name": "ls8ws022",
+        "Release": "5.4.0-137-generic",
+        "Version": "#154-Ubuntu SMP Thu Jan 5 17:03:22 UTC 2023",
+        "Machine": "x86_64",
+        "Processor": "Intel(R) Xeon(R) W-2155 CPU @ 3.30GHz",
+        "Physical cores": 10,
+        "Total cores": 20,
+        "Max Frequency": 4500.0,
+        "Min Frequency": 1200.0,
+        "Current Frequency": 1203.389,
+        "Total": 67103240192,
+        "Available": 64394809344,
+        "Used": 1966796800
+    },
+    "config": {
+        "dataset": "vehicle_trips_dataset_without_missing_values",
+        "model": "nbeats",
+        "output_dir": "mnt_data/results",
+        "ds_seed": 124,
+        "epochs": 100,
+        "datadir": "mnt_data/data",
+        "cpu_monitor_interval": 0.5,
+        "seed": 42,
+        "timestamp": "2023_03_21_12_35_02",
+        "lag": 9,
+        "external_forecast_horizon": 30,
+        "integer_conversion": true,
+        "train_logdir": "mnt_data/results/train_2023_03_21_12_09_37"
+    },
+    "full_log": "results/merged22/infer_2023_03_21_12_35_02.tar.gz"
+}
