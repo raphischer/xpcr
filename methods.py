@@ -2,12 +2,9 @@ import os
 import pandas as pd
 import inspect
 import json
-from datetime import datetime
 import importlib
-from typing import Dict, Optional
 
-from gluonts.model.r_forecast import RForecastPredictor
-
+# from gluonts.model.r_forecast import RForecastPredictor
 from gluonts.dataset.common import ListDataset
 from gluonts.dataset.field_names import FieldName
 from gluonts.mx import Trainer
@@ -15,28 +12,27 @@ from gluonts.mx.trainer.callback import TrainingHistory
 from gluonts.evaluation.backtest import make_evaluation_predictions
 from gluonts.evaluation import Evaluator
 
-
 from data_loader import convert_tsf_to_dataframe as load_data
 
-class ARIMAWrapper(RForecastPredictor):
+# class ARIMAWrapper(RForecastPredictor):
 
-    def __init__(
-        self,
-        freq: str,
-        prediction_length: int,
-        period: int = None,
-        trunc_length: Optional[int] = None,
-        params: Optional[Dict] = None,
-    ) -> None:
+#     def __init__(
+#         self,
+#         freq: str,
+#         prediction_length: int,
+#         period: int = None,
+#         trunc_length: Optional[int] = None,
+#         params: Optional[Dict] = None,
+#     ) -> None:
 
-        super().__init__(
-            freq=freq,
-            prediction_length=prediction_length,
-            method_name='arima',
-            period=period,
-            trunc_length=trunc_length,
-            params=params
-        )
+#         super().__init__(
+#             freq=freq,
+#             prediction_length=prediction_length,
+#             method_name='arima',
+#             period=period,
+#             trunc_length=trunc_length,
+#             params=params
+#         )
 
 
 with open('meta_model.json', 'r') as meta:
@@ -224,6 +220,7 @@ class MetricInferenceEarlyStopping(Callback):
         self.verbose = verbose
         self.restore_best_network = restore_best_network
         self.num_samples = num_samples
+        self.written_first = False
 
         if minimize_metric:
             self.best_metric_value = np.inf
@@ -267,7 +264,8 @@ class MetricInferenceEarlyStopping(Callback):
                 f"Validation metric {self.metric}: {current_metric_value}, best: {self.best_metric_value}"
             )
 
-        if self.is_better(current_metric_value, self.best_metric_value):
+        if self.is_better(current_metric_value, self.best_metric_value) or not self.written_first:
+            self.written_first = True
             self.best_metric_value = current_metric_value
 
             if self.restore_best_network:
