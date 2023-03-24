@@ -19,7 +19,7 @@ if __name__ == '__main__':
     parser.add_argument("--property-extractors-module", default="properties", help="python file with PROPERTIES dictionary, which maps properties to executable extractor functions")
     parser.add_argument("--database-path", default="results/database22.pkl", help="filename for database, or directories with databases inside")
     parser.add_argument("--boundaries", default="boundaries.json")
-    parser.add_argument("--drop-subsampled", default=False, type=bool)
+    parser.add_argument("--drop-subsampled", default=True, type=bool)
     # interactive exploration params
     parser.add_argument("--host", default='localhost', type=str, help="default host") # '0.0.0.0'
     parser.add_argument("--port", default=8888, type=int, help="default port")
@@ -36,29 +36,29 @@ if __name__ == '__main__':
                 databases.append(pd.read_pickle(os.path.join(args.database_path, fname)))
                 print(f'{fname:<20} shape {databases[-1].shape}, env {pd.unique(databases[-1]["environment"])} {len(pd.unique(databases[-1]["dataset"]))} datasets')
         database = pd.concat(databases)
-        database.reset_index()
     # merge infer and train tasks
     merged_database = []
     for group_field_vals, data in database.groupby(['dataset', 'environment', 'model']):
         assert data.shape[0] < 3, "found too many values"
         merged = data.fillna(method='bfill').head(1)
-        merged['task'] = 'Train and Test'
+        merged.loc[:,'task'] = 'Train and Test'
         merged_database.append(merged)
     database = pd.concat(merged_database)
     # # retrieve original dataset from all subsampled versions, and recalculate the configuration
     database['dataset_orig'] = database['dataset'].map(subsampled_to_orig)
     database['configuration'] = database.aggregate(lambda row: ' - '.join([row['task'], row['dataset'], row['model']]), axis=1)
+    database.reset_index()
 
     meta = load_meta()
-    if args.drop_subsampled:
-        raise NotImplementedError
-    else: # store meta information for all subsampled datasets!
-        for ds in pd.unique(database['dataset']):
-            if ds not in meta['dataset']:
-                orig = database[database['dataset'] == ds]['dataset_orig'].iloc[0]
+    for ds in pd.unique(database['dataset']):
+        rows = database[database['dataset'] == ds]
+        if ds not in meta['dataset']:
+            if args.drop_subsampled:
+                database = database[database['dataset'] != ds]
+            else: # store meta information for all subsampled datasets!
+                orig = rows['dataset_orig'].iloc[0]
                 meta['dataset'][ds] = meta['dataset'][orig].copy()
                 meta['dataset'][ds]['name'] = meta['dataset'][ds]['name'] + ds.replace(orig + '_', '') # append the ds seed to name
-
 
     if args.mode == 'paper': # TODO REMOVE LATER
         from create_paper_results import create_all
