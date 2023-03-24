@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import re
 from distutils.util import strtobool
 
 from exprep.util import fix_seed
@@ -49,6 +50,14 @@ TIMEDELTA_MAP = {
     "quarterly": timedelta(days=365.25 / 4),
     "yearly": timedelta(days=365.25 )
 }
+
+
+def subsampled_to_orig(subsampled_ds):
+    match = re.match(r'(.*)_(\d+)', subsampled_ds)
+    if match is None or match.group(0) != subsampled_ds:
+        return subsampled_ds
+    return match.group(1)
+
 
 # Converts the contents in a .tsf file into a dataframe and returns it along with other meta-data of the dataset: frequency, horizon, whether the dataset contains missing values and whether the series have equal lengths
 #

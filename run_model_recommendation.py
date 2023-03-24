@@ -106,9 +106,9 @@ REGRESSORS = {
 SCORING = ['neg_mean_absolute_error', 'max_error']
 # meta learn config
 N_SPLITS =          5
-TARGET_COLUMNS =    ['compound_index', 'running_time', 'parameters', 'RMSE']
+# TARGET_COLUMNS =    ['compound_index', 'running_time', 'parameters', 'RMSE']
 CV =                GroupKFold(n_splits=N_SPLITS) # KFold StratifiedKFold
-GROUP_BY =          'orig_dataset' # 'model'
+GROUP_BY =          'dataset_orig' # 'model'
 METRIC_FIELD =      'index'
 
 
@@ -123,63 +123,68 @@ def evaluate_recommendation(database, only_print_better_than_random=False):
     ##############################################################
     print(f'\n\n:::::::::::::::::::::::::::: {"RUNNING ON " + str(X.shape) + " FEATURES":^35} ::::::::::::::::::::::::::::\n\n')
 
-    for col in TARGET_COLUMNS:
+    target_cols = []
+    for col in database.columns:
         
-        y = np.array([val[METRIC_FIELD] if isinstance(val, dict) else val for val in database[col]])
-        task = f'Regression of {col}'
-        print(f'\n\n:::::::::::::::::::::::::::: {task:^35} ::::::::::::::::::::::::::::')
-        
-        predictions, true, proba = {}, {}, {}
-        best_name, best_score, best_scores = '', -np.inf, None
-        cv_splitted = list(CV.split(X, y, group_info))
-        split_index = np.zeros((database.shape[0], 1))
-
-        for model_name, model_cls in REGRESSORS.items():
-            # custom CV to ensure splitting y labels only on training y
-            # scores = cross_validate(cls_, X, y, scoring=SCORING, cv=CV, groups=group_info, return_train_score=True)
-            scores = {}
-
-            for split_idx, (train_idx, test_idx) in enumerate(cv_splitted):
-                X_train, X_test, y_train, y_test = X[train_idx], X[test_idx], y[train_idx], y[test_idx]
-                split_index[test_idx] = split_idx
-
-                model_cls.fit(X_train, y_train)
-                for score in SCORING:
-                    scorer = check_scoring(model_cls, score)
-                    for split, X_pred, y_true in zip(['train', 'test'], [X_train, X_test], [y_train, y_test]):
-                        score_name = f'{split}_{score}'
-                        if score_name not in scores:
-                            scores[score_name] = []
-                        scores[score_name].append(scorer(model_cls, X_pred, y_true))
-
-                # safe the predictions per model for later usage
-                if model_name not in predictions:
-                    predictions[model_name] = np.zeros_like(y, dtype=np.float)
-                    true[model_name] = np.zeros_like(y, dtype=np.float)
-                    proba[model_name] = np.zeros_like(y, dtype=np.float)
-                predictions[model_name][test_idx] = model_cls.predict(X_test)
-                true[model_name][test_idx] = y_test
-                has_prob = hasattr(model_cls, "predict_proba")
-                if has_prob:
-                    proba[model_name] = model_cls.predict_proba(X_test)
+        y = np.array([val[METRIC_FIELD] if isinstance(val, dict) else np.nan for val in database[col]])
+        if np.any(np.isnan(y)):
+            print('SKIPPING', col)
+        else:
+            target_cols.append(col)
+            task = f'Regression of {col}'
+            print(f'\n\n:::::::::::::::::::::::::::: {task:^35} ::::::::::::::::::::::::::::')
             
-            # print scoring and best method
-            if not only_print_better_than_random or np.mean(scores[BEST_SCORER]) > 0.5:
-                print_cv_scoring_results(model_name, SCORING, scores)
-            if np.mean(scores[BEST_SCORER]) > np.mean(best_score):
-                best_name = model_name
-                best_score = scores[BEST_SCORER]
-                best_scores = scores
-        print('----------- BEST METHOD:')
-        print_cv_scoring_results(best_name, SCORING, best_scores)
+            predictions, true, proba = {}, {}, {}
+            best_name, best_score, best_scores = '', -np.inf, None
+            cv_splitted = list(CV.split(X, y, group_info))
+            split_index = np.zeros((database.shape[0], 1))
 
-        # store true label and prediction in database
-        database[f'{col}_pred'] = predictions[best_name]
-        database[f'{col}_true'] = true[best_name]
-        database[f'{col}_prob'] = proba[best_name]
-        database[f'{col}_pred_model'] = best_name
-        database[f'{col}_pred_error'] = np.abs(database[f'{col}_pred'] - database[f'{col}_true'])
-        database['split_index'] = split_index
+            for model_name, model_cls in REGRESSORS.items():
+                # custom CV to ensure splitting y labels only on training y
+                # scores = cross_validate(cls_, X, y, scoring=SCORING, cv=CV, groups=group_info, return_train_score=True)
+                scores = {}
+
+                for split_idx, (train_idx, test_idx) in enumerate(cv_splitted):
+                    X_train, X_test, y_train, y_test = X[train_idx], X[test_idx], y[train_idx], y[test_idx]
+                    split_index[test_idx] = split_idx
+
+                    model_cls.fit(X_train, y_train)
+                    for score in SCORING:
+                        scorer = check_scoring(model_cls, score)
+                        for split, X_pred, y_true in zip(['train', 'test'], [X_train, X_test], [y_train, y_test]):
+                            score_name = f'{split}_{score}'
+                            if score_name not in scores:
+                                scores[score_name] = []
+                            scores[score_name].append(scorer(model_cls, X_pred, y_true))
+
+                    # safe the predictions per model for later usage
+                    if model_name not in predictions:
+                        predictions[model_name] = np.zeros_like(y, dtype=np.float)
+                        true[model_name] = np.zeros_like(y, dtype=np.float)
+                        proba[model_name] = np.zeros_like(y, dtype=np.float)
+                    predictions[model_name][test_idx] = model_cls.predict(X_test)
+                    true[model_name][test_idx] = y_test
+                    has_prob = hasattr(model_cls, "predict_proba")
+                    if has_prob:
+                        proba[model_name] = model_cls.predict_proba(X_test)
+                
+                # print scoring and best method
+                if not only_print_better_than_random or np.mean(scores[BEST_SCORER]) > 0.5:
+                    print_cv_scoring_results(model_name, SCORING, scores)
+                if np.mean(scores[BEST_SCORER]) > np.mean(best_score):
+                    best_name = model_name
+                    best_score = scores[BEST_SCORER]
+                    best_scores = scores
+            print('----------- BEST METHOD:')
+            print_cv_scoring_results(best_name, SCORING, best_scores)
+
+            # store true label and prediction in database
+            database[f'{col}_pred'] = predictions[best_name]
+            database[f'{col}_true'] = true[best_name]
+            database[f'{col}_prob'] = proba[best_name]
+            database[f'{col}_pred_model'] = best_name
+            database[f'{col}_pred_error'] = np.abs(database[f'{col}_pred'] - database[f'{col}_true'])
+            database['split_index'] = split_index
 
     
     ##############################################################
@@ -195,7 +200,7 @@ def evaluate_recommendation(database, only_print_better_than_random=False):
         'pred_error': {},
         'pred_thresholderror_acc': {}
     }
-    for col in TARGET_COLUMNS:
+    for col in target_cols:
         for key in result_scores.keys():
             result_scores[key][col] = []
 
