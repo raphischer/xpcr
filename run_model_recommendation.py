@@ -186,7 +186,7 @@ def evaluate_recommendation(database, only_print_better_than_random=False):
             database[f'{col}_pred_error'] = np.abs(database[f'{col}_pred'] - database[f'{col}_true'])
             database['split_index'] = split_index
 
-    
+    database.to_pickle('meta_learn_results.pkl')
     ##############################################################
     ##### 2. EVALUATE THE PREDICTION ACROSS CV AND DATASETS  #####
     ##############################################################
@@ -228,10 +228,3 @@ def evaluate_recommendation(database, only_print_better_than_random=False):
     
     with open(os.path.join('paper_results', 'model_selection_results.json'), 'w') as rf:
         json.dump(result_scores, rf, indent=4, cls=PatchedJSONEncoder)
-
-        # print(f'\n\nStatistics for predicting the best model on {col}')
-        # print(f'Top-1 Accuracy of finding the best model:  {np.mean(top_1_acc):5.1f} +- {np.std(top_1_acc):5.2f}')
-        # print(f'Top-{k_best} Accuracy of finding the best model:  {np.mean(top_k_acc):5.1f} +- {np.std(top_k_acc):5.2f}')
-        # print(f'Overlap of top-{k_best} scored and predicted:     {np.mean(top_k_overlap):5.1f} +- {np.std(top_k_overlap):5.2f}')
-        # print(f'Prediction Error:                          {np.mean(pred_error):5.1f} +- {np.std(pred_error):5.2f}')
-        # print(f'Accuracy of being below {error_threshold:<4} error:        {np.mean(pred_thresholderror_acc):5.1f} +- {np.std(pred_thresholderror_acc):5.2f}')
