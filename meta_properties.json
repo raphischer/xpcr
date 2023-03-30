@@ -1,4 +1,39 @@
 {
+    "RMSE": {
+        "name": "Test RMSE",
+        "unit": "number",
+        "group": "Performance",
+        "weight": 0.4,
+        "independent_of_task": true
+    },
+    "MAPE": {
+        "name": "Test MAPE",
+        "unit": "number",
+        "group": "Performance",
+        "weight": 0.3,
+        "independent_of_task": true
+    },
+    "MASE": {
+        "name": "Test MASE",
+        "unit": "number",
+        "group": "Performance",
+        "weight": 0.3,
+        "independent_of_task": true
+    },
+    "parameters": {
+        "name": "Number of Parameters",
+        "unit": "number",
+        "group": "Complexity",
+        "weight": 0.6,
+        "independent_of_task": true
+    },
+    "fsize": {
+        "name": "Model Size on Disc",
+        "unit": "byte",
+        "group": "Complexity",
+        "weight": 0.4,
+        "independent_of_task": true
+    },
     "train_power_draw": {
         "name": "Training Power Draw",
         "unit": "wattseconds",
@@ -22,40 +57,5 @@
         "unit": "seconds",
         "group": "Resources",
         "weight": 0.2
-    },
-    "RMSE": {
-        "name": "Test RMSE",
-        "unit": "number",
-        "group": "Quality",
-        "weight": 0.4,
-        "independent_of_task": true
-    },
-    "MAPE": {
-        "name": "Test MAPE",
-        "unit": "number",
-        "group": "Quality",
-        "weight": 0.3,
-        "independent_of_task": true
-    },
-    "MASE": {
-        "name": "Test MASE",
-        "unit": "number",
-        "group": "Quality",
-        "weight": 0.3,
-        "independent_of_task": true
-    },
-    "parameters": {
-        "name": "Number of Parameters",
-        "unit": "number",
-        "group": "Complexity",
-        "weight": 0.6,
-        "independent_of_task": true
-    },
-    "fsize": {
-        "name": "Model Size on Disc",
-        "unit": "byte",
-        "group": "Complexity",
-        "weight": 0.4,
-        "independent_of_task": true
     }
 }

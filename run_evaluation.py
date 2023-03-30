@@ -19,7 +19,7 @@ if __name__ == '__main__':
     parser.add_argument("--property-extractors-module", default="properties", help="python file with PROPERTIES dictionary, which maps properties to executable extractor functions")
     parser.add_argument("--database-path", default="results/database22.pkl", help="filename for database, or directories with databases inside")
     parser.add_argument("--boundaries", default="boundaries.json")
-    parser.add_argument("--drop-subsampled", default=True, type=bool)
+    parser.add_argument("--drop-subsampled", default=False, type=bool)
     # interactive exploration params
     parser.add_argument("--host", default='localhost', type=str, help="default host") # '0.0.0.0'
     parser.add_argument("--port", default=8888, type=int, help="default port")
@@ -60,10 +60,6 @@ if __name__ == '__main__':
                 meta['dataset'][ds] = meta['dataset'][orig].copy()
                 meta['dataset'][ds]['name'] = meta['dataset'][ds]['name'] + ds.replace(orig + '_', '') # append the ds seed to name
 
-    if args.mode == 'paper': # TODO REMOVE LATER
-        from create_paper_results import create_all
-        create_all(None, meta)
-
     rated_database, boundaries, real_boundaries, _ = rate_database(database, properties_meta=meta['properties'], boundaries=args.boundaries)
     print(f'Database constructed from logs has {rated_database.shape} entries')
 
@@ -74,7 +70,7 @@ if __name__ == '__main__':
 
     if args.mode == 'paper':
         from create_paper_results import create_all
-        create_all(rated_database, meta)
+        create_all(rated_database, boundaries, real_boundaries, meta)
 
     if args.mode == 'label':
         from exprep.labels.label_generation import PropertyLabel

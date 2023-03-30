@@ -1,6 +1,7 @@
 {
     "deepar": {
         "name": "DeepAR",
+        "short": "DAR",
         "local/global": "Global",
         "data": "Univariate",
         "method": "RNN",
@@ -12,6 +13,7 @@
     },
     "deepstate": {
         "name": "DeepState",
+        "short": "DST",
         "local/global": "Global",
         "data": "Univariate",
         "method": "RNN, state-space model",
@@ -23,6 +25,7 @@
     },
     "deepfactor": {
         "name": "DeepFactor",
+        "short": "DFA",
         "local/global": "Global",
         "data": "Univariate",
         "method": "RNN, state-space model, Gaussian process",
@@ -34,6 +37,7 @@
     },
     "deeprenewal": {
         "name": "Deep Renewal Processes",
+        "short": "DRP",
         "local/global": "Global",
         "data": "Univariate",
         "method": "RNN",
@@ -45,6 +49,7 @@
     },
     "gpforecaster": {
         "name": "GPForecaster",
+        "short": "GPF",
         "local/global": "Global",
         "data": "Univariate",
         "method": "MLP, Gaussian process",
@@ -56,6 +61,7 @@
     },
     "mqcnn": {
         "name": "MQ-CNN",
+        "short": "MQC",
         "local/global": "Global",
         "data": "Univariate",
         "method": "CNN encoder, MLP decoder",
@@ -67,6 +73,7 @@
     },
     "mqrnn": {
         "name": "MQ-RNN",
+        "short": "MQR",
         "local/global": "Global",
         "data": "Univariate",
         "method": "RNN encoder, MLP encoder",
@@ -78,6 +85,7 @@
     },
     "nbeats": {
         "name": "N-BEATS",
+        "short": "NBE",
         "local/global": "Global",
         "data": "Univariate",
         "method": "MLP, residual links",
@@ -100,6 +108,7 @@
     },
     "tempfus": {
         "name": "Temporal Fusion Transformer",
+        "short": "TFT",
         "local/global": "Global",
         "data": "Univariate",
         "method": "LSTM, self attention",
@@ -122,6 +131,7 @@
     },
     "wavenet": {
         "name": "WaveNet",
+        "short": "WVN",
         "local/global": "Global",
         "data": "Univariate",
         "method": "Dilated convolution",
@@ -133,6 +143,7 @@
     },
     "feedforward": {
         "name": "SimpleFeedForward",
+        "short": "FFO",
         "local/global": "Global",
         "data": "Univariate",
         "method": "MLP",

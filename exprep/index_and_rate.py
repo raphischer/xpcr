@@ -181,7 +181,7 @@ def load_boundaries(content=None):
         raise RuntimeError('Invalid boundary input', content)
 
     # Convert boundaries to dictionary
-    min_value, max_value = 0, 100000
+    min_value, max_value = -100, 100000
     boundary_intervals = {}
     for key, boundaries in content.items():
         intervals = [[max_value, boundaries[0]]]
@@ -317,7 +317,7 @@ def find_relevant_metrics(database):
                         # set axis defaults for dataset / task combo
                         if val['group'] == 'Resources' and (lookup not in most_imp_res or most_imp_res[lookup][1] < val['weight']):
                             most_imp_res[lookup] = (col, val['weight'])
-                        if val['group'] == 'Quality' and (lookup not in most_imp_qual or most_imp_qual[lookup][1] < val['weight']):
+                        if val['group'] == 'Performance' and (lookup not in most_imp_qual or most_imp_qual[lookup][1] < val['weight']):
                             most_imp_qual[lookup] = (col, val['weight'])
                         break
             all_metrics[lookup] = metrics
