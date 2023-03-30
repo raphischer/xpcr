@@ -10,11 +10,13 @@ from sklearn.model_selection import cross_validate
 from sklearn.utils import resample
 from sklearn.model_selection import KFold, StratifiedKFold, GroupKFold
 from sklearn.metrics import check_scoring
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
 
 # ML methods
 from sklearn.ensemble import RandomForestRegressor, ExtraTreesRegressor
 from sklearn.linear_model import LinearRegression, Ridge, Lasso, ElasticNet
-from sklearn.svm import LinearSVR
+from sklearn.svm import LinearSVR, SVR
 from sklearn.dummy import DummyRegressor
 
 from exprep.util import PatchedJSONEncoder
@@ -92,14 +94,18 @@ FEATURES = {
 
 
 REGRESSORS = {
-    'Global Mean': DummyRegressor(),
-    'Linear Regression': LinearRegression(),
-    'Ridge Regression': Ridge(),
-    'Lasso Regression': Lasso(),
-    'ElasticNet': ElasticNet(),
-    # 'SVM': LinearSVR(),
-    'Random Forest': RandomForestRegressor(),
-    'Extra RF': ExtraTreesRegressor(),
+    'Global Mean':              make_pipeline(StandardScaler(), DummyRegressor()),
+    'Linear Regression':        make_pipeline(StandardScaler(), LinearRegression()),
+    'Ridge A1':                 make_pipeline(StandardScaler(), Ridge(alpha=1.0)),
+    'Ridge A0.1':               make_pipeline(StandardScaler(), Ridge(alpha=0.1)),
+    'Lasso A1':                 make_pipeline(StandardScaler(), Lasso(alpha=1.0)),
+    'Lasso A0.1':               make_pipeline(StandardScaler(), Lasso(alpha=0.1)),
+    'ElasticNet A1':            make_pipeline(StandardScaler(), ElasticNet(alpha=1.0)),
+    'ElasticNet A0.1':          make_pipeline(StandardScaler(), ElasticNet(alpha=0.1)),
+    'LinearSVR':                make_pipeline(StandardScaler(), LinearSVR()),
+    'SVR':                      make_pipeline(StandardScaler(), SVR()),
+    'Random Forest':            make_pipeline(StandardScaler(), RandomForestRegressor(n_estimators=10)),
+    'Extra RF':                 make_pipeline(StandardScaler(), ExtraTreesRegressor(n_estimators=10)),
 }
 
 
@@ -186,4 +192,4 @@ def evaluate_recommendation(database, only_print_better_than_random=False):
             database[f'{col}_pred_error'] = np.abs(database[f'{col}_pred'] - database[f'{col}_true'])
             database['split_index'] = split_index
 
-    database.to_pickle('meta_learn_results.pkl')
+    database.to_pickle('results/meta_learn_results.pkl')

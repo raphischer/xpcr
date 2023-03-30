@@ -15,11 +15,11 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--mode", default='meta', choices=['meta', 'interactive', 'paper', 'label', 'stats'])
+    parser.add_argument("--mode", default='interactive', choices=['meta', 'interactive', 'paper', 'label', 'stats'])
     parser.add_argument("--property-extractors-module", default="properties", help="python file with PROPERTIES dictionary, which maps properties to executable extractor functions")
     parser.add_argument("--database-path", default="results/database22.pkl", help="filename for database, or directories with databases inside")
     parser.add_argument("--boundaries", default="boundaries.json")
-    parser.add_argument("--drop-subsampled", default=False, type=bool)
+    parser.add_argument("--drop-subsampled", default=True, type=bool)
     # interactive exploration params
     parser.add_argument("--host", default='localhost', type=str, help="default host") # '0.0.0.0'
     parser.add_argument("--port", default=8888, type=int, help="default port")
@@ -113,20 +113,8 @@ if __name__ == '__main__':
         #     print(f'{idx:<3} {ds_print} {success} {str(ds_stat["entries"]):<8} entries {len(ds_)}, time total {ds_stat["time_total"] / 3600:6.2f} h (train {ds_stat["time_train"] / 3600:6.2f} h, infer {ds_stat["time_infer"] / 3600:6.2f} h)')
     
     if args.mode == 'meta':
-        # check for completeness of results
-        # max_shape = (0, 0)
-        # for idx, ((ds), data) in enumerate(iter(grouped_by)):
-        #     shape = data.shape
-        #     if shape[0] > max_shape[0] or shape[1] > max_shape[1]:
-        #         max_shape = shape
         for idx, ((ds), data) in enumerate(iter(rated_database.groupby(['dataset']))):
-            # if data.shape != max_shape:
-            #     # discard these results due to incompleteness
-            #     mod_missing = " ".join([mod for mod in pd.unique(rated_database["model"]) if mod not in pd.unique(data['model'])])
-            #     print(f'Dropping {ds:<40} - shape {str(data.shape):<8} does not match expected {str(max_shape):<8} - missing models: {mod_missing}')
-            #     rated_database = rated_database.drop(data.index)
-            # else:
-                # store dataset specific meta features
+            # store dataset specific meta features
             ds_name = data['dataset_orig'].iloc[0]
             subsample_str = ds.replace(ds_name, '').replace('_', '')
             ds_seed = -1 if len(subsample_str) == 0 else int(subsample_str)
