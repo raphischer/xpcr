@@ -4,7 +4,7 @@
         "shortname": "RMSE",
         "unit": "number",
         "group": "Performance",
-        "weight": 0.4,
+        "weight": 0.2,
         "independent_of_task": true
     },
     "MAPE": {
@@ -12,7 +12,7 @@
         "shortname": "MAPE",
         "unit": "number",
         "group": "Performance",
-        "weight": 0.3,
+        "weight": 0.1,
         "independent_of_task": true
     },
     "MASE": {
@@ -20,51 +20,51 @@
         "shortname": "MASE",
         "unit": "number",
         "group": "Performance",
-        "weight": 0.3,
+        "weight": 0.1,
         "independent_of_task": true
     },
     "parameters": {
         "name": "Number of Parameters",
-        "shortname": "Parameters",
+        "shortname": "Params",
         "unit": "number",
         "group": "Complexity",
-        "weight": 0.6,
+        "weight": 0.2,
         "independent_of_task": true
     },
     "fsize": {
         "name": "Model Size on Disc",
-        "shortname": "Filesize",
+        "shortname": "Size",
         "unit": "byte",
         "group": "Complexity",
-        "weight": 0.4,
+        "weight": 0.2,
         "independent_of_task": true
     },
     "train_power_draw": {
         "name": "Training Power Draw",
-        "shortname": "Train Power",
+        "shortname": "T Power",
         "unit": "wattseconds",
         "group": "Resources",
-        "weight": 0.3
+        "weight": 0.1
     },
     "train_running_time": {
         "name": "Training Time",
-        "shortname": "Train Time",
+        "shortname": "T Time",
         "unit": "seconds",
         "group": "Resources",
-        "weight": 0.2
+        "weight": 0.08
     },
     "power_draw": {
         "name": "Power Draw per Inference",
-        "shortname": "Infer Power",
+        "shortname": "I Power",
         "unit": "wattseconds",
         "group": "Resources",
-        "weight": 0.3
+        "weight": 0.1
     },
     "running_time": {
         "name": "Running Time per Inference",
-        "shortname": "Infer Time",
+        "shortname": "I Time",
         "unit": "seconds",
         "group": "Resources",
-        "weight": 0.2
+        "weight": 0.08
     }
 }
