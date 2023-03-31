@@ -28,7 +28,7 @@
         "shortname": "Params",
         "unit": "number",
         "group": "Complexity",
-        "weight": 0.2,
+        "weight": 0.17,
         "independent_of_task": true
     },
     "fsize": {
@@ -36,7 +36,7 @@
         "shortname": "Size",
         "unit": "byte",
         "group": "Complexity",
-        "weight": 0.2,
+        "weight": 0.17,
         "independent_of_task": true
     },
     "train_power_draw": {
