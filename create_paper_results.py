@@ -12,7 +12,8 @@ from exprep.index_and_rate import calculate_single_compound_rating
 from exprep.elex.graphs import create_scatter_graph, add_rating_background
 from exprep.elex.util import RATING_COLORS, RATING_COLOR_SCALE
 
-PLOT_WIDTH = 1000
+PLOT_WIDTH = 700
+PLOT_HEIGHT = PLOT_WIDTH / 2
 
 
 def create_all(database, boundaries, boundaries_real, meta):
@@ -73,8 +74,8 @@ def create_all(database, boundaries, boundaries_real, meta):
     os.remove("dummy.pdf")
 
 
-    #### PCR trade-offs scatters
-    for xaxis, yaxis in [['running_time', 'RMSE'], ['parameters', 'power_draw']]:
+    ### PCR trade-offs scatters
+    for xaxis, yaxis in [['power_draw', 'RMSE'], ['train_power_draw', 'parameters']]:
         for idx, (ds, data) in enumerate(database.groupby(['dataset_orig'])):
             subd = data[data['dataset'] == ds]
             plot_data = {}
@@ -96,7 +97,7 @@ def create_all(database, boundaries, boundaries_real, meta):
             else:
                 current = (ds, subd['task'].iloc[0], subd['environment'].iloc[0])
                 rating_pos = [boundaries_real[current][ax] for ax in [xaxis, yaxis]]
-            scatter = create_scatter_graph(plot_data, axis_names, False)
+            scatter = create_scatter_graph(plot_data, axis_names, False, ax_border=0.05, marker_width=PLOT_WIDTH / 60)
             add_rating_background(scatter, rating_pos, 'optimistic median', False)
             scatter.update_layout(width=PLOT_WIDTH / 2, height=PLOT_WIDTH / 2, margin={'l': 0, 'r': 0, 'b': 0, 't': 0})
             scatter.write_image(f'landscape_{ds}_{xaxis}_{yaxis}.pdf')
@@ -126,20 +127,28 @@ def create_all(database, boundaries, boundaries_real, meta):
     pred_cols = ['compound_index'] + pred_cols
     pred_col_names = ['Compound index'] + pred_col_names
 
-
-    ###### star plots with recommendation vs best
+    # access statistics per data set
+    top_increasing_k_stats = {}
     best5_ene, best5_rmse, opti_ene, opti_rmse, rec_ene, rec_rmse = [], [], [], [], [], []
     for idx, ((ds), data) in enumerate(meta_learned_db.groupby(['dataset'])):
         true_best = data.sort_values(f'compound_index_true', ascending=False).iloc[0]
         pred_best = data.sort_values(f'compound_index_pred', ascending=False).iloc[0]
+        sorted_by_pred_rmse = data.sort_values(f'RMSE_pred', ascending=False)
+        lowest_rmse = min([entry['value'] for entry in data['RMSE']])
+        lowest_ene = sum([entry['value'] for entry in data['train_power_draw']]) / 3.6e3
+        # save ene and rmse for increasing k
+        top_increasing_k_stats[ds] = {'rmse': [], 'ene': []}
+        for k in range(1, data.shape[0] + 1):
+            subd = sorted_by_pred_rmse.iloc[:k]
+            top_increasing_k_stats[ds]['rmse'].append( lowest_rmse / min([entry['value'] for entry in subd['RMSE']]))
+            top_increasing_k_stats[ds]['ene'].append( sum([entry['value'] for entry in subd['train_power_draw']]) / (3.6e3 * lowest_ene) )
 
-        # safe energy draw and rmses for scatter plot
         if data['dataset_orig'].iloc[0] == ds:
-            pred_best_rmse = data.sort_values(f'RMSE_pred', ascending=False).iloc[0]
-            random = data.iloc[np.random.choice(data.shape[0], 1)[0]]
-            best5 = data.sort_values(f'RMSE_pred', ascending=False).iloc[:4]
-            opti_ene.append(sum([entry['value'] for entry in data['train_power_draw']]) / 3.6e3)
-            opti_rmse.append(min([entry['value'] for entry in data['RMSE']]))
+            # save best, top-5 and top-1 rmse & ene
+            pred_best_rmse = sorted_by_pred_rmse.iloc[0]
+            best5 = sorted_by_pred_rmse.iloc[:4]
+            opti_ene.append(lowest_ene)
+            opti_rmse.append(lowest_rmse)
             rec_ene.append(pred_best_rmse['train_power_draw']['value'] / 3.6e3)
             rec_rmse.append(pred_best_rmse['RMSE']['value'])
             best5_ene.append(sum([entry['value'] for entry in best5['train_power_draw']]) / 3.6e3)
@@ -148,25 +157,25 @@ def create_all(database, boundaries, boundaries_real, meta):
             assert best5_rmse[-1] >= opti_rmse[-1]
             assert best5_ene[-1] < opti_ene[-1]
 
-            fig = go.Figure()
+            ######### star plots with recommendation vs best
+            fig = make_subplots(rows=1, cols=1, subplot_titles=[meta['dataset'][ds]['name']])
             fig.add_trace(go.Scatterpolar(
                 r=[true_best[col + '_true'] for col in pred_cols[1:]], line={'color': RATING_COLORS[0]},
-                theta=pred_col_shortnames, fill='toself', name=f'Compound Index (Actual Best): {true_best[pred_cols[0]]:4.2f}'
+                theta=pred_col_shortnames, fill='toself', name=f'Compound (Best): {true_best[pred_cols[0]]:4.2f}'
             ))
             fig.add_trace(go.Scatterpolar(
                 r=[pred_best[col + '_true'] for col in pred_cols[1:]], line={'color': RATING_COLORS[2]},
-                theta=pred_col_shortnames, fill='toself', name=f'Compound Index (Predicted):   {pred_best[pred_cols[0]]:4.2f}'
+                theta=pred_col_shortnames, fill='toself', name=f'Compound (Pred): {pred_best[pred_cols[0]]:4.2f}'
             ))
             fig.update_layout(
-                polar=dict(radialaxis=dict(visible=True)), title_x=0.5, title_y=1,
-                title_text=meta['dataset'][ds]['name'], width=PLOT_WIDTH*0.33, height=350,
-                legend=dict( yanchor="bottom", y=1.1, xanchor="center", x=0.5 ))
+                polar=dict(radialaxis=dict(visible=True)), width=PLOT_WIDTH*0.33, height=PLOT_HEIGHT,
+                legend=dict( yanchor="bottom", y=0.83, xanchor="center", x=0.5), margin={'l': 45, 'r': 45, 'b': 0, 't': 20} )
             fig.write_image(f'true_best_{ds}.pdf')
             if idx < 2:
                 fig.show()
 
-    ####### energy consumption VS RMSE scatter comparison
-    fig = go.Figure()
+    ######### energy consumption VS RMSE scatter comparison
+    fig = make_subplots(rows=1, cols=1, x_title='Power Draw [Wh]', y_title="RMSE")
     connections_x, connections_y = [], []
     for i in range(len(rec_ene)):
         connections_x = connections_x + [None, rec_ene[i], best5_ene[i], opti_ene[i], None]
@@ -175,40 +184,66 @@ def create_all(database, boundaries, boundaries_real, meta):
     fig.add_trace(go.Scatter(x=connections_x, y=connections_y,
                         mode='lines',
                         line=dict(color='grey', width=1, dash='dash'),
-                        name='Connect', showlegend=False))
+                        name='Connect', showlegend=False), row=1, col=1)
     fig.add_trace(go.Scatter(x=rec_ene, y=rec_rmse,
                         mode='markers',
                         marker=dict(size=15, color=RATING_COLORS[0], line=dict(width=3, color='white')),
-                        name='Training best recommended'))
+                        name='Training best recommended'), row=1, col=1)
     fig.add_trace(go.Scatter(x=best5_ene, y=best5_rmse,
                         mode='markers',
                         marker=dict(size=15, color=RATING_COLORS[2], line=dict(width=3, color='white')),
-                        name='Training top-5 recommended'))
+                        name='Training top-5 recommended'), row=1, col=1)
     fig.add_trace(go.Scatter(x=opti_ene, y=opti_rmse,
                         mode='markers',
                         marker=dict(size=15, color=RATING_COLORS[4], line=dict(width=3, color='white')),
-                        name='Training all models'))
+                        name='Training all models'), row=1, col=1)
     
     fig.update_xaxes(range=[0, 100])
     fig.update_yaxes(range=[0, 50000])
     fig.update_layout(
-        legend=dict( yanchor="top", y=0.99, xanchor="right", x=0.99 ),
-        xaxis_title="Power Draw [Wh]",
-        yaxis_title="RMSE",
-        width=PLOT_WIDTH, height=500
+        legend=dict( yanchor="top", y=0.99, xanchor="right", x=0.99),
+        width=PLOT_WIDTH, height=PLOT_HEIGHT, margin={'l': 60, 'r': 0, 'b': 60, 't': 0}
     )
+    
     fig.write_image(f'energy savings.pdf')
     fig.show()
 
 
+    ####### increasing top k curves
+    fig = make_subplots(rows=1, cols=2, shared_yaxes=True, x_title='k (testing top-k recommendations)', y_title="Relative value", subplot_titles=['RMSE', 'Power Draw'], horizontal_spacing=0.02)
+
+    for ds, values in top_increasing_k_stats.items():
+        rmse = values['rmse']
+        ene = values['ene']
+        k = np.arange(1, len(rmse) + 1)
+        fig.add_trace(go.Scatter(x=k, y=rmse, mode='lines', line=dict(color='rgba(229,36,33,0.3)')), row=1, col=1)
+        fig.add_trace(go.Scatter(x=k, y=ene, mode='lines', line=dict(color='rgba(229,36,33,0.3)')), row=1, col=2)
+    
+    avg_rmse = np.array([np.array(val['rmse']) for val in top_increasing_k_stats.values()]).mean(axis=0)
+    avg_ene = np.array([np.array(val['ene']) for val in top_increasing_k_stats.values()]).mean(axis=0)
+    fig.add_trace(go.Scatter(
+        x=k, y=avg_rmse, mode='lines', line=dict(color='rgba(0,0,0,1.0)')), row=1, col=1
+    )
+    fig.add_trace(go.Scatter(
+        x=k, y=avg_ene, mode='lines', line=dict(color='rgba(0,0,0,1.0)')), row=1, col=2
+    )
+    
+    fig.update_layout(
+        width=PLOT_WIDTH, height=PLOT_HEIGHT,
+        showlegend=False, margin={'l': 60, 'r': 0, 'b': 60, 't': 25}
+    )
+    
+    fig.write_image(f'increasing k.pdf')
+    fig.show()
+
 
     # ERRORS OF PREDICTION
     result_scores = {
-        'Prediction error (a)': {},
-        'Error < 0.1 (b)': {},
-        'Top-1 acc (c)': {},
-        'Top-5 acc (d)': {},
-        'Top-5 intersect (e)': {}
+        'Error (a)': {},
+        'Thresh (b)': {},
+        'Top-1 (c)': {},
+        'Top-5 (d)': {},
+        'Inters (e)': {}
     }
 
     for col in pred_cols:
@@ -230,18 +265,18 @@ def create_all(database, boundaries, boundaries_real, meta):
                 overlap.append(len(set(top_5_true).intersection(set(top_5_pred))))
                 error.append(err)
                 error_acc.append(err < error_threshold)
-            
-            result_scores['Prediction error (a)'][col].append(np.mean(error))
-            result_scores['Error < 0.1 (b)'][col].append(np.mean(error_acc) * 100)
-            result_scores['Top-1 acc (c)'][col].append(np.mean(top_1) * 100)
-            result_scores['Top-5 acc (d)'][col].append(np.mean(top_k) * 100)
-            result_scores['Top-5 intersect (e)'][col].append(np.mean(overlap))
+            result_scores['Error (a)'][col].append(np.mean(error))
+            result_scores['Thresh (b)'][col].append(np.mean(error_acc) * 100)
+            result_scores['Top-1 (c)'][col].append(np.mean(top_1) * 100)
+            result_scores['Top-5 (d)'][col].append(np.mean(top_k) * 100)
+            result_scores['Inters (e)'][col].append(np.mean(overlap))
 
     fig = make_subplots(rows=1, cols=len(result_scores), subplot_titles=[key for key in result_scores.keys()], shared_yaxes=True, horizontal_spacing=0.02)
 
     max_x = []
     for plot_idx, results in enumerate(result_scores.values()):
-        x, y, e, w = zip(*reversed([(np.mean(vals), meta['properties'][key]['name'], np.std(vals), meta['properties'][key]['weight']) for key, vals in results.items()]))
+        x, y, e, w = zip(*reversed([(np.mean(vals), meta['properties'][key]['name'], np.std(vals)
+        , meta['properties'][key]['weight']) for key, vals in results.items()]))
         w = np.array(w) * -2 + 0.5
         w = list(w[:-1]) + [1.0]
         c = sample_colorscale(RATING_COLOR_SCALE, w)
@@ -250,8 +285,7 @@ def create_all(database, boundaries, boundaries_real, meta):
             ), row=1, col=plot_idx + 1
         )
         max_x.append(max(x) + (max(x) / 10))
-    fig.update_layout(width=PLOT_WIDTH, height=500)
-    fig.update_layout(showlegend=False)
+    fig.update_layout(width=PLOT_WIDTH, height=PLOT_HEIGHT, showlegend=False, margin={'l': 0, 'r': 0, 'b': 0, 't': 25})
     fig.update_layout(
         xaxis_range = [0, max_x[0]],
         xaxis2_range = [0, max_x[1]],
@@ -259,9 +293,10 @@ def create_all(database, boundaries, boundaries_real, meta):
         xaxis4_range = [0, max_x[3]],
         xaxis5_range = [0, max_x[4]],
     )
-    fig.update_coloraxes(colorscale=RATING_COLOR_SCALE)
-    fig.update_layout(coloraxis_colorbar=dict(
-        title="Contribution to compound",
-    ))
+    
+    # fig.update_coloraxes(colorscale=RATING_COLOR_SCALE)
+    # fig.update_layout(coloraxis_colorbar=dict(
+    #     title="Contribution to compound",
+    # ))
     fig.write_image(f'quality_of_model_recommendation.pdf')
     fig.show()

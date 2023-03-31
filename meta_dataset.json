@@ -1,6 +1,6 @@
 {
     "web_traffic_extended_dataset_without_missing_values": {
-        "name": "Extended Wikipedia Web Traffic Daily (without Missing Values)",
+        "name": "Extended Wikipedia Web Traffic Daily",
         "doi": "10.5281/zenodo.7371038",
         "license": {
             "id": "CC-BY-3.0"
@@ -8,7 +8,7 @@
         "publication_date": "2022-11-28"
     },
     "web_traffic_extended_dataset_with_missing_values": {
-        "name": "Extended Wikipedia Web Traffic Daily (with Missing Values)",
+        "name": "Extended Wikipedia Web Traffic Daily",
         "doi": "10.5281/zenodo.7370977",
         "license": {
             "id": "CC-BY-3.0"
@@ -24,7 +24,7 @@
         "publication_date": "2021-08-12"
     },
     "temperature_rain_dataset_without_missing_values": {
-        "name": "Temperature Rain without Missing Values",
+        "name": "Temperature Rain",
         "doi": "10.5281/zenodo.5129091",
         "license": {
             "id": "CC-BY-4.0"
@@ -32,7 +32,7 @@
         "publication_date": "2021-07-23"
     },
     "temperature_rain_dataset_with_missing_values": {
-        "name": "Temperature Rain with Missing Values",
+        "name": "Temperature Rain",
         "doi": "10.5281/zenodo.5129073",
         "license": {
             "id": "CC-BY-4.0"
@@ -40,7 +40,7 @@
         "publication_date": "2021-07-23"
     },
     "vehicle_trips_dataset_without_missing_values": {
-        "name": "Vehicle Trips without Missing Values",
+        "name": "Vehicle Trips",
         "doi": "10.5281/zenodo.5122537",
         "license": {
             "id": "CC-BY-4.0"
@@ -48,7 +48,7 @@
         "publication_date": "2021-07-22"
     },
     "vehicle_trips_dataset_with_missing_values": {
-        "name": "Vehicle Trips with Missing Values",
+        "name": "Vehicle Trips",
         "doi": "10.5281/zenodo.5122535",
         "license": {
             "id": "CC-BY-4.0"
@@ -56,7 +56,7 @@
         "publication_date": "2021-07-22"
     },
     "rideshare_dataset_without_missing_values": {
-        "name": "Rideshare without Missing Values",
+        "name": "Rideshare",
         "doi": "10.5281/zenodo.5122232",
         "license": {
             "id": "CC-BY-4.0"
@@ -64,7 +64,7 @@
         "publication_date": "2021-07-22"
     },
     "rideshare_dataset_with_missing_values": {
-        "name": "Rideshare with Missing Values",
+        "name": "Rideshare",
         "doi": "10.5281/zenodo.5122114",
         "license": {
             "id": "CC-BY-4.0"
@@ -72,7 +72,7 @@
         "publication_date": "2021-07-22"
     },
     "bitcoin_dataset_without_missing_values": {
-        "name": "Bitcoin without Missing Values",
+        "name": "Bitcoin",
         "doi": "10.5281/zenodo.5122101",
         "license": {
             "id": "CC-BY-4.0"
@@ -80,7 +80,7 @@
         "publication_date": "2021-07-22"
     },
     "bitcoin_dataset_with_missing_values": {
-        "name": "Bitcoin with Missing Values",
+        "name": "Bitcoin",
         "doi": "10.5281/zenodo.5121965",
         "license": {
             "id": "CC-BY-4.0"
@@ -88,7 +88,7 @@
         "publication_date": "2021-07-22"
     },
     "covid_mobility_dataset_without_missing_values": {
-        "name": "COVID-19 Mobility (without Missing Values)",
+        "name": "COVID-19 Mobility",
         "doi": "10.5281/zenodo.4663809",
         "license": {
             "id": "CC-BY-4.0"
@@ -96,7 +96,7 @@
         "publication_date": "2021-04-06"
     },
     "covid_mobility_dataset_with_missing_values": {
-        "name": "COVID-19 Mobility (with Missing Values)",
+        "name": "COVID-19 Mobility",
         "doi": "10.5281/zenodo.4663762",
         "license": {
             "id": "CC-BY-4.0"
@@ -112,7 +112,7 @@
         "publication_date": "2021-04-02"
     },
     "kdd_cup_2018_dataset_without_missing_values": {
-        "name": "KDD Cup (without Missing Values)",
+        "name": "KDD Cup",
         "doi": "10.5281/zenodo.4656756",
         "license": {
             "id": "CC-BY-4.0"
@@ -120,7 +120,7 @@
         "publication_date": "2020-06-14"
     },
     "kdd_cup_2018_dataset_with_missing_values": {
-        "name": "KDD Cup (with Missing Values)",
+        "name": "KDD Cup",
         "doi": "10.5281/zenodo.4656719",
         "license": {
             "id": "CC-BY-4.0"
@@ -152,7 +152,7 @@
         "publication_date": "2020-06-13"
     },
     "london_smart_meters_dataset_without_missing_values": {
-        "name": "London Smart Meters (without Missing Values)",
+        "name": "London Smart Meters",
         "doi": "10.5281/zenodo.4656091",
         "license": {
             "id": "CC-BY-4.0"
@@ -312,7 +312,7 @@
         "publication_date": "2020-06-11"
     },
     "nn5_daily_dataset_without_missing_values": {
-        "name": "NN5 Daily (without Missing Values)",
+        "name": "NN5 Daily",
         "doi": "10.5281/zenodo.4656117",
         "license": {
             "id": "CC-BY-4.0"
@@ -320,7 +320,7 @@
         "publication_date": "2020-06-11"
     },
     "nn5_daily_dataset_with_missing_values": {
-        "name": "NN5 Daily (with Missing Values)",
+        "name": "NN5 Daily",
         "doi": "10.5281/zenodo.4656110",
         "license": {
             "id": "CC-BY-4.0"
@@ -352,7 +352,7 @@
         "publication_date": "2020-06-11"
     },
     "kaggle_web_traffic_dataset_with_missing_values": {
-        "name": "Kaggle Wikipedia Web Traffic Daily (with Missing Values)",
+        "name": "Kaggle Wikipedia Web Traffic Daily",
         "doi": "10.5281/zenodo.4656080",
         "license": {
             "id": "CC-BY-4.0"
@@ -360,7 +360,7 @@
         "publication_date": "2020-06-13"
     },
     "kaggle_web_traffic_dataset_without_missing_values": {
-        "name": "Kaggle Wikipedia Web Traffic Daily (without Missing Values)",
+        "name": "Kaggle Wikipedia Web Traffic Daily",
         "doi": "10.5281/zenodo.4656075",
         "license": {
             "id": "CC-BY-4.0"
@@ -368,7 +368,7 @@
         "publication_date": "2020-06-13"
     },
     "london_smart_meters_dataset_with_missing_values": {
-        "name": "London Smart Meters (with Missing Values)",
+        "name": "London Smart Meters",
         "doi": "10.5281/zenodo.4656072",
         "license": {
             "id": "CC-BY-4.0"
@@ -424,7 +424,7 @@
         "publication_date": "2020-08-20"
     },
     "car_parts_dataset_with_missing_values": {
-        "name": "Car Parts (with Missing Values)",
+        "name": "Car Parts",
         "doi": "10.5281/zenodo.4656022",
         "license": {
             "id": "CC-BY-4.0"
@@ -432,7 +432,7 @@
         "publication_date": "2020-08-21"
     },
     "car_parts_dataset_without_missing_values": {
-        "name": "Car Parts (without Missing Values)",
+        "name": "Car Parts",
         "doi": "10.5281/zenodo.4656021",
         "license": {
             "id": "CC-BY-4.0"
@@ -456,7 +456,7 @@
         "publication_date": "2020-08-21"
     },
     "wind_farms_minutely_dataset_with_missing_values": {
-        "name": "Wind Farms (with Missing Values)",
+        "name": "Wind Farms",
         "doi": "10.5281/zenodo.4654909",
         "license": {
             "id": "CC-BY-4.0"
@@ -464,7 +464,7 @@
         "publication_date": "2020-08-23"
     },
     "wind_farms_minutely_dataset_without_missing_values": {
-        "name": "Wind Farms (without Missing Values)",
+        "name": "Wind Farms",
         "doi": "10.5281/zenodo.4654858",
         "license": {
             "id": "CC-BY-4.0"
@@ -496,7 +496,7 @@
         "publication_date": "2020-08-27"
     },
     "sunspot_dataset_with_missing_values": {
-        "name": "Sunspot Daily (with Missing Values)",
+        "name": "Sunspot Daily",
         "doi": "10.5281/zenodo.4654773",
         "license": {
             "id": "CC-BY-4.0"
@@ -504,7 +504,7 @@
         "publication_date": "2020-06-11"
     },
     "sunspot_dataset_without_missing_values": {
-        "name": "Sunspot Daily (without Missing Values)",
+        "name": "Sunspot Daily",
         "doi": "10.5281/zenodo.4654722",
         "license": {
             "id": "CC-BY-4.0"

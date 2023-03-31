@@ -15,7 +15,7 @@ def add_rating_background(fig, rating_pos, mode, dark_mode):
                 fig.add_shape(type="rect", layer='below', fillcolor=color, x0=x0, x1=x1, y0=y0, y1=y1, opacity=.8)
 
 
-def create_scatter_graph(plot_data, axis_title, dark_mode, ax_border=0.1):
+def create_scatter_graph(plot_data, axis_title, dark_mode, ax_border=0.1, marker_width=15):
     fig = go.Figure()
     for env, data in plot_data.items():
         if 'names' not in data:
@@ -24,8 +24,8 @@ def create_scatter_graph(plot_data, axis_title, dark_mode, ax_border=0.1):
         fig.add_trace(go.Scatter(
             x=data['x'], y=data['y'], name=env_name, text=data['names'],
             mode='markers+text', marker_symbol=ENV_SYMBOLS[env_i],
-            legendgroup=env_name, marker=dict(color=[RATING_COLORS[r] for r in data['ratings']], size=15),
-            marker_line=dict(width=3, color='black'))
+            legendgroup=env_name, marker=dict(color=[RATING_COLORS[r] for r in data['ratings']], size=marker_width),
+            marker_line=dict(width=marker_width / 5, color='black'))
         )
     fig.update_traces(textposition='top center')
     fig.update_layout(xaxis_title=axis_title[0], yaxis_title=axis_title[1])
