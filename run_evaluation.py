@@ -19,7 +19,7 @@ if __name__ == '__main__':
     parser.add_argument("--property-extractors-module", default="properties", help="python file with PROPERTIES dictionary, which maps properties to executable extractor functions")
     parser.add_argument("--database-path", default="results/database22.pkl", help="filename for database, or directories with databases inside")
     parser.add_argument("--boundaries", default="boundaries.json")
-    parser.add_argument("--drop-subsampled", default=True, type=bool)
+    parser.add_argument("--dropsubsampled", default=False, type=bool)
     # interactive exploration params
     parser.add_argument("--host", default='localhost', type=str, help="default host") # '0.0.0.0'
     parser.add_argument("--port", default=8888, type=int, help="default port")
@@ -53,7 +53,7 @@ if __name__ == '__main__':
     for ds in pd.unique(database['dataset']):
         rows = database[database['dataset'] == ds]
         if ds not in meta['dataset']:
-            if args.drop_subsampled:
+            if args.dropsubsampled:
                 database = database[database['dataset'] != ds]
             else: # store meta information for all subsampled datasets!
                 orig = rows['dataset_orig'].iloc[0]
