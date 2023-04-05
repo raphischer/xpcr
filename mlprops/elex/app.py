@@ -123,10 +123,9 @@ class Visualization(dash.Dash):
         scale_switch = scale_switch or 'index'
         env_names = self.environments[self.state['task']] if env_names is None else env_names
         for env in env_names:
-            env_data = { 'names': [], 'ratings': [], 'x': [], 'y': [] }
+            env_data = { 'ratings': [], 'x': [], 'y': [] }
             for _, log in find_sub_database(self.state['sub_database'], environment=env).iterrows():
                 env_data['ratings'].append(log['compound_rating'])
-                env_data['names'].append(log['model'])
                 for xy_axis, metric in zip(['x', 'y'], [self.state['xaxis'], self.state['yaxis']]):
                     if isinstance(log[metric], dict): # either take the value or the index of the metric
                         env_data[xy_axis].append(log[metric][scale_switch])
