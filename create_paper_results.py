@@ -13,7 +13,7 @@ from exprep.elex.graphs import create_scatter_graph, add_rating_background
 from exprep.elex.util import RATING_COLORS, RATING_COLOR_SCALE
 
 PLOT_WIDTH = 700
-PLOT_HEIGHT = PLOT_WIDTH / 2
+PLOT_HEIGHT = PLOT_WIDTH // 2.5
 
 
 def create_all(database, boundaries, boundaries_real, meta):
@@ -131,8 +131,6 @@ def create_all(database, boundaries, boundaries_real, meta):
     top_increasing_k_stats = {}
     best5_ene, best5_rmse, opti_ene, opti_rmse, rec_ene, rec_rmse = [], [], [], [], [], []
     for idx, ((ds), data) in enumerate(meta_learned_db.groupby(['dataset'])):
-        true_best = data.sort_values(f'compound_index_true', ascending=False).iloc[0]
-        pred_best = data.sort_values(f'compound_index_pred', ascending=False).iloc[0]
         sorted_by_pred_rmse = data.sort_values(f'RMSE_pred', ascending=False)
         lowest_rmse = min([entry['value'] for entry in data['RMSE']])
         lowest_ene = sum([entry['value'] for entry in data['train_power_draw']]) / 3.6e3
@@ -158,6 +156,8 @@ def create_all(database, boundaries, boundaries_real, meta):
             assert best5_ene[-1] < opti_ene[-1]
 
             ######### star plots with recommendation vs best
+            true_best = data.sort_values(f'compound_index_true', ascending=False).iloc[0]
+            pred_best = data.sort_values(f'compound_index_pred', ascending=False).iloc[0]
             fig = make_subplots(rows=1, cols=1, subplot_titles=[meta['dataset'][ds]['name']])
             fig.add_trace(go.Scatterpolar(
                 r=[true_best[col + '_true'] for col in pred_cols[1:]], line={'color': RATING_COLORS[0]},
