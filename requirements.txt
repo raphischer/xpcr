@@ -1,12 +1,10 @@
-matplotlib
 gluonts
 mxnet
 numpy==1.18.5
-rpy2 # install R, and from R run install.packages("curl", "forecast")
+pandas
 scikit-learn
-xgboost
+codecarbon
 
- 
 # rating and results generation (ELEx)
 dash
 plotly
