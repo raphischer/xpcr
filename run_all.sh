@@ -1,12 +1,12 @@
 #!/bin/bash
-# "bitcoin_dataset_without_missing_values" fails for ds-seed 42 on deepfactor deeprenewal deepstate mqcnn mqrnn and nbeats???!!!
 # TODO full command
-# for d in "m1_quarterly_dataset" "solar_weekly_dataset" "tourism_quarterly_dataset" "fred_md_dataset" "nn5_daily_dataset_without_missing_values" "electricity_weekly_dataset" "nn5_weekly_dataset" "hospital_dataset" "m3_quarterly_dataset" "m1_monthly_dataset" "traffic_weekly_dataset" "m4_weekly_dataset" "tourism_monthly_dataset" "covid_deaths_dataset" "cif_2016_dataset" "pedestrian_counts_dataset" "vehicle_trips_dataset_without_missing_values"
-# TODO ws05
-# -1 seed for "m1_quarterly_dataset" "solar_weekly_dataset" "tourism_quarterly_dataset" "fred_md_dataset" "nn5_daily_dataset_without_missing_values" "electricity_weekly_dataset" "nn5_weekly_dataset" "hospital_dataset" "m3_quarterly_dataset" "m1_monthly_dataset"
+# for d in "bitcoin_dataset_without_missing_values" "m1_quarterly_dataset" "solar_weekly_dataset" "tourism_quarterly_dataset" "fred_md_dataset" "nn5_daily_dataset_without_missing_values" "electricity_weekly_dataset" "nn5_weekly_dataset" "hospital_dataset" "m3_quarterly_dataset" "m1_monthly_dataset" "traffic_weekly_dataset" "m4_weekly_dataset" "tourism_monthly_dataset" "covid_deaths_dataset" "cif_2016_dataset" "pedestrian_counts_dataset" "vehicle_trips_dataset_without_missing_values"
 # TODO ws022
-# ------------
-for d in "traffic_weekly_dataset" "m4_weekly_dataset" "tourism_monthly_dataset" "covid_deaths_dataset" "cif_2016_dataset" "pedestrian_counts_dataset" "vehicle_trips_dataset_without_missing_values"
+# ------------------
+# TODO GPU
+# TODO ws05
+
+for d in "bitcoin_dataset_without_missing_values" "m1_quarterly_dataset" "solar_weekly_dataset" "tourism_quarterly_dataset" "fred_md_dataset" "nn5_daily_dataset_without_missing_values" "electricity_weekly_dataset" "nn5_weekly_dataset" "hospital_dataset" "m3_quarterly_dataset" "m1_monthly_dataset" "traffic_weekly_dataset" "m4_weekly_dataset" "tourism_monthly_dataset" "covid_deaths_dataset" "cif_2016_dataset" "pedestrian_counts_dataset" "vehicle_trips_dataset_without_missing_values"
 do
     for m in "deepar" "deepstate" "deepfactor" "deeprenewal" "gpforecaster" "mqcnn" "mqrnn" "nbeats" "tempfus" "wavenet" "feedforward"
     do
