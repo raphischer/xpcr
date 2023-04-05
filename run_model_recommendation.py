@@ -19,7 +19,7 @@ from sklearn.linear_model import LinearRegression, Ridge, Lasso, ElasticNet
 from sklearn.svm import LinearSVR, SVR
 from sklearn.dummy import DummyRegressor
 
-from exprep.util import PatchedJSONEncoder
+from mlprops.util import PatchedJSONEncoder
 
 
 # suppress warnings

@@ -4,8 +4,8 @@ import json
 import numpy as np
 import pandas as pd
 
-from exprep.unit_reformatting import CustomUnitReformater
-from exprep.load_experiment_logs import find_sub_database
+from mlprops.unit_reformatting import CustomUnitReformater
+from mlprops.load_experiment_logs import find_sub_database
 
 
 def calculate_compound_rating(ratings, mode='optimistic median'):

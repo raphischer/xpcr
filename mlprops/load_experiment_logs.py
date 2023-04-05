@@ -7,8 +7,8 @@ import importlib
 import pandas as pd
 import numpy as np
 
-from exprep.monitoring import aggregate_monitoring_log
-from exprep.util import basename, PatchedJSONEncoder, read_json, read_txt
+from mlprops.monitoring import aggregate_monitoring_log
+from mlprops.util import basename, PatchedJSONEncoder, read_json, read_txt
 
 
 #############################

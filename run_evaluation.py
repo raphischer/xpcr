@@ -4,8 +4,8 @@ import pandas as pd
 import numpy as np
 import re
 
-from exprep.index_and_rate import rate_database
-from exprep.util import load_meta
+from mlprops.index_and_rate import rate_database
+from mlprops.util import load_meta
 
 from data_loader import convert_tsf_to_dataframe as load_data
 from data_loader import subsampled_to_orig
@@ -64,7 +64,7 @@ if __name__ == '__main__':
     print(f'Database constructed from logs has {rated_database.shape} entries')
 
     if args.mode == 'interactive':
-        from exprep.elex.app import Visualization
+        from mlprops.elex.app import Visualization
         app = Visualization(rated_database, boundaries, real_boundaries, meta)
         app.run_server(debug=args.debug, host=args.host, port=args.port)
 
@@ -73,8 +73,8 @@ if __name__ == '__main__':
         create_all(rated_database, boundaries, real_boundaries, meta)
 
     if args.mode == 'label':
-        from exprep.labels.label_generation import PropertyLabel
-        from exprep.elex.util import fill_meta
+        from mlprops.labels.label_generation import PropertyLabel
+        from mlprops.elex.util import fill_meta
         summary = fill_meta(rated_database.iloc[0].to_dict(), meta)
         pdf_doc = PropertyLabel(summary, 'optimistic median')
         pdf_doc.save('label.pdf')

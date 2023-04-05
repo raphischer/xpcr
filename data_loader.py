@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 import re
 from distutils.util import strtobool
 
-from exprep.util import fix_seed
+from mlprops.util import fix_seed
 
 import numpy as np
 import pandas as pd

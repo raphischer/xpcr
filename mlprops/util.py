@@ -9,7 +9,7 @@ import re
 import numpy as np
 import pandas as pd
 
-from exprep.monitoring import log_system_info
+from mlprops.monitoring import log_system_info
 
 
 def load_meta(directory=None):

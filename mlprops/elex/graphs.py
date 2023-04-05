@@ -1,8 +1,8 @@
 import numpy as np
 import plotly.graph_objects as go
 
-from exprep.index_and_rate import calculate_compound_rating
-from exprep.elex.util import RATING_COLORS, ENV_SYMBOLS, PATTERNS
+from mlprops.index_and_rate import calculate_compound_rating
+from mlprops.elex.util import RATING_COLORS, ENV_SYMBOLS, PATTERNS
 
 
 def add_rating_background(fig, rating_pos, mode, dark_mode):

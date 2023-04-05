@@ -8,9 +8,9 @@ from plotly.subplots import make_subplots
 import plotly.express as px
 from plotly.express.colors import sample_colorscale
 
-from exprep.index_and_rate import calculate_single_compound_rating
-from exprep.elex.graphs import create_scatter_graph, add_rating_background
-from exprep.elex.util import RATING_COLORS, RATING_COLOR_SCALE
+from mlprops.index_and_rate import calculate_single_compound_rating
+from mlprops.elex.graphs import create_scatter_graph, add_rating_background
+from mlprops.elex.util import RATING_COLORS, RATING_COLOR_SCALE
 
 PLOT_WIDTH = 700
 PLOT_HEIGHT = PLOT_WIDTH // 2.5

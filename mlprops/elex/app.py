@@ -9,13 +9,13 @@ from dash.dependencies import Input, Output, State
 from dash import dcc
 import dash_bootstrap_components as dbc
 
-from exprep.index_and_rate import rate_database, load_boundaries, save_boundaries, calculate_optimal_boundaries, save_weights, find_optimal_reference, find_relevant_metrics, update_weights
-from exprep.elex.pages import create_page
-from exprep.elex.util import summary_to_html_tables, toggle_element_visibility, fill_meta
-from exprep.elex.graphs import create_scatter_graph, create_bar_graph, add_rating_background
-from exprep.labels.label_generation import PropertyLabel
-from exprep.unit_reformatting import CustomUnitReformater
-from exprep.load_experiment_logs import find_sub_database
+from mlprops.index_and_rate import rate_database, load_boundaries, save_boundaries, calculate_optimal_boundaries, save_weights, find_optimal_reference, find_relevant_metrics, update_weights
+from mlprops.elex.pages import create_page
+from mlprops.elex.util import summary_to_html_tables, toggle_element_visibility, fill_meta
+from mlprops.elex.graphs import create_scatter_graph, create_bar_graph, add_rating_background
+from mlprops.labels.label_generation import PropertyLabel
+from mlprops.unit_reformatting import CustomUnitReformater
+from mlprops.load_experiment_logs import find_sub_database
 
 
 class Visualization(dash.Dash):

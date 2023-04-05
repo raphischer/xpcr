@@ -1,4 +1,4 @@
-from exprep.load_experiment_logs import load_database
+from mlprops.load_experiment_logs import load_database
 
 RESULT_PATHS = [
     ('mnt_data/results', 'results/merged22', 'results/database22.pkl')

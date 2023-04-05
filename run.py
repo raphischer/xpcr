@@ -7,7 +7,7 @@ import traceback
 from pathlib import Path
 
 from methods import init_model_and_data, run_validation, evaluate
-from exprep.util import fix_seed, create_output_dir, Logger, PatchedJSONEncoder
+from mlprops.util import fix_seed, create_output_dir, Logger, PatchedJSONEncoder
 from codecarbon import OfflineEmissionsTracker
 
 
