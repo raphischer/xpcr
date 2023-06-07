@@ -113,26 +113,31 @@ if __name__ == '__main__':
         #     print(f'{idx:<3} {ds_print} {success} {str(ds_stat["entries"]):<8} entries {len(ds_)}, time total {ds_stat["time_total"] / 3600:6.2f} h (train {ds_stat["time_train"] / 3600:6.2f} h, infer {ds_stat["time_infer"] / 3600:6.2f} h)')
     
     if args.mode == 'meta':
-        for idx, ((ds), data) in enumerate(iter(rated_database.groupby(['dataset']))):
-            # store dataset specific meta features
-            ds_name = data['dataset_orig'].iloc[0]
-            subsample_str = ds.replace(ds_name, '').replace('_', '')
-            ds_seed = -1 if len(subsample_str) == 0 else int(subsample_str)
+        meta_database_path = "results/database_for_meta.pkl"
+        if os.path.isfile(meta_database_path): # read just the single database
+            rated_database = pd.read_pickle(meta_database_path)
+        else:
+            for idx, ((ds), data) in enumerate(iter(rated_database.groupby(['dataset']))):
+                # store dataset specific meta features
+                ds_name = data['dataset_orig'].iloc[0]
+                subsample_str = ds.replace(ds_name, '').replace('_', '')
+                ds_seed = -1 if len(subsample_str) == 0 else int(subsample_str)
 
-            full_path = os.path.join('mnt_data/data', ds_name + '.tsf')
-            ts_data, freq, seasonality, forecast_horizon, contain_missing_values, contain_equal_length = load_data(full_path, ds_sample_seed=ds_seed)
-            # rated_database.loc[data.index,'orig_dataset'] = ds_name # ensure no bleeding across subsampled datasets in cross-validation
-            rated_database.loc[data.index,'num_ts'] = ts_data.shape[0]
-            rated_database.loc[data.index,'avg_ts_len'] = ts_data['series_value'].map(lambda ts: len(ts)).mean()
-            rated_database.loc[data.index,'avg_ts_mean'] = ts_data['series_value'].map(lambda ts: np.mean(ts)).mean()
-            rated_database.loc[data.index,'avg_ts_min'] = ts_data['series_value'].map(lambda ts: np.min(ts)).mean()
-            rated_database.loc[data.index,'avg_ts_max'] = ts_data['series_value'].map(lambda ts: np.max(ts)).mean()
-            rated_database.loc[data.index,'seasonality'] = seasonality
-            rated_database.loc[data.index,'freq'] = freq
-            rated_database.loc[data.index,'forecast_horizon'] = forecast_horizon
-            rated_database.loc[data.index,'contain_missing_values'] = contain_missing_values
-            rated_database.loc[data.index,'contain_equal_length'] = contain_equal_length
-
+                full_path = os.path.join('mnt_data/data', ds_name + '.tsf')
+                ts_data, freq, seasonality, forecast_horizon, contain_missing_values, contain_equal_length = load_data(full_path, ds_sample_seed=ds_seed)
+                # rated_database.loc[data.index,'orig_dataset'] = ds_name # ensure no bleeding across subsampled datasets in cross-validation
+                rated_database.loc[data.index,'num_ts'] = ts_data.shape[0]
+                rated_database.loc[data.index,'avg_ts_len'] = ts_data['series_value'].map(lambda ts: len(ts)).mean()
+                rated_database.loc[data.index,'avg_ts_mean'] = ts_data['series_value'].map(lambda ts: np.mean(ts)).mean()
+                rated_database.loc[data.index,'avg_ts_min'] = ts_data['series_value'].map(lambda ts: np.min(ts)).mean()
+                rated_database.loc[data.index,'avg_ts_max'] = ts_data['series_value'].map(lambda ts: np.max(ts)).mean()
+                rated_database.loc[data.index,'seasonality'] = seasonality
+                rated_database.loc[data.index,'freq'] = freq
+                rated_database.loc[data.index,'forecast_horizon'] = forecast_horizon
+                rated_database.loc[data.index,'contain_missing_values'] = contain_missing_values
+                rated_database.loc[data.index,'contain_equal_length'] = contain_equal_length
+            rated_database.to_pickle(meta_database_path)
+            
         models = pd.unique(rated_database["model"])
         shape = rated_database.shape
         ds = pd.unique(rated_database["dataset"])
