@@ -4,14 +4,16 @@ import json
 import pandas as pd
 import numpy as np
 
-# preprocessing, metrics & co
+# preprocessing, metrics & co^
+from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder, LabelEncoder
 from sklearn.model_selection import cross_validate
 from sklearn.utils import resample
 from sklearn.model_selection import KFold, StratifiedKFold, GroupKFold
-from sklearn.metrics import check_scoring
+from sklearn.metrics import mean_absolute_error, max_error
 from sklearn.preprocessing import StandardScaler
-from sklearn.pipeline import make_pipeline
+from sklearn.pipeline import Pipeline
+from sklearn.base import clone
 
 # ML methods
 from sklearn.ensemble import RandomForestRegressor, ExtraTreesRegressor
@@ -55,61 +57,51 @@ def prepare_features(df, features):
     return X, fnames, fitted_transform
 
 
-SHORTFORMS = {
-    'mean_absolute_error': 'MAE',
-    'max_error': 'MaxE',
-    'accuracy': 'ACC',
-    'balanced_accuracy': 'BAL ACC'
-}
-
-
 def print_cv_scoring_results(model_name, scoring, scores):
     results = {} # 'fit time': (f'{np.mean(scores["fit_time"]):7.2f}'[:6], f'{np.std(scores["fit_time"]):6.1f}'[:5])}
     for split in ['train', 'test']:
         for score in scoring:
             res = scores[split + '_' + score]
             mean_res, std_res = np.mean(res), np.std(res)
-            if mean_res < 0:
-                score = score.replace('neg_', '')
-                mean_res *= -1
-            for lf, sf in SHORTFORMS.items():
-                if score == lf:
-                    score = score.replace(lf, sf)
             results[f'{split:<5} {score}'] = (f'{mean_res:7.5f}'[:6], f'{std_res:6.4f}'[:5])
     print(f'{model_name:<20}' + ' - '.join([f'{metric:<10} {mean_v} +- {std_v}' for metric, (mean_v, std_v) in results.items()]))
 
 
-FEATURES = {
-    'freq':                     OneHotEncoder(),
-    'forecast_horizon':         OneHotEncoder(),
-    'contain_missing_values':   OneHotEncoder(),
-    'contain_equal_length':     OneHotEncoder(),
-    'model':                    OneHotEncoder(),
-    'num_ts':                   None,
-    'avg_ts_len':               None,
-    'avg_ts_mean':              None,
-    'avg_ts_min':               None,
-    'avg_ts_max':               None
+FEATURES_CAT = {
+    'freq':                     True,
+    'forecast_horizon':         True,
+    'contain_missing_values':   True,
+    'contain_equal_length':     True,
+    'model':                    True,
+    'num_ts':                   False,
+    'avg_ts_len':               False,
+    'avg_ts_mean':              False,
+    'avg_ts_min':               False,
+    'avg_ts_max':               False
 }
 
 
 REGRESSORS = {
-    'Global Mean':              make_pipeline(StandardScaler(), DummyRegressor()),
-    'Linear Regression':        make_pipeline(StandardScaler(), LinearRegression()),
-    'Ridge A1':                 make_pipeline(StandardScaler(), Ridge(alpha=1.0)),
-    'Ridge A0.1':               make_pipeline(StandardScaler(), Ridge(alpha=0.1)),
-    'Lasso A1':                 make_pipeline(StandardScaler(), Lasso(alpha=1.0)),
-    'Lasso A0.1':               make_pipeline(StandardScaler(), Lasso(alpha=0.1)),
-    'ElasticNet A1':            make_pipeline(StandardScaler(), ElasticNet(alpha=1.0)),
-    'ElasticNet A0.1':          make_pipeline(StandardScaler(), ElasticNet(alpha=0.1)),
-    'LinearSVR':                make_pipeline(StandardScaler(), LinearSVR()),
-    'SVR':                      make_pipeline(StandardScaler(), SVR()),
-    'Random Forest':            make_pipeline(StandardScaler(), RandomForestRegressor(n_estimators=10)),
-    'Extra RF':                 make_pipeline(StandardScaler(), ExtraTreesRegressor(n_estimators=10)),
+    # 'Global Mean':              DummyRegressor(),
+    'Linear Regression':        LinearRegression(),
+    'Ridge A1':                 Ridge(alpha=1.0),
+    'Ridge A0.1':               Ridge(alpha=0.1),
+    'Lasso A1':                 Lasso(alpha=1.0),
+    'Lasso A0.1':               Lasso(alpha=0.1),
+    'ElasticNet A1':            ElasticNet(alpha=1.0),
+    'ElasticNet A0.1':          ElasticNet(alpha=0.1),
+    'LinearSVR':                LinearSVR(),
+    'SVR':                      SVR(),
+    'Random Forest':            RandomForestRegressor(n_estimators=10),
+    'Extra RF':                 ExtraTreesRegressor(n_estimators=10),
 }
 
 
-SCORING = ['neg_mean_absolute_error', 'max_error']
+SCORING = {
+    'MAE': mean_absolute_error,
+    'MaxE': max_error
+}
+
 # meta learn config
 N_SPLITS =          5
 # TARGET_COLUMNS =    ['compound_index', 'running_time', 'parameters', 'RMSE']
@@ -117,74 +109,89 @@ CV =                GroupKFold(n_splits=N_SPLITS) # KFold StratifiedKFold
 GROUP_BY =          'dataset_orig' # 'model'
 METRIC_FIELD =      'index'
 
+# Append classifier to preprocessing pipeline.
+# Now we have a full prediction pipeline.
+# clf = Pipeline(steps=[('preprocessor', preprocessor),
+#                       ('classifier', LogisticRegression(solver='lbfgs'))])
 
-def evaluate_recommendation(database, only_print_better_than_random=False):
-    BEST_SCORER = f'test_{SCORING[0]}'
+
+
+def evaluate_recommendation(database):
+    BEST_SCORER = f'test_{next(iter(SCORING.keys()))}'
     # load features and prepare ML pipeline
-    X, fnames, fitted_transform = prepare_features(database, FEATURES)
+    # X, fnames, fitted_transform = prepare_features(database, FEATURES)
+    # custom CV to ensure splitting y labels only on training y
     group_info = LabelEncoder().fit_transform(database[GROUP_BY].values)
+    cv_splitted = list(CV.split(np.zeros((database.shape[0], 1)), None, group_info))
 
     ##############################################################
     ##### 1. TRAIN AND EVALUATE A BUNCH OF REGRESSION MODELS #####
     ##############################################################
-    print(f'\n\n:::::::::::::::::::::::::::: {"RUNNING ON " + str(X.shape) + " FEATURES":^35} ::::::::::::::::::::::::::::\n\n')
+    # print(f'\n\n:::::::::::::::::::::::::::: {"RUNNING ON " + str(X.shape) + " FEATURES":^35} ::::::::::::::::::::::::::::\n\n')
 
-    target_cols = []
     for col in database.columns:
-        
         y = np.array([val[METRIC_FIELD] if isinstance(val, dict) else np.nan for val in database[col]])
         if np.any(np.isnan(y)):
             print('SKIPPING', col)
         else:
-            target_cols.append(col)
             task = f'Regression of {col}'
             print(f'\n\n:::::::::::::::::::::::::::: {task:^35} ::::::::::::::::::::::::::::')
             
             predictions, true, proba = {}, {}, {}
-            best_name, best_score, best_scores = '', -np.inf, None
-            cv_splitted = list(CV.split(X, y, group_info))
+            best_name, best_score, best_scores = '', np.inf, None
             split_index = np.zeros((database.shape[0], 1))
 
             for model_name, model_cls in REGRESSORS.items():
-                # custom CV to ensure splitting y labels only on training y
-                # scores = cross_validate(cls_, X, y, scoring=SCORING, cv=CV, groups=group_info, return_train_score=True)
-                scores = {}
+                # for models with intercept, onehot enocded features need to have one column dropped due to collinearity
+                # https://stackoverflow.com/questions/44712521/very-large-values-predicted-for-linear-regression
+                drop_first = 'first'#  if hasattr(model_cls, 'fit_intercept') else None
+                numeric_transformer = Pipeline(steps=[ ('scaler', StandardScaler()) ])
+                categories = [ sorted(pd.unique(database[feat]).tolist()) for feat, cat in FEATURES_CAT.items() if cat ]
+                categoric_transformer = Pipeline(steps=[ ('onehot', OneHotEncoder(categories=categories, drop=drop_first)) ])
+                preprocessor = ColumnTransformer(transformers=[
+                    ('num', numeric_transformer, [feat for feat, cat in FEATURES_CAT.items() if not cat]),
+                    ('cat', categoric_transformer, [feat for feat, cat in FEATURES_CAT.items() if cat]) 
+                ])
 
-                for split_idx, (train_idx, test_idx) in enumerate(cv_splitted):
-                    X_train, X_test, y_train, y_test = X[train_idx], X[test_idx], y[train_idx], y[test_idx]
-                    split_index[test_idx] = split_idx
-
-                    model_cls.fit(X_train, y_train)
-                    for score in SCORING:
-                        scorer = check_scoring(model_cls, score)
-                        for split, X_pred, y_true in zip(['train', 'test'], [X_train, X_test], [y_train, y_test]):
-                            score_name = f'{split}_{score}'
-                            if score_name not in scores:
-                                scores[score_name] = []
-                            scores[score_name].append(scorer(model_cls, X_pred, y_true))
-
-                    # safe the predictions per model for later usage
-                    if model_name not in predictions:
-                        predictions[model_name] = np.zeros_like(y, dtype=np.float)
-                        true[model_name] = np.zeros_like(y, dtype=np.float)
-                        proba[model_name] = np.zeros_like(y, dtype=np.float)
-                    predictions[model_name][test_idx] = model_cls.predict(X_test)
-                    true[model_name][test_idx] = y_test
-                    has_prob = hasattr(model_cls, "predict_proba")
-                    if has_prob:
-                        proba[model_name] = model_cls.predict_proba(X_test)
+                predictions[model_name] = np.zeros_like(y, dtype=np.float)
+                true[model_name] = np.zeros_like(y, dtype=np.float)
+                proba[model_name] = np.zeros_like(y, dtype=np.float)
                 
+                # init scoring dict
+                scores = {}
+                for score in SCORING.keys():
+                    scores[f'train_{score}'] = []
+                    scores[f'test_{score}'] = []
+                
+                # fit and predict for each split
+                for split_idx, (train_idx, test_idx) in enumerate(cv_splitted):
+                    split_index[test_idx] = split_idx
+                    X_train, X_test, y_train, y_test = database.iloc[train_idx], database.iloc[test_idx], y[train_idx], y[test_idx]
+                    model = Pipeline(steps=[('preprocessor', preprocessor), ('regressor', clone(model_cls))])
+                    model.fit(X_train, y_train)
+                    y_train_pred = model.predict(X_train)
+                    # safe the predictions per model for later usage
+                    predictions[model_name][test_idx] = model.predict(X_test)
+                    true[model_name][test_idx] = y_test
+                    if hasattr(model, "predict_proba"):
+                        proba[model_name] = model.predict_proba(X_test)
+                    # calculate scoring
+                    for score_name, score in SCORING.items():
+                        scores[f'train_{score_name}'].append(score(y_train, y_train_pred))
+                        scores[f'test_{score_name}'].append(score(y_test, predictions[model_name][test_idx]))
+
                 # print scoring and best method
-                if not only_print_better_than_random or np.mean(scores[BEST_SCORER]) > 0.5:
-                    print_cv_scoring_results(model_name, SCORING, scores)
-                if np.mean(scores[BEST_SCORER]) > np.mean(best_score):
+                print_cv_scoring_results(model_name, SCORING.keys(), scores)
+                if np.mean(scores[BEST_SCORER]) < np.mean(best_score):
                     best_name = model_name
                     best_score = scores[BEST_SCORER]
                     best_scores = scores
             print('----------- BEST METHOD:')
-            print_cv_scoring_results(best_name, SCORING, best_scores)
+            print_cv_scoring_results(best_name, SCORING.keys(), best_scores)
 
             # store true label and prediction in database
+            high_errors = predictions['Linear Regression'] - true['Linear Regression'] > 100
+            print(database.loc[high_errors].shape[0], pd.unique(database.loc[high_errors]['dataset_orig']))
             database[f'{col}_pred'] = predictions[best_name]
             database[f'{col}_true'] = true[best_name]
             database[f'{col}_prob'] = proba[best_name]

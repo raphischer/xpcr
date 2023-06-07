@@ -139,6 +139,7 @@ if __name__ == '__main__':
                 rated_database.loc[data.index,'forecast_horizon'] = forecast_horizon
                 rated_database.loc[data.index,'contain_missing_values'] = contain_missing_values
                 rated_database.loc[data.index,'contain_equal_length'] = contain_equal_length
+                # also assess heterogeneity nonlinearity pacf_features
             rated_database.to_pickle(meta_database_path)
 
         models = pd.unique(rated_database["model"])
@@ -146,4 +147,8 @@ if __name__ == '__main__':
         ds = pd.unique(rated_database["dataset"])
         print(f'Meta learning to be run on {shape} database entries, with a total of {len(ds)} datasets and {len(models)} models!')
         from run_model_recommendation import evaluate_recommendation
+
+        # TODO check why there is an issue here?
+        rated_database = rated_database[rated_database['dataset_orig'] != 'bitcoin_dataset_without_missing_values']
+
         evaluate_recommendation(rated_database)
