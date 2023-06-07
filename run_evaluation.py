@@ -7,6 +7,7 @@ import re
 from mlprops.index_and_rate import rate_database
 from mlprops.util import load_meta
 
+from data_lookup_info import LOOKUP
 from data_loader import convert_tsf_to_dataframe as load_data
 from data_loader import subsampled_to_orig
 
@@ -125,6 +126,8 @@ if __name__ == '__main__':
 
                 full_path = os.path.join('mnt_data/data', ds_name + '.tsf')
                 ts_data, freq, seasonality, forecast_horizon, contain_missing_values, contain_equal_length = load_data(full_path, ds_sample_seed=ds_seed)
+                if forecast_horizon is None:
+                    forecast_horizon = LOOKUP[ds_name][1]
                 # rated_database.loc[data.index,'orig_dataset'] = ds_name # ensure no bleeding across subsampled datasets in cross-validation
                 rated_database.loc[data.index,'num_ts'] = ts_data.shape[0]
                 rated_database.loc[data.index,'avg_ts_len'] = ts_data['series_value'].map(lambda ts: len(ts)).mean()
@@ -137,7 +140,7 @@ if __name__ == '__main__':
                 rated_database.loc[data.index,'contain_missing_values'] = contain_missing_values
                 rated_database.loc[data.index,'contain_equal_length'] = contain_equal_length
             rated_database.to_pickle(meta_database_path)
-            
+
         models = pd.unique(rated_database["model"])
         shape = rated_database.shape
         ds = pd.unique(rated_database["dataset"])
