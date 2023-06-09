@@ -1,5 +1,6 @@
 import os
 import time
+import pickle
 
 import pandas as pd
 import numpy as np
@@ -14,6 +15,9 @@ from mlprops.elex.util import RATING_COLORS, RATING_COLOR_SCALE
 
 PLOT_WIDTH = 700
 PLOT_HEIGHT = PLOT_WIDTH // 2.5
+
+DS_SEL = 'traffic_weekly_dataset'
+COL_SEL = 'RMSE'
 
 
 def create_all(database, boundaries, boundaries_real, meta):
@@ -74,6 +78,48 @@ def create_all(database, boundaries, boundaries_real, meta):
     os.remove("dummy.pdf")
 
 
+
+    ### EXPLANATIONS
+    data = meta_learned_db[meta_learned_db['dataset'] == DS_SEL]
+    best_model = data.iloc[np.argmax(data['compound_index_pred'])]
+    cols_to_plot = [col for col in data.columns if col.endswith('_pred') and 'compound' not in col]
+    contrib = np.array([best_model[col] * best_model[col.replace('_pred', '')]['weight'] for col in cols_to_plot])
+    contrib = contrib / contrib.sum() * 100
+    # why recommendation?
+    title = f"Why use {meta['model'][best_model['model']]['short']} on {meta['dataset'][DS_SEL]['name']}?"
+    fig=px.bar(
+        title=title, x=[meta['properties'][col.replace('_pred', '')]['shortname'] for col in cols_to_plot],
+        y=contrib, color=np.array(contrib) * -1.0, color_continuous_scale=RATING_COLOR_SCALE
+    )
+    fig.update_yaxes(title='Contribution to compound [%]')
+    fig.update_xaxes(title='', tickangle=90)
+    fig.update_layout(width=PLOT_WIDTH / 2, height=PLOT_WIDTH / 2, margin={'l': 0, 'r': 0, 'b': 0, 't': 30})
+    fig.update(layout_coloraxis_showscale=False)
+    fig.write_image("why_recommended.pdf")
+    fig.show()
+    # why RMSE estimate?
+    mod_path = os.path.join(os.path.dirname(os.getcwd()), 'results', f'{COL_SEL}_models', f'model{int(best_model["split_index"])}.pkl')
+    with open(mod_path, 'rb') as modfile:
+        model = pickle.load(modfile)
+    ft_imp = model.named_steps['regressor'].feature_importances_
+    ft_names = [None] * ft_imp.size
+    transf_ind = model.named_steps['preprocessor'].output_indices_
+    transf = model.named_steps['preprocessor'].named_transformers_
+    ft_names[transf_ind['num']] = transf['num'].feature_names_in_ # numerical feature names
+    cat_names = []
+    for ft, cat in zip(transf['cat'].feature_names_in_, transf['cat'].named_steps['onehot'].categories):
+        cat_names = cat_names + [f'{ft}_{val}' for val in cat]
+    ft_names[transf_ind['cat']] = cat_names # categorical feature names
+    title = f"Reasons for RMSE estimate?"
+    fig=px.bar(title=title, x=ft_names, y=ft_imp, color=ft_imp * -1.0, color_continuous_scale=RATING_COLOR_SCALE)
+    fig.update_yaxes(title='Feature importance')
+    fig.update_xaxes(title='', tickangle=90)
+    fig.update_layout(width=PLOT_WIDTH / 2, height=PLOT_WIDTH / 2, margin={'l': 0, 'r': 0, 'b': 0, 't': 30})
+    fig.update(layout_coloraxis_showscale=False)
+    fig.write_image("why_rmse.pdf")
+    fig.show()
+
+
     ### PCR trade-offs scatters
     for xaxis, yaxis in [['power_draw', 'RMSE'], ['train_power_draw', 'parameters']]:
         for idx, (ds, data) in enumerate(database.groupby(['dataset_orig'])):
@@ -106,26 +152,15 @@ def create_all(database, boundaries, boundaries_real, meta):
 
 
     ######## META LEARN RESULTS #######
-    meta['properties']['compound_index'] = {'name': 'Compound score', 'weight': 1.0}
+    meta['properties']['compound_index'] = {'shortname': 'Compound', 'weight': 1.0}
+    meta['properties']['compound_index_direct'] = {'shortname': 'Direct comp', 'weight': 1.0}
     k_best = 5
     error_threshold = 0.1
-    pred_cols = [col.replace('_true', '') for col in meta_learned_db.columns if '_true' in col]
+    pred_cols = [col.replace('_true', '') for col in meta_learned_db.columns if '_true' in col and 'compound' not in col]
     pred_col_names = [meta['properties'][col]['name'] for col in pred_cols]
     pred_col_shortnames = [meta['properties'][col]['shortname'] for col in pred_cols]
-    # assess the overal compound index prediction
-    meta_learned_db['compound_index_true'] = meta_learned_db['compound_index']
-    compounds_pred = []
-    for _, row in meta_learned_db.iterrows():
-        to_rate = {}
-        for col in pred_cols:
-            to_rate[col] = {'rating': 0} # TODO also assess compound rating with help of boundaries
-            to_rate[col]['weight'] = row[col]['weight']
-            to_rate[col]['index'] = row[pred_cols[0] + '_pred']
-        compounds_pred.append(calculate_single_compound_rating(to_rate, 'optimistic median')['index'])
-    meta_learned_db['compound_index_pred'] = compounds_pred
-    meta_learned_db['compound_index_pred_error'] = np.abs(meta_learned_db['compound_index_pred'] - meta_learned_db['compound_index_true'] )
-    pred_cols = ['compound_index'] + pred_cols
-    pred_col_names = ['Compound index'] + pred_col_names
+    pred_cols = ['compound_index', 'compound_index_direct'] + pred_cols
+    pred_col_names = ['Compound index', 'Direct compound index'] + pred_col_names
 
     # access statistics per data set
     top_increasing_k_stats = {}
@@ -159,6 +194,7 @@ def create_all(database, boundaries, boundaries_real, meta):
             true_best = data.sort_values(f'compound_index_true', ascending=False).iloc[0]
             pred_best = data.sort_values(f'compound_index_pred', ascending=False).iloc[0]
             fig = make_subplots(rows=1, cols=1, subplot_titles=[meta['dataset'][ds]['name']])
+            # the first pred col gives the real assessed compound index
             fig.add_trace(go.Scatterpolar(
                 r=[true_best[col + '_true'] for col in pred_cols[1:]], line={'color': RATING_COLORS[0]},
                 theta=pred_col_shortnames, fill='toself', name=f'Compound (Best): {true_best[pred_cols[0]]:4.2f}'
@@ -275,10 +311,10 @@ def create_all(database, boundaries, boundaries_real, meta):
 
     max_x = []
     for plot_idx, results in enumerate(result_scores.values()):
-        x, y, e, w = zip(*reversed([(np.mean(vals), meta['properties'][key]['name'], np.std(vals)
+        x, y, e, w = zip(*reversed([(np.mean(vals), meta['properties'][key]['shortname'], np.std(vals)
         , meta['properties'][key]['weight']) for key, vals in results.items()]))
         w = np.array(w) * -2 + 0.5
-        w = list(w[:-1]) + [1.0]
+        w = list(w[:-2]) + [1.0, 1.0]
         c = sample_colorscale(RATING_COLOR_SCALE, w)
         fig.add_trace(go.Bar(
                 x=x, y=y, error_x=dict(type='data', array=e), orientation='h', marker_color=c

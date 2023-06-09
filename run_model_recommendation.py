@@ -1,5 +1,6 @@
 import os
 import json
+import pickle
 
 import pandas as pd
 import numpy as np
@@ -20,8 +21,11 @@ from sklearn.ensemble import RandomForestRegressor, ExtraTreesRegressor
 from sklearn.linear_model import LinearRegression, Ridge, Lasso, ElasticNet
 from sklearn.svm import LinearSVR, SVR
 from sklearn.dummy import DummyRegressor
+from sklearn.tree import DecisionTreeRegressor
 
 from mlprops.util import PatchedJSONEncoder
+from mlprops.index_and_rate import calculate_single_compound_rating
+from create_paper_results import COL_SEL
 
 
 # suppress warnings
@@ -86,14 +90,24 @@ REGRESSORS = {
     'Linear Regression':        LinearRegression(),
     'Ridge A1':                 Ridge(alpha=1.0),
     'Ridge A0.1':               Ridge(alpha=0.1),
+    'Ridge A00.1':              Ridge(alpha=0.01),
     'Lasso A1':                 Lasso(alpha=1.0),
     'Lasso A0.1':               Lasso(alpha=0.1),
+    'Lasso A0.01':              Lasso(alpha=0.01),
     'ElasticNet A1':            ElasticNet(alpha=1.0),
     'ElasticNet A0.1':          ElasticNet(alpha=0.1),
-    'LinearSVR':                LinearSVR(),
-    'SVR':                      SVR(),
-    'Random Forest':            RandomForestRegressor(n_estimators=10),
-    'Extra RF':                 ExtraTreesRegressor(n_estimators=10),
+    'ElasticNet A0.01':         ElasticNet(alpha=0.01),
+    'LinearSVR C1':             LinearSVR(),
+    'LinearSVR C10':            LinearSVR(C=10.0),
+    'LinearSVR C100':           LinearSVR(C=100.0),
+    'SVR rbf':                  SVR(),
+    'SVR poly':                 SVR(kernel='poly'),
+    'SVR sigmoid':              SVR(kernel='sigmoid'),
+    'DecisionTree':             DecisionTreeRegressor(),
+    'FriedmanTree':             DecisionTreeRegressor(criterion='friedman_mse'),
+    'PoissonTree':              DecisionTreeRegressor(criterion='poisson'),
+    # 'Random Forest':            RandomForestRegressor(n_estimators=10),
+    # 'Extra RF':                 ExtraTreesRegressor(n_estimators=10),
 }
 
 
@@ -101,6 +115,7 @@ SCORING = {
     'MAE': mean_absolute_error,
     'MaxE': max_error
 }
+CV_SCORER = f'test_{next(iter(SCORING.keys()))}'
 
 # meta learn config
 N_SPLITS =          5
@@ -109,17 +124,8 @@ CV =                GroupKFold(n_splits=N_SPLITS) # KFold StratifiedKFold
 GROUP_BY =          'dataset_orig' # 'model'
 METRIC_FIELD =      'index'
 
-# Append classifier to preprocessing pipeline.
-# Now we have a full prediction pipeline.
-# clf = Pipeline(steps=[('preprocessor', preprocessor),
-#                       ('classifier', LogisticRegression(solver='lbfgs'))])
-
-
 
 def evaluate_recommendation(database):
-    BEST_SCORER = f'test_{next(iter(SCORING.keys()))}'
-    # load features and prepare ML pipeline
-    # X, fnames, fitted_transform = prepare_features(database, FEATURES)
     # custom CV to ensure splitting y labels only on training y
     group_info = LabelEncoder().fit_transform(database[GROUP_BY].values)
     cv_splitted = list(CV.split(np.zeros((database.shape[0], 1)), None, group_info))
@@ -127,10 +133,12 @@ def evaluate_recommendation(database):
     ##############################################################
     ##### 1. TRAIN AND EVALUATE A BUNCH OF REGRESSION MODELS #####
     ##############################################################
-    # print(f'\n\n:::::::::::::::::::::::::::: {"RUNNING ON " + str(X.shape) + " FEATURES":^35} ::::::::::::::::::::::::::::\n\n')
 
     for col in database.columns:
         y = np.array([val[METRIC_FIELD] if isinstance(val, dict) else np.nan for val in database[col]])
+        if col == 'compound_index':
+            y = database[col].to_numpy()
+            col = 'compound_index_direct'
         if np.any(np.isnan(y)):
             print('SKIPPING', col)
         else:
@@ -138,13 +146,13 @@ def evaluate_recommendation(database):
             print(f'\n\n:::::::::::::::::::::::::::: {task:^35} ::::::::::::::::::::::::::::')
             
             predictions, true, proba = {}, {}, {}
-            best_name, best_score, best_scores = '', np.inf, None
+            best_models, best_name, best_score, best_scores = None, '', np.inf, None
             split_index = np.zeros((database.shape[0], 1))
 
             for model_name, model_cls in REGRESSORS.items():
                 # for models with intercept, onehot enocded features need to have one column dropped due to collinearity
                 # https://stackoverflow.com/questions/44712521/very-large-values-predicted-for-linear-regression
-                drop_first = 'first'#  if hasattr(model_cls, 'fit_intercept') else None
+                drop_first = 'first' if hasattr(model_cls, 'fit_intercept') else None
                 numeric_transformer = Pipeline(steps=[ ('scaler', StandardScaler()) ])
                 categories = [ sorted(pd.unique(database[feat]).tolist()) for feat, cat in FEATURES_CAT.items() if cat ]
                 categoric_transformer = Pipeline(steps=[ ('onehot', OneHotEncoder(categories=categories, drop=drop_first)) ])
@@ -164,6 +172,7 @@ def evaluate_recommendation(database):
                     scores[f'test_{score}'] = []
                 
                 # fit and predict for each split
+                models = []
                 for split_idx, (train_idx, test_idx) in enumerate(cv_splitted):
                     split_index[test_idx] = split_idx
                     X_train, X_test, y_train, y_test = database.iloc[train_idx], database.iloc[test_idx], y[train_idx], y[test_idx]
@@ -179,24 +188,46 @@ def evaluate_recommendation(database):
                     for score_name, score in SCORING.items():
                         scores[f'train_{score_name}'].append(score(y_train, y_train_pred))
                         scores[f'test_{score_name}'].append(score(y_test, predictions[model_name][test_idx]))
+                    models.append(model)
 
                 # print scoring and best method
                 print_cv_scoring_results(model_name, SCORING.keys(), scores)
-                if np.mean(scores[BEST_SCORER]) < np.mean(best_score):
+                if np.mean(scores[CV_SCORER]) < np.mean(best_score):
+                    best_models = models
                     best_name = model_name
-                    best_score = scores[BEST_SCORER]
+                    best_score = scores[CV_SCORER]
                     best_scores = scores
             print('----------- BEST METHOD:')
             print_cv_scoring_results(best_name, SCORING.keys(), best_scores)
 
             # store true label and prediction in database
-            high_errors = predictions['Linear Regression'] - true['Linear Regression'] > 100
-            print(database.loc[high_errors].shape[0], pd.unique(database.loc[high_errors]['dataset_orig']))
             database[f'{col}_pred'] = predictions[best_name]
             database[f'{col}_true'] = true[best_name]
             database[f'{col}_prob'] = proba[best_name]
             database[f'{col}_pred_model'] = best_name
             database[f'{col}_pred_error'] = np.abs(database[f'{col}_pred'] - database[f'{col}_true'])
             database['split_index'] = split_index
+            
+            # write models in order to check feature importance later on
+            if col == COL_SEL:
+                path = os.path.join('results', f'{COL_SEL}_models')
+                if not os.path.isdir(path):
+                    os.makedirs(path)
+                for idx, model in enumerate(best_models):
+                    with open(os.path.join(path, f'model{idx}.pkl'), 'wb') as outfile:
+                        pickle.dump(model, outfile)
+
+    pred_cols = [col.replace('_true', '') for col in database.columns if '_true' in col and 'compound' not in col]
+    database['compound_index_true'] = database['compound_index']
+    compounds_pred = []
+    for _, row in database.iterrows():
+        to_rate = {}
+        for col in pred_cols:
+            to_rate[col] = {'rating': 0} # TODO also assess compound rating with help of boundaries
+            to_rate[col]['weight'] = row[col]['weight']
+            to_rate[col]['index'] = row[col + '_pred']
+        compounds_pred.append(calculate_single_compound_rating(to_rate, 'optimistic median')['index'])
+    database['compound_index_pred'] = compounds_pred
+    database['compound_index_pred_error'] = np.abs(database['compound_index_pred'] - database['compound_index_true'] )
 
     database.to_pickle('results/meta_learn_results.pkl')
