@@ -131,24 +131,26 @@ if __name__ == '__main__':
                 # rated_database.loc[data.index,'orig_dataset'] = ds_name # ensure no bleeding across subsampled datasets in cross-validation
                 rated_database.loc[data.index,'num_ts'] = ts_data.shape[0]
                 rated_database.loc[data.index,'avg_ts_len'] = ts_data['series_value'].map(lambda ts: len(ts)).mean()
+                rated_database.loc[data.index,'std_ts_len'] = ts_data['series_value'].map(lambda ts: len(ts)).std()
                 rated_database.loc[data.index,'avg_ts_mean'] = ts_data['series_value'].map(lambda ts: np.mean(ts)).mean()
+                rated_database.loc[data.index,'min_ts_mean'] = ts_data['series_value'].map(lambda ts: np.mean(ts)).min()
+                rated_database.loc[data.index,'max_ts_mean'] = ts_data['series_value'].map(lambda ts: np.mean(ts)).max()
                 rated_database.loc[data.index,'avg_ts_min'] = ts_data['series_value'].map(lambda ts: np.min(ts)).mean()
+                rated_database.loc[data.index,'min_ts_min'] = ts_data['series_value'].map(lambda ts: np.min(ts)).min()
                 rated_database.loc[data.index,'avg_ts_max'] = ts_data['series_value'].map(lambda ts: np.max(ts)).mean()
+                rated_database.loc[data.index,'max_ts_max'] = ts_data['series_value'].map(lambda ts: np.max(ts)).max()
                 rated_database.loc[data.index,'seasonality'] = seasonality
                 rated_database.loc[data.index,'freq'] = freq
                 rated_database.loc[data.index,'forecast_horizon'] = forecast_horizon
                 rated_database.loc[data.index,'contain_missing_values'] = contain_missing_values
                 rated_database.loc[data.index,'contain_equal_length'] = contain_equal_length
-                # also assess heterogeneity nonlinearity pacf_features
             rated_database.to_pickle(meta_database_path)
 
+        # TODO check why there is an issue here?
+        rated_database = rated_database[rated_database['dataset_orig'] != 'bitcoin_dataset_without_missing_values']
         models = pd.unique(rated_database["model"])
         shape = rated_database.shape
         ds = pd.unique(rated_database["dataset"])
         print(f'Meta learning to be run on {shape} database entries, with a total of {len(ds)} datasets and {len(models)} models!')
         from run_model_recommendation import evaluate_recommendation
-
-        # TODO check why there is an issue here?
-        rated_database = rated_database[rated_database['dataset_orig'] != 'bitcoin_dataset_without_missing_values']
-
         evaluate_recommendation(rated_database)
