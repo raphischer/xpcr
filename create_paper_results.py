@@ -20,6 +20,18 @@ DS_SEL = 'traffic_weekly_dataset'
 COL_SEL = 'RMSE'
 
 
+FT_NAMES = {
+    'model_choice': 'Model Choice',
+    'freq': 'Seasoniality',
+    'forecast_horizon': 'Forecast Horizon',
+    'num_ts': 'Number of Series',
+    'avg_ts_len': 'Avg Series Length',
+    'avg_ts_mean': 'Avg Series Mean',
+    'avg_ts_min': 'Avg Series Min',
+    'avg_ts_max': 'Avg Series Max',
+    'contain_equal_length_True': 'Equally long?'
+}
+
 def create_all(database, boundaries, boundaries_real, meta):
     meta_learned_db = pd.read_pickle('results/meta_learn_results.pkl')
     os.chdir('paper_results')
@@ -66,7 +78,8 @@ def create_all(database, boundaries, boundaries_real, meta):
         rows.append(' & '.join(row) + r' \\')
     final_text = TEX_TABLE_GENERAL.replace('$DATA', '\n        '.join(rows))
     final_text = final_text.replace('$ALIGN', r'{l|ccccccccccc}')
-    with open('ds_model_index.tex', 'w') as outf:        outf.write(final_text)
+    with open('ds_model_index.tex', 'w') as outf:
+        outf.write(final_text)
 
 
     print('Generating figures')
@@ -106,11 +119,17 @@ def create_all(database, boundaries, boundaries_real, meta):
     transf_ind = model.named_steps['preprocessor'].output_indices_
     transf = model.named_steps['preprocessor'].named_transformers_
     ft_names[transf_ind['num']] = transf['num'].feature_names_in_ # numerical feature names
+    ft_names[transf_ind['freq']] = ['freq']
     cat_names = []
     for ft, cat in zip(transf['cat'].feature_names_in_, transf['cat'].named_steps['onehot'].categories):
-        cat_names = cat_names + [f'{ft}_{val}' for val in cat]
+        cat_names = cat_names + [f'{ft}_{val}' for val in cat[1:]]
     ft_names[transf_ind['cat']] = cat_names # categorical feature names
+    print(len(ft_names))
     title = f"Reasons for RMSE estimate?"
+    model_idc = [i for i, ft in enumerate(ft_names) if ft.startswith('model')]
+    # summarize the importance of onehot encoded model choices
+    ft_names = ['Model Choice'] + [FT_NAMES[ft] for i, ft in enumerate(ft_names) if i not in model_idc]
+    ft_imp = np.array( [np.sum([ft_imp[i] for i in model_idc])] + [imp for i, imp in enumerate(ft_imp) if i not in model_idc] )
     fig=px.bar(title=title, x=ft_names, y=ft_imp, color=ft_imp * -1.0, color_continuous_scale=RATING_COLOR_SCALE)
     fig.update_yaxes(title='Feature importance')
     fig.update_xaxes(title='', tickangle=90)

@@ -5,7 +5,7 @@ import pickle
 import pandas as pd
 import numpy as np
 
-# preprocessing, metrics & co^
+# preprocessing, metrics & co
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder, LabelEncoder
 from sklearn.model_selection import cross_validate
@@ -14,7 +14,19 @@ from sklearn.model_selection import KFold, StratifiedKFold, GroupKFold
 from sklearn.metrics import mean_absolute_error, max_error
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
-from sklearn.base import clone
+from sklearn.base import clone, BaseEstimator, TransformerMixin
+
+from data_loader import TIMEDELTA_MAP, FREQUENCY_MAP
+FREQ_TO_SECS = {v: TIMEDELTA_MAP[k].total_seconds() for k, v in FREQUENCY_MAP.items()}
+    
+
+class FreqTransformer(BaseEstimator, TransformerMixin):
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X, y=None):
+        return X.applymap(lambda val: FREQ_TO_SECS[val])
+
 
 # ML methods
 from sklearn.ensemble import RandomForestRegressor, ExtraTreesRegressor
@@ -71,17 +83,24 @@ def print_cv_scoring_results(model_name, scoring, scores):
     print(f'{model_name:<20}' + ' - '.join([f'{metric:<10} {mean_v} +- {std_v}' for metric, (mean_v, std_v) in results.items()]))
 
 
-FEATURES_CAT = {
-    'freq':                     True,
-    'forecast_horizon':         True,
-    'contain_missing_values':   True,
-    'contain_equal_length':     True,
-    'model':                    True,
-    'num_ts':                   False,
-    'avg_ts_len':               False,
-    'avg_ts_mean':              False,
-    'avg_ts_min':               False,
-    'avg_ts_max':               False
+FEATURES_ENCODING = {
+    'contain_missing_values':   'cat',
+    'contain_equal_length':     'cat',
+    'model':                    'cat',
+    'freq':                     'freq',
+    'forecast_horizon':         'num',
+    'num_ts':                   'num',
+    'avg_ts_len':               'num',
+    'avg_ts_mean':              'num',
+    'avg_ts_min':               'num',
+    'avg_ts_max':               'num'
+}
+
+
+ENCODERS = {
+    'num': lambda config: Pipeline(steps=[ ('scaler', StandardScaler()) ]),
+    'cat': lambda config: Pipeline(steps=[ ('onehot', OneHotEncoder(drop=config[0], categories=config[1])) ]),
+    'freq': lambda config: Pipeline(steps=[ ('freq_trans', FreqTransformer()), ('scaler', StandardScaler()) ])
 }
 
 
@@ -150,16 +169,17 @@ def evaluate_recommendation(database):
             split_index = np.zeros((database.shape[0], 1))
 
             for model_name, model_cls in REGRESSORS.items():
+                # create the feature preprocessing pipeline
                 # for models with intercept, onehot enocded features need to have one column dropped due to collinearity
                 # https://stackoverflow.com/questions/44712521/very-large-values-predicted-for-linear-regression
-                drop_first = 'first' if hasattr(model_cls, 'fit_intercept') else None
-                numeric_transformer = Pipeline(steps=[ ('scaler', StandardScaler()) ])
-                categories = [ sorted(pd.unique(database[feat]).tolist()) for feat, cat in FEATURES_CAT.items() if cat ]
-                categoric_transformer = Pipeline(steps=[ ('onehot', OneHotEncoder(categories=categories, drop=drop_first)) ])
-                preprocessor = ColumnTransformer(transformers=[
-                    ('num', numeric_transformer, [feat for feat, cat in FEATURES_CAT.items() if not cat]),
-                    ('cat', categoric_transformer, [feat for feat, cat in FEATURES_CAT.items() if cat]) 
-                ])
+                # drop_first = 'first' # if hasattr(model_cls, 'fit_intercept') else None
+                categories = [ sorted(pd.unique(database[feat]).tolist()) for feat, enc in FEATURES_ENCODING.items() if enc == 'cat' ]
+                config = ('first', categories)
+                transformers = {}
+                for enc in FEATURES_ENCODING.values():
+                    if enc not in transformers:
+                        transformers[enc] = (enc, ENCODERS[enc](config), [ft for ft, enc_ in FEATURES_ENCODING.items() if enc_ == enc])
+                preprocessor = ColumnTransformer(transformers=list(transformers.values()))
 
                 predictions[model_name] = np.zeros_like(y, dtype=np.float)
                 true[model_name] = np.zeros_like(y, dtype=np.float)
