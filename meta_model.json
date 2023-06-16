@@ -273,5 +273,17 @@
         "url": "https://www.jstatsoft.org/article/view/v027i03",
         "module": null,
         "class": "ARIMAWrapper"
+    },
+    "autosklearn": {
+        "name": "Auto-Sklearn",
+        "short": "ASK",
+        "local/global": "Global",
+        "data": "Univariate",
+        "method": "AutoML",
+        "implementation": "scikit-learn",
+        "paper": "Feurer et al. 2015",
+        "url": "https://papers.neurips.cc/paper/5872-efficient-and-robust-automated-machine-learning",
+        "module": null,
+        "class": "AutoSKLearn"
     }
 }

@@ -9,7 +9,7 @@ from codecarbon import OfflineEmissionsTracker
 
 from data_lookup_info import LOOKUP
 from methods import init_model_and_data, run_validation, evaluate
-from mlprops.util import fix_seed, create_output_dir, Logger, PatchedJSONEncoder
+from mlprops.util import fix_seed, create_output_dir, PatchedJSONEncoder
 
 
 def main(args):
@@ -70,13 +70,15 @@ def main(args):
         emissions_tracker = OfflineEmissionsTracker(measure_power_secs=args.cpu_monitor_interval, log_level='warning', country_iso_code="DEU", save_to_file=True, output_dir=output_dir)
         emissions_tracker.start()
         forecast, groundtruth = run_validation(model, ts_test, num_samples)
+        forecast = list(forecast)
+        groundtruth = list(groundtruth)
         emissions_tracker.stop()
 
-        model.serialize(Path(output_dir))
-        relevant_files = [os.path.join(output_dir, fname) for fname in ['input_transform.json', 'parameters.json', 'prediction_net-0000.params', 'prediction_net-network.json', 'type.txt', 'version.json']]
-        end_time = time.time()
-
         try:
+            model.serialize(Path(output_dir))
+            relevant_files = [os.path.join(output_dir, fname) for fname in ['input_transform.json', 'parameters.json', 'prediction_net-0000.params', 'prediction_net-network.json', 'type.txt', 'version.json']]
+            end_time = time.time()
+
             model_stats = {
                 'params': sum([val._reduce().size for val in model.network._collect_params_with_prefix().values()]),
                 'fsize': sum([os.path.getsize(fname) for fname in relevant_files])
@@ -132,9 +134,11 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    tmpdir = os.path.join(os.path.dirname(args.output_dir), "tmp", os.path.basename(args.output_dir))
-    if not os.path.isdir(tmpdir):
-        os.makedirs(tmpdir)
-    os.environ['TMPDIR'] = tmpdir
+    if args.model != 'autosklearn':
+        tmpdir = os.path.join(os.path.dirname(args.output_dir), "tmp", os.path.basename(args.output_dir))
+        if not os.path.isdir(tmpdir):
+            os.makedirs(tmpdir)
+        os.environ['TMPDIR'] = tmpdir
+        print('Using tmp dir', tmpdir)
 
     main(args)

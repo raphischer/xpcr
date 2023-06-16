@@ -1,38 +1,129 @@
 import os
-import pandas as pd
 import inspect
 import json
 import importlib
+from itertools import chain
+from typing import List
 
-# from gluonts.model.r_forecast import RForecastPredictor
+import numpy as np
+import pandas as pd
+
 from gluonts.dataset.common import ListDataset
 from gluonts.dataset.field_names import FieldName
-from gluonts.mx import Trainer
-from gluonts.mx.trainer.callback import TrainingHistory
 from gluonts.evaluation.backtest import make_evaluation_predictions
 from gluonts.evaluation import Evaluator
+from gluonts.model.forecast import Forecast
+from gluonts.core.component import validated
+from gluonts.dataset.util import forecast_start
 
 from data_loader import convert_tsf_to_dataframe as load_data
 
-# class ARIMAWrapper(RForecastPredictor):
 
-#     def __init__(
-#         self,
-#         freq: str,
-#         prediction_length: int,
-#         period: int = None,
-#         trunc_length: Optional[int] = None,
-#         params: Optional[Dict] = None,
-#     ) -> None:
+class BasicForecast(Forecast):
 
-#         super().__init__(
-#             freq=freq,
-#             prediction_length=prediction_length,
-#             method_name='arima',
-#             period=period,
-#             trunc_length=trunc_length,
-#             params=params
-#         )
+    @validated()
+    def __init__(
+        self,
+        models: List,
+        featurized_data: List,
+        start_date: pd.Period,
+        prediction_length: int,
+    ):
+        self.models = models
+        self.featurized_data = featurized_data
+        self.start_date = start_date
+        self.prediction_length = prediction_length
+        self.item_id = None
+        self.lead_time = None
+
+    def quantile(self, q: float) -> np.ndarray:
+        """
+        Returns np.array, where the i^th entry is the estimate of the q
+        quantile of the conditional distribution of the value of the i^th step
+        in the forecast horizon.
+        """
+        assert 0 <= q <= 1
+        return np.array(
+            list(
+                chain.from_iterable(
+                    model.predict(self.featurized_data)
+                    for model in self.models
+                )
+            )
+        )
+    
+
+class AutoSKLearn:
+
+    def __init__(self, freq, context_length, prediction_length, samples_per_series=100):
+        self.freq = freq
+        self.context_length = context_length
+        self.prediction_length = prediction_length
+        self.samples_per_series = samples_per_series
+        self.lead_time = 0
+
+        # from sklearn.linear_model import LinearRegression
+        # self.models = [LinearRegression() for _ in range(self.prediction_length)]
+
+        # from gluonts.model.rotbaum._estimator import TreeEstimator
+        # self.rotbaum = TreeEstimator(freq=self.freq, prediction_length=self.prediction_length)
+
+        from autosklearn.regression import AutoSklearnRegressor
+        per_regr = 1200 // self.prediction_length
+        self.models = [AutoSklearnRegressor(per_regr) for idx in range(self.prediction_length)]
+
+    def train(self, training_data):
+        sampled_window_starts = []
+        for ser in training_data:
+            valid_starts = np.arange(ser['target'].size - self.context_length - self.prediction_length + 1)
+            if valid_starts.size == 0:
+                continue
+            if valid_starts.size > self.samples_per_series:
+                sampled_window_starts.append( (ser['target'], np.random.choice(valid_starts, size=self.samples_per_series)) )
+            else:
+                sampled_window_starts.append( (ser['target'], valid_starts) )
+        n_samples = int(np.sum([starts.size for _, starts in sampled_window_starts]))
+
+        for pred_idx in range(self.prediction_length):
+            print(f'Training AutoLearn regressor {pred_idx+1} / {self.prediction_length}')
+            y = np.zeros((n_samples), dtype=training_data[0]['target'].dtype)
+            X = np.zeros((n_samples, self.context_length), dtype=training_data[0]['target'].dtype)
+            idx = 0
+            for ser, starts in sampled_window_starts:
+                for start in starts:
+                    X[idx,:] = ser[start:(start + self.context_length)]
+                    y[idx] = ser[start + self.context_length + pred_idx]
+                    idx += 1
+
+            self.models[pred_idx].fit(X, y)
+        
+        # self.rotbaum_predictor = self.rotbaum.train(training_data)
+        return self
+    
+    def predict(self, dataset, num_samples):
+        # rot_pred = list(self.rotbaum_predictor.predict(dataset, num_samples=num_samples)
+
+        if num_samples:
+            print(
+                "Forecast is not sample based. Ignoring parameter"
+                " `num_samples` from predict method."
+            )
+
+        for ts in dataset:
+            starting_index = len(ts["target"]) - self.context_length
+            end_index = starting_index + self.context_length
+            time_series_window = ts["target"][starting_index:end_index]
+            
+            # featurized_data = self.rotbaum_predictor.preprocess_object.make_features(
+            #     ts, starting_index=starting_index
+            # )
+
+            yield BasicForecast(
+                self.models,
+                [time_series_window],
+                start_date=forecast_start(ts),
+                prediction_length=self.prediction_length,
+            )
 
 
 with open('meta_model.json', 'r') as meta:
@@ -76,11 +167,11 @@ def init_model_and_data(args):
         # use gluonts data format
         all_train_ts.append( {
             FieldName.TARGET: ts_data[:len(ts_data) - forecast_horizon],
-            FieldName.START: pd.Timestamp(ts_start, freq=freq)
+            FieldName.START: pd.Timestamp(ts_start)
         } )
         all_fcast_ts.append( {
             FieldName.TARGET: ts_data,
-            FieldName.START: pd.Timestamp(ts_start, freq=freq)
+            FieldName.START: pd.Timestamp(ts_start)
         } )
 
     train_gluonts_ds = ListDataset(all_train_ts, freq=freq)
@@ -114,25 +205,24 @@ def init_model_and_data(args):
     # already init estimator & predictor for early stopping callback
     estimator = model_cls(**args)
 
-    early_stopping = MetricInferenceEarlyStopping(validation_dataset=fcast_gluonts_ds, estimator=estimator, metric="RMSE", verbose=False)
-    history = TrainingHistory()
-    trainer = Trainer(epochs=epochs, callbacks=[history, early_stopping])
+    if not isinstance(estimator, BasicForecast):
+        from early_stopping import MetricInferenceEarlyStopping
+        from gluonts.mx import Trainer
+        from gluonts.mx.trainer.callback import TrainingHistory
+        early_stopper = MetricInferenceEarlyStopping(validation_dataset=fcast_gluonts_ds, estimator=estimator, metric="RMSE", verbose=False)
+        history = TrainingHistory()
+        trainer = Trainer(epochs=epochs, callbacks=[history, early_stopper])
+        estimator.trainer = trainer
 
-    estimator.trainer = trainer    
     return train_gluonts_ds, history, fcast_gluonts_ds, estimator
 
 
-def run_validation(predictor, ts_test, num_samples=100):
+def run_validation(predictor, dataset, num_samples=100):
     # TODO check for integer_conversion in args and round?
-    forecast, groundtruth = make_evaluation_predictions(dataset=ts_test, predictor=predictor, num_samples=num_samples)
-    return forecast, groundtruth
+    return make_evaluation_predictions(dataset=dataset, predictor=predictor, num_samples=num_samples)
 
 
 def evaluate(forecast, groundtruth):
-    forecast = list(forecast)
-    groundtruth = list(groundtruth)
-    
-    # evaluate
     try:
         evaluator = Evaluator(quantiles=[0.1, 0.5, 0.9])
         agg_metrics, item_metrics = evaluator(groundtruth, forecast)
@@ -143,148 +233,3 @@ def evaluate(forecast, groundtruth):
         contained_nan = True
 
     return {'aggregated': agg_metrics, "contained_nan": contained_nan}
-
-
-
-
-### EARLY STOPPING adapted from https://gist.github.com/pbruneau/04c0dce4bdfb66ffac3f554f1b98c706
-import numpy as np
-import mxnet as mx
-
-from gluonts.model.estimator import Estimator
-from gluonts.dataset.common import Dataset
-from gluonts.mx import copy_parameters, GluonPredictor
-from gluonts.mx.trainer.callback import Callback
-
-
-class MetricInferenceEarlyStopping(Callback):
-    """
-    Early Stopping mechanism based on the prediction network.
-    Can be used to base the Early Stopping directly on a metric of interest, instead of on the training/validation loss.
-    In the same way as test datasets are used during model evaluation,
-    the time series of the validation_dataset can overlap with the train dataset time series,
-    except for a prediction_length part at the end of each time series.
-    Parameters
-    ----------
-    validation_dataset
-        An out-of-sample dataset which is used to monitor metrics
-    predictor
-        A gluon predictor, with a prediction network that matches the training network
-    evaluator
-        The Evaluator used to calculate the validation metrics.
-    metric
-        The metric on which to base the early stopping on.
-    patience
-        Number of epochs to train on given the metric did not improve more than min_delta.
-    min_delta
-        Minimum change in the monitored metric counting as an improvement
-    verbose
-        Controls, if the validation metric is printed after each epoch.
-    minimize_metric
-        The metric objective.
-    restore_best_network
-        Controls, if the best model, as assessed by the validation metrics is restored after training.
-    num_samples
-        The amount of samples drawn to calculate the inference metrics.
-    """
-
-    def __init__(
-        self,
-        validation_dataset: Dataset,
-        estimator: Estimator,
-        evaluator: Evaluator = Evaluator(num_workers=None, allow_nan_forecast=True), # nan can happen for tempfus
-        metric: str = "MSE",
-        patience: int = 10,
-        min_delta: float = 0.0,
-        verbose: bool = True,
-        minimize_metric: bool = True,
-        restore_best_network: bool = True,
-        num_samples: int = 100,
-    ):
-        assert (
-            patience >= 0
-        ), "EarlyStopping Callback patience needs to be >= 0"
-        assert (
-            min_delta >= 0
-        ), "EarlyStopping Callback min_delta needs to be >= 0.0"
-        assert (
-            num_samples >= 1
-        ), "EarlyStopping Callback num_samples needs to be >= 1"
-
-        self.validation_dataset = list(validation_dataset)
-        self.estimator = estimator
-        self.evaluator = evaluator
-        self.metric = metric
-        self.patience = patience
-        self.min_delta = min_delta
-        self.verbose = verbose
-        self.restore_best_network = restore_best_network
-        self.num_samples = num_samples
-        self.written_first = False
-
-        if minimize_metric:
-            self.best_metric_value = np.inf
-            self.is_better = np.less
-        else:
-            self.best_metric_value = -np.inf
-            self.is_better = np.greater
-
-        self.validation_metric_history = []
-        self.best_network = None
-        self.n_stale_epochs = 0
-
-    def on_epoch_end(
-        self,
-        epoch_no: int,
-        epoch_loss: float,
-        training_network: mx.gluon.nn.HybridBlock,
-        trainer: mx.gluon.Trainer,
-        best_epoch_info: dict,
-        ctx: mx.Context
-    ) -> bool:
-        should_continue = True
-        
-        transformation = self.estimator.create_transformation()
-        with self.estimator.trainer.ctx:
-            predictor = self.estimator.create_predictor(transformation=transformation, trained_network=training_network)
-
-        from gluonts.evaluation.backtest import make_evaluation_predictions
-
-        forecast_it, ts_it = make_evaluation_predictions(
-            dataset=self.validation_dataset,
-            predictor=predictor,
-            num_samples=self.num_samples,
-        )
-
-        agg_metrics, item_metrics = self.evaluator(ts_it, forecast_it)
-        current_metric_value = agg_metrics[self.metric]
-        self.validation_metric_history.append(current_metric_value)
-
-        if self.verbose:
-            print(
-                f"Validation metric {self.metric}: {current_metric_value}, best: {self.best_metric_value}"
-            )
-
-        if self.is_better(current_metric_value, self.best_metric_value) or not self.written_first:
-            self.written_first = True
-            self.best_metric_value = current_metric_value
-
-            if self.restore_best_network:
-                training_network.save_parameters(os.path.join(os.getenv('TMPDIR'), "best_network.params"))
-
-            self.n_stale_epochs = 0
-        else:
-            self.n_stale_epochs += 1
-            if self.n_stale_epochs == self.patience:
-                should_continue = False
-                print(
-                    f"EarlyStopping callback initiated stop of training at epoch {epoch_no}."
-                )
-
-                if self.restore_best_network:
-                    print(
-                        f"Restoring best network from epoch {epoch_no - self.patience}."
-                    )
-                    training_network.load_parameters(os.path.join(os.getenv('TMPDIR'), "best_network.params"))
-
-        return should_continue
