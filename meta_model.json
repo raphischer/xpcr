@@ -275,7 +275,7 @@
         "class": "ARIMAWrapper"
     },
     "autosklearn": {
-        "name": "Auto-Sklearn",
+        "name": "AutoSklearn",
         "short": "ASK",
         "local/global": "Global",
         "data": "Univariate",
@@ -284,6 +284,30 @@
         "paper": "Feurer et al. 2015",
         "url": "https://papers.neurips.cc/paper/5872-efficient-and-robust-automated-machine-learning",
         "module": null,
-        "class": "AutoSKLearn"
+        "class": "AutoSklearn"
+    },
+    "autokeras": {
+        "name": "AutoKeras",
+        "short": "AKR",
+        "local/global": "Global",
+        "data": "Univariate",
+        "method": "AutoML",
+        "implementation": "tensorflow",
+        "paper": "Haifeng  et al. 2023",
+        "url": "https://www.jmlr.org/papers/v24/20-1355.html",
+        "module": null,
+        "class": "AutoKeras"
+    },
+    "autokerasforecast": {
+        "name": "AutoKerasForecaster",
+        "short": "AKF",
+        "local/global": "Global",
+        "data": "Univariate",
+        "method": "AutoML",
+        "implementation": "tensorflow",
+        "paper": "Haifeng  et al. 2023",
+        "url": "https://www.jmlr.org/papers/v24/20-1355.html",
+        "module": null,
+        "class": "AutoKerasForecaster"
     }
 }

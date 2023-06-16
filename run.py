@@ -49,7 +49,7 @@ def main(args):
 
             results = {
                 'history': {
-                    'loss': history.loss_history
+                    'loss': history.loss_history if history is not None else None
                 },
                 'start': start_time,
                 'end': end_time,

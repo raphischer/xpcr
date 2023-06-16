@@ -53,7 +53,7 @@ class BasicForecast(Forecast):
         )
     
 
-class AutoSKLearn:
+class HorizonFCEnsemble:
 
     def __init__(self, freq, context_length, prediction_length, samples_per_series=100):
         self.freq = freq
@@ -62,18 +62,12 @@ class AutoSKLearn:
         self.samples_per_series = samples_per_series
         self.lead_time = 0
 
-        # from sklearn.linear_model import LinearRegression
-        # self.models = [LinearRegression() for _ in range(self.prediction_length)]
-
-        # from gluonts.model.rotbaum._estimator import TreeEstimator
-        # self.rotbaum = TreeEstimator(freq=self.freq, prediction_length=self.prediction_length)
-
-        from autosklearn.regression import AutoSklearnRegressor
-        per_regr = 1200 // self.prediction_length
-        self.models = [AutoSklearnRegressor(per_regr) for idx in range(self.prediction_length)]
-
+    def fit(self, model_idx, X, y):
+        self.models[model_idx].fit(X, y)
+        
     def train(self, training_data):
         sampled_window_starts = []
+        # identify context windows to train on
         for ser in training_data:
             valid_starts = np.arange(ser['target'].size - self.context_length - self.prediction_length + 1)
             if valid_starts.size == 0:
@@ -83,7 +77,7 @@ class AutoSKLearn:
             else:
                 sampled_window_starts.append( (ser['target'], valid_starts) )
         n_samples = int(np.sum([starts.size for _, starts in sampled_window_starts]))
-
+        # run a training step for each individual model
         for pred_idx in range(self.prediction_length):
             print(f'Training AutoLearn regressor {pred_idx+1} / {self.prediction_length}')
             y = np.zeros((n_samples), dtype=training_data[0]['target'].dtype)
@@ -94,36 +88,94 @@ class AutoSKLearn:
                     X[idx,:] = ser[start:(start + self.context_length)]
                     y[idx] = ser[start + self.context_length + pred_idx]
                     idx += 1
-
-            self.models[pred_idx].fit(X, y)
-        
-        # self.rotbaum_predictor = self.rotbaum.train(training_data)
+            self.fit(pred_idx, X, y)
         return self
     
     def predict(self, dataset, num_samples):
-        # rot_pred = list(self.rotbaum_predictor.predict(dataset, num_samples=num_samples)
-
         if num_samples:
-            print(
-                "Forecast is not sample based. Ignoring parameter"
-                " `num_samples` from predict method."
-            )
+            print("Forecast is not sample based. Ignoring parameter `num_samples` from predict method.")
 
         for ts in dataset:
             starting_index = len(ts["target"]) - self.context_length
             end_index = starting_index + self.context_length
             time_series_window = ts["target"][starting_index:end_index]
-            
-            # featurized_data = self.rotbaum_predictor.preprocess_object.make_features(
-            #     ts, starting_index=starting_index
-            # )
-
+            # wrap into basic forecast
             yield BasicForecast(
                 self.models,
                 [time_series_window],
                 start_date=forecast_start(ts),
                 prediction_length=self.prediction_length,
             )
+
+
+class AutoSklearn(HorizonFCEnsemble):
+
+    def __init__(self, freq, context_length, prediction_length, samples_per_series=100):
+        super().__init__(freq, context_length, prediction_length, samples_per_series)
+        from autosklearn.regression import AutoSklearnRegressor
+        per_regr = 1200 // self.prediction_length # 4500
+        self.models = [AutoSklearnRegressor(per_regr) for _ in range(self.prediction_length)]
+
+
+class AutoKeras(HorizonFCEnsemble):
+
+    def __init__(self, freq, context_length, prediction_length, samples_per_series=100, epochs=5, max_trials=1):
+        super().__init__(freq, context_length, prediction_length, samples_per_series)
+        self.epochs = epochs
+        self.max_trials = max_trials
+        import autokeras as ak
+        self.models = [ak.StructuredDataRegressor(max_trials=self.max_trials, directory=os.environ['TMPDIR']) for _ in range(self.prediction_length)]
+
+    def fit(self, model_idx, X, y):
+        self.models[model_idx].fit(X, y, epochs=self.epochs)
+
+
+class AutoKerasForecaster(HorizonFCEnsemble):
+
+    def __init__(self, freq, context_length, prediction_length, samples_per_series=100, epochs=5, max_trials=1):
+        super().__init__(freq, context_length, prediction_length, samples_per_series)
+        self.epochs = epochs
+        self.max_trials = max_trials
+        import autokeras as ak
+        self.model = ak.TimeseriesForecaster(
+            lookback=self.context_length,
+            predict_from=self.lead_time + 1,
+            predict_until=self.prediction_length,
+            max_trials=self.max_trials,
+            objective="val_loss",
+        )
+
+    def train(self, training_data):
+        min_length = min([len(ser['target']) for ser in training_data])
+        X = np.swapaxes(np.array([ser['target'][:min_length] for ser in training_data]), 0, 1)
+        self.model.fit(X, X, epochs=self.epochs)
+        print('TRAIN DATA', X.shape, len(training_data))
+        return self
+
+    def predict(self, dataset, num_samples):
+        if num_samples:
+            print("Forecast is not sample based. Ignoring parameter `num_samples` from predict method.")
+
+        min_length = min([len(ser['target']) for ser in dataset])
+        X = np.swapaxes(np.array([ser['target'][:min_length] for ser in dataset]), 0, 1)
+        for ts in dataset:
+            starting_index = len(ts["target"]) - self.context_length
+            end_index = starting_index + self.context_length
+            X.append(ts["target"][starting_index:end_index])
+        X = np.swapaxes(np.array(X), 0, 1)
+        X = np.concatenate([X, np.zeros((self.prediction_length, len(dataset)))])
+        print('TEST DATA', X.shape, len(dataset))
+        prediction = self.model.predict(X)
+        print(a)
+            # wrap into basic forecast
+            # yield BasicForecast(
+            #     self.models,
+            #     [time_series_window],
+            #     start_date=forecast_start(ts),
+            #     prediction_length=self.prediction_length,
+            # )
+
+    
 
 
 with open('meta_model.json', 'r') as meta:
@@ -205,7 +257,7 @@ def init_model_and_data(args):
     # already init estimator & predictor for early stopping callback
     estimator = model_cls(**args)
 
-    if not isinstance(estimator, BasicForecast):
+    if not isinstance(estimator, HorizonFCEnsemble):
         from early_stopping import MetricInferenceEarlyStopping
         from gluonts.mx import Trainer
         from gluonts.mx.trainer.callback import TrainingHistory
@@ -213,6 +265,9 @@ def init_model_and_data(args):
         history = TrainingHistory()
         trainer = Trainer(epochs=epochs, callbacks=[history, early_stopper])
         estimator.trainer = trainer
+    else:
+        history = None
+
 
     return train_gluonts_ds, history, fcast_gluonts_ds, estimator
 
@@ -224,11 +279,11 @@ def run_validation(predictor, dataset, num_samples=100):
 
 def evaluate(forecast, groundtruth):
     try:
-        evaluator = Evaluator(quantiles=[0.1, 0.5, 0.9])
+        evaluator = Evaluator(quantiles=[0.1, 0.5, 0.9], num_workers=None)
         agg_metrics, item_metrics = evaluator(groundtruth, forecast)
         contained_nan = False
     except ValueError:
-        evaluator = Evaluator(quantiles=[0.1, 0.5, 0.9], allow_nan_forecast=True) # nan can happen for tempfus
+        evaluator = Evaluator(quantiles=[0.1, 0.5, 0.9], num_workers=None, allow_nan_forecast=True) # nan can happen for tempfus
         agg_metrics, item_metrics = evaluator(groundtruth, forecast)
         contained_nan = True
 
