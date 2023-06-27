@@ -119,7 +119,7 @@ class AutoSklearn(HorizonFCEnsemble):
 
 class AutoKeras(HorizonFCEnsemble):
 
-    def __init__(self, freq, context_length, prediction_length, samples_per_series=100, epochs=5, max_trials=1):
+    def __init__(self, freq, context_length, prediction_length, samples_per_series=100, epochs=100, max_trials=5):
         super().__init__(freq, context_length, prediction_length, samples_per_series)
         self.epochs = epochs
         self.max_trials = max_trials

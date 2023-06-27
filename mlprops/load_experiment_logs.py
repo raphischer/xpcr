@@ -88,7 +88,7 @@ def aggregate_log(log, property_extractors):
 
 def merge_database(database):
     database['configuration'] = database.aggregate(lambda row: ' - '.join([row['task'], row['dataset'], row['model']]), axis=1)
-    database['environment'] = database.aggregate(lambda row: ' - '.join([row['architecture'], row['software']]), axis=1)
+    database['environment'] = database.aggregate(lambda row: ' - '.join([str(row['architecture']), str(row['software'])]), axis=1)
     grouped = database.groupby(['configuration', 'environment'])
     grouped_results = grouped.first() # take first occurence as a start
     mean_values = grouped.mean()
