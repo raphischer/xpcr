@@ -17,7 +17,7 @@ PLOT_WIDTH = 700
 PLOT_HEIGHT = PLOT_WIDTH // 2.5
 
 DS_SEL = 'traffic_weekly_dataset'
-COL_SEL = 'RMSE'
+COL_SEL = 'MASE'
 
 
 FT_NAMES = {
@@ -110,7 +110,7 @@ def create_all(database, boundaries, boundaries_real, meta):
     fig.update(layout_coloraxis_showscale=False)
     fig.write_image("why_recommended.pdf")
     fig.show()
-    # why RMSE estimate?
+    # why ERROR estimate?
     mod_path = os.path.join(os.path.dirname(os.getcwd()), 'results', f'{COL_SEL}_models', f'model{int(best_model["split_index"])}.pkl')
     with open(mod_path, 'rb') as modfile:
         model = pickle.load(modfile)
@@ -125,7 +125,7 @@ def create_all(database, boundaries, boundaries_real, meta):
         cat_names = cat_names + [f'{ft}_{val}' for val in cat[1:]]
     ft_names[transf_ind['cat']] = cat_names # categorical feature names
     print(len(ft_names))
-    title = f"Reasons for RMSE estimate?"
+    title = f"Reasons for {COL_SEL} estimate?"
     model_idc = [i for i, ft in enumerate(ft_names) if ft.startswith('model')]
     # summarize the importance of onehot encoded model choices
     ft_names = ['Model Choice'] + [FT_NAMES[ft] for i, ft in enumerate(ft_names) if i not in model_idc]
@@ -135,12 +135,12 @@ def create_all(database, boundaries, boundaries_real, meta):
     fig.update_xaxes(title='', tickangle=90)
     fig.update_layout(width=PLOT_WIDTH / 2, height=PLOT_WIDTH / 2, margin={'l': 0, 'r': 0, 'b': 0, 't': 30})
     fig.update(layout_coloraxis_showscale=False)
-    fig.write_image("why_rmse.pdf")
+    fig.write_image("why_error.pdf")
     fig.show()
 
 
     ### PCR trade-offs scatters
-    for xaxis, yaxis in [['power_draw', 'RMSE'], ['train_power_draw', 'parameters']]:
+    for xaxis, yaxis in [['power_draw', COL_SEL], ['train_power_draw', 'parameters']]:
         for idx, (ds, data) in enumerate(database.groupby(['dataset_orig'])):
             subd = data[data['dataset'] == ds]
             plot_data = {}
@@ -182,34 +182,39 @@ def create_all(database, boundaries, boundaries_real, meta):
     pred_col_names = ['Compound index', 'Direct compound index'] + pred_col_names
 
     # access statistics per data set
+    autokeras = pd.read_pickle('../results/autokeras.pkl')
     top_increasing_k_stats = {}
-    best5_ene, best5_rmse, opti_ene, opti_rmse, rec_ene, rec_rmse = [], [], [], [], [], []
+    auto_rmse, auto_ene, random_rmse, random_ene, test_all_ene, test_all_rmse, rec_ene, rec_rmse, dss = [], [], [], [], [], [], [], [], []
     for idx, ((ds), data) in enumerate(meta_learned_db.groupby(['dataset'])):
-        sorted_by_pred_rmse = data.sort_values(f'RMSE_pred', ascending=False)
-        lowest_rmse = min([entry['value'] for entry in data['RMSE']])
+        sorted_by_pred_rmse = data.sort_values(f'{COL_SEL}_pred', ascending=False)
+        lowest_rmse = min([entry['value'] for entry in data[COL_SEL]])
         lowest_ene = sum([entry['value'] for entry in data['train_power_draw']]) / 3.6e3
         # save ene and rmse for increasing k
         top_increasing_k_stats[ds] = {'rmse': [], 'ene': []}
         for k in range(1, data.shape[0] + 1):
             subd = sorted_by_pred_rmse.iloc[:k]
-            top_increasing_k_stats[ds]['rmse'].append( lowest_rmse / min([entry['value'] for entry in subd['RMSE']]))
+            top_increasing_k_stats[ds]['rmse'].append( lowest_rmse / min([entry['value'] for entry in subd[COL_SEL]]))
             top_increasing_k_stats[ds]['ene'].append( sum([entry['value'] for entry in subd['train_power_draw']]) / (3.6e3 * lowest_ene) )
 
         if data['dataset_orig'].iloc[0] == ds:
             # save best, top-5 and top-1 rmse & ene
-            pred_best_rmse = sorted_by_pred_rmse.iloc[0]
-            best5 = sorted_by_pred_rmse.iloc[:4]
-            opti_ene.append(lowest_ene)
-            opti_rmse.append(lowest_rmse)
-            rec_ene.append(pred_best_rmse['train_power_draw']['value'] / 3.6e3)
-            rec_rmse.append(pred_best_rmse['RMSE']['value'])
-            best5_ene.append(sum([entry['value'] for entry in best5['train_power_draw']]) / 3.6e3)
-            best5_rmse.append(min([entry['value'] for entry in best5['RMSE']]))
-            assert rec_rmse[-1] >= opti_rmse[-1]
-            assert best5_rmse[-1] >= opti_rmse[-1]
-            assert best5_ene[-1] < opti_ene[-1]
+            # best5 = sorted_by_pred_rmse.iloc[:4]
+            dss.append(ds)
+            auto = autokeras[autokeras['dataset'] == ds]
+            auto = auto.sort_values('task')
+            auto = auto.fillna(method='bfill').head(1)
+            auto_rmse.append(auto[COL_SEL].values[0])
+            auto_ene.append(auto['train_power_draw'].values[0] / 3.6e3)
+            test_all_ene.append(lowest_ene)
+            test_all_rmse.append(lowest_rmse)
+            pred_best = sorted_by_pred_rmse.iloc[0]
+            rec_ene.append(pred_best['train_power_draw']['value'] / 3.6e3)
+            rec_rmse.append(pred_best[COL_SEL]['value'])
+            rndm = sorted_by_pred_rmse.iloc[np.random.randint(1, sorted_by_pred_rmse.shape[0] - 1, size=(1,))[0]]
+            random_ene.append(rndm['train_power_draw']['value'] / 3.6e3)
+            random_rmse.append(rndm[COL_SEL]['value'])
 
-            ######### star plots with recommendation vs best
+            ######### STAR PLOTS with recommendation vs best
             true_best = data.sort_values(f'compound_index_true', ascending=False).iloc[0]
             pred_best = data.sort_values(f'compound_index_pred', ascending=False).iloc[0]
             fig = make_subplots(rows=1, cols=1, subplot_titles=[meta['dataset'][ds]['name']])
@@ -229,43 +234,34 @@ def create_all(database, boundaries, boundaries_real, meta):
             if idx < 2:
                 fig.show()
 
-    ######### energy consumption VS RMSE scatter comparison
-    fig = make_subplots(rows=1, cols=1, x_title='Power Draw [Wh]', y_title="RMSE")
-    connections_x, connections_y = [], []
-    for i in range(len(rec_ene)):
-        connections_x = connections_x + [None, rec_ene[i], best5_ene[i], opti_ene[i], None]
-        connections_y = connections_y + [None, rec_rmse[i], best5_rmse[i], opti_rmse[i], None]
+    ######### METHOD COMPARISON TABLE
+    models = pd.unique(database['model'])
+    rows = [f'Data set & {COL_SEL} & Power Draw & {COL_SEL} & Power Draw & {COL_SEL} & Power Draw' + r' \\' + '\n' + r'        \midrule']
+    for idx, ((ds), data) in enumerate(meta_learned_db.groupby(['dataset'])):
+        if data['dataset_orig'].iloc[0] == ds:
+            ds_name = meta['dataset'][ds]['name']
+            ds_name_short = ds_name[:13] + '..' + ds_name[-5:] if len(ds_name) > 20 else ds_name
+            row = [ds_name_short]
+            # most accurate recommendation
+            best = data.sort_values(f'{COL_SEL}_pred', ascending=False).iloc[0]
+            values = [(best[COL_SEL]['value'], best['train_power_draw']['value'] / 3.6e3)]
+            # auto learn
+            auto = autokeras[autokeras['dataset'] == ds]
+            auto = auto.sort_values('task')
+            auto = auto.fillna(method='bfill').head(1)
+            values.append( (auto[COL_SEL].values[0], auto['train_power_draw'].values[0] / 3.6e3) )
 
-    fig.add_trace(go.Scatter(x=connections_x, y=connections_y,
-                        mode='lines',
-                        line=dict(color='grey', width=1, dash='dash'),
-                        name='Connect', showlegend=False), row=1, col=1)
-    fig.add_trace(go.Scatter(x=rec_ene, y=rec_rmse,
-                        mode='markers',
-                        marker=dict(size=15, color=RATING_COLORS[0], line=dict(width=3, color='white')),
-                        name='Training best recommended'), row=1, col=1)
-    fig.add_trace(go.Scatter(x=best5_ene, y=best5_rmse,
-                        mode='markers',
-                        marker=dict(size=15, color=RATING_COLORS[2], line=dict(width=3, color='white')),
-                        name='Training top-5 recommended'), row=1, col=1)
-    fig.add_trace(go.Scatter(x=opti_ene, y=opti_rmse,
-                        mode='markers',
-                        marker=dict(size=15, color=RATING_COLORS[4], line=dict(width=3, color='white')),
-                        name='Training all models'), row=1, col=1)
-    
-    fig.update_xaxes(range=[0, 100])
-    fig.update_yaxes(range=[0, 50000])
-    fig.update_layout(
-        legend=dict( yanchor="top", y=0.99, xanchor="right", x=0.99),
-        width=PLOT_WIDTH, height=PLOT_HEIGHT, margin={'l': 60, 'r': 0, 'b': 60, 't': 0}
-    )
-    
-    fig.write_image(f'energy savings.pdf')
-    fig.show()
+
+
+        rows.append(' & '.join(row) + r' \\')
+    final_text = TEX_TABLE_GENERAL.replace('$DATA', '\n        '.join(rows))
+    final_text = final_text.replace('$ALIGN', r'{l|cc|cc|cc}')
+    with open('method_comparison.tex', 'w') as outf:
+        outf.write(final_text)
 
 
     ####### increasing top k curves
-    fig = make_subplots(rows=1, cols=2, shared_yaxes=True, x_title='k (testing top-k recommendations)', y_title="Relative value", subplot_titles=['RMSE', 'Power Draw'], horizontal_spacing=0.02)
+    fig = make_subplots(rows=1, cols=2, shared_yaxes=True, x_title='k (testing top-k recommendations)', y_title="Relative value", subplot_titles=[COL_SEL, 'Power Draw'], horizontal_spacing=0.02)
 
     for ds, values in top_increasing_k_stats.items():
         rmse = values['rmse']
