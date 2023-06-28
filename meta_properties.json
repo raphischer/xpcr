@@ -4,7 +4,7 @@
         "shortname": "RMSE",
         "unit": "number",
         "group": "Performance",
-        "weight": 0.2,
+        "weight": 0.1,
         "independent_of_task": true
     },
     "MAPE": {
@@ -20,7 +20,7 @@
         "shortname": "MASE",
         "unit": "number",
         "group": "Performance",
-        "weight": 0.1,
+        "weight": 0.2,
         "independent_of_task": true
     },
     "parameters": {

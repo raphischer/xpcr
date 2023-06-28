@@ -41,6 +41,7 @@ if __name__ == '__main__':
     merged_database = []
     for group_field_vals, data in database.groupby(['dataset', 'environment', 'model']):
         assert data.shape[0] < 3, "found too many values"
+        data = data.sort_values('task')
         merged = data.fillna(method='bfill').head(1)
         merged.loc[:,'task'] = 'Train and Test'
         merged_database.append(merged)

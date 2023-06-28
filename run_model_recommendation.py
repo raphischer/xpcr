@@ -8,9 +8,7 @@ import numpy as np
 # preprocessing, metrics & co
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder, LabelEncoder
-from sklearn.model_selection import cross_validate
-from sklearn.utils import resample
-from sklearn.model_selection import KFold, StratifiedKFold, GroupKFold
+from sklearn.model_selection import GroupKFold
 from sklearn.metrics import mean_absolute_error, max_error
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
@@ -29,13 +27,10 @@ class FreqTransformer(BaseEstimator, TransformerMixin):
 
 
 # ML methods
-from sklearn.ensemble import RandomForestRegressor, ExtraTreesRegressor
 from sklearn.linear_model import LinearRegression, Ridge, Lasso, ElasticNet
 from sklearn.svm import LinearSVR, SVR
-from sklearn.dummy import DummyRegressor
 from sklearn.tree import DecisionTreeRegressor
 
-from mlprops.util import PatchedJSONEncoder
 from mlprops.index_and_rate import calculate_single_compound_rating
 from create_paper_results import COL_SEL
 
