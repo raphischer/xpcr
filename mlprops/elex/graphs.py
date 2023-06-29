@@ -1,8 +1,9 @@
 import numpy as np
 import plotly.graph_objects as go
+from plotly.express.colors import sample_colorscale
 
 from mlprops.index_and_rate import calculate_compound_rating
-from mlprops.elex.util import RATING_COLORS, ENV_SYMBOLS, PATTERNS
+from mlprops.elex.util import RATING_COLORS, ENV_SYMBOLS, PATTERNS, RATING_COLOR_SCALE
 
 
 def add_rating_background(fig, rating_pos, mode, dark_mode):
@@ -24,7 +25,7 @@ def create_scatter_graph(plot_data, axis_title, dark_mode, ax_border=0.1, marker
         fig.add_trace(go.Scatter(
             x=data['x'], y=data['y'], name=env_name, text=data['names'],
             mode='markers+text', marker_symbol=ENV_SYMBOLS[env_i],
-            legendgroup=env_name, marker=dict(color=[RATING_COLORS[r] for r in data['ratings']], size=marker_width),
+            legendgroup=env_name, marker=dict(color=sample_colorscale(RATING_COLOR_SCALE, [1-val for val in data['index']]), size=marker_width),
             marker_line=dict(width=marker_width / 5, color='black'))
         )
     fig.update_traces(textposition='top center')

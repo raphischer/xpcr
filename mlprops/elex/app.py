@@ -41,7 +41,7 @@ class Visualization(dash.Dash):
             'sub_database': None,
             'indexmode': index_mode,
             'update_on_change': False,
-            'rating_mode': 'optimistic median',
+            'rating_mode': 'optimistic mean',
             'model': None,
             'label': None
         }
@@ -50,7 +50,7 @@ class Visualization(dash.Dash):
         self.metrics, self.xaxis_default, self.yaxis_default = find_relevant_metrics(self.database)
         
         # setup page and create callbacks
-        self.layout = create_page(self.datasets, self.meta['dataset'], index_mode)
+        self.layout = create_page(self.datasets, self.meta['dataset'], index_mode, self.state['rating_mode'])
         self.callback(
             [Output('x-weight', 'value'), Output('y-weight', 'value')],
             [Input('xaxis', 'value'), Input('yaxis', 'value'), Input('weights-upload', 'contents')]
@@ -123,9 +123,10 @@ class Visualization(dash.Dash):
         scale_switch = scale_switch or 'index'
         env_names = self.environments[self.state['task']] if env_names is None else env_names
         for env in env_names:
-            env_data = { 'ratings': [], 'x': [], 'y': [] }
+            env_data = { 'ratings': [], 'x': [], 'y': [], 'index': [] }
             for _, log in find_sub_database(self.state['sub_database'], environment=env).iterrows():
                 env_data['ratings'].append(log['compound_rating'])
+                env_data['index'].append(log['compound_index'])
                 for xy_axis, metric in zip(['x', 'y'], [self.state['xaxis'], self.state['yaxis']]):
                     if isinstance(log[metric], dict): # either take the value or the index of the metric
                         env_data[xy_axis].append(log[metric][scale_switch])

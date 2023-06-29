@@ -31,7 +31,7 @@ style_upload = dict({
 }, **style_btn_cfg)
 
 
-def create_page(datasets, dataset_meta, indexmode):
+def create_page(datasets, dataset_meta, indexmode, rating_mode):
 
     if isinstance(dataset_meta, str) and os.path.isfile(dataset_meta):
         dataset_meta = read_json(dataset_meta)
@@ -98,7 +98,7 @@ def create_page(datasets, dataset_meta, indexmode):
                 ),
                 html.H4('Rating Mode'),
                 dbc.RadioItems(
-                    id='rating', value='optimistic median',
+                    id='rating', value=rating_mode,
                     options=[{'label': opt, 'value': opt.lower()} for opt in ['Optimistic Median', 'Pessimistic Median', 'Optimistic Mean', 'Pessimistic Mean', 'Best', 'Worst']],
                 )
             ], title = 'More Graph Options')
