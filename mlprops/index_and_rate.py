@@ -69,7 +69,7 @@ def calculate_single_compound_rating(input, mode='optimistic mean'):
         if 'median' in mode:
             results[name] = weighted_median(values, weights)
         if 'mean' in mode:
-            results[name] = np.average(ratings, weights=weights)
+            results[name] = np.average(values, weights=weights)
     if len(results) < 2:
         raise NotImplementedError('Rating Mode not implemented!', mode)
     round_m = np.ceil if 'pessimistic' in mode else np.floor # compound rating needs to be rounded to int depending on mode
