@@ -1,10 +1,18 @@
 {
+    "MASE": {
+        "name": "Test MASE",
+        "shortname": "MASE",
+        "unit": "number",
+        "group": "Performance",
+        "weight": 0.165,
+        "independent_of_task": true
+    },
     "RMSE": {
         "name": "Test RMSE",
         "shortname": "RMSE",
         "unit": "number",
         "group": "Performance",
-        "weight": 0.1,
+        "weight": 0.0825,
         "independent_of_task": true
     },
     "MAPE": {
@@ -12,15 +20,7 @@
         "shortname": "MAPE",
         "unit": "number",
         "group": "Performance",
-        "weight": 0.1,
-        "independent_of_task": true
-    },
-    "MASE": {
-        "name": "Test MASE",
-        "shortname": "MASE",
-        "unit": "number",
-        "group": "Performance",
-        "weight": 0.2,
+        "weight": 0.0825,
         "independent_of_task": true
     },
     "parameters": {
@@ -28,7 +28,7 @@
         "shortname": "Params",
         "unit": "number",
         "group": "Complexity",
-        "weight": 0.17,
+        "weight": 0.165,
         "independent_of_task": true
     },
     "fsize": {
@@ -36,7 +36,7 @@
         "shortname": "Size",
         "unit": "byte",
         "group": "Complexity",
-        "weight": 0.17,
+        "weight": 0.165,
         "independent_of_task": true
     },
     "train_power_draw": {
@@ -51,7 +51,7 @@
         "shortname": "T Time",
         "unit": "seconds",
         "group": "Resources",
-        "weight": 0.08
+        "weight": 0.065
     },
     "power_draw": {
         "name": "Power Draw per Inference",
@@ -65,6 +65,6 @@
         "shortname": "I Time",
         "unit": "seconds",
         "group": "Resources",
-        "weight": 0.08
+        "weight": 0.065
     }
 }

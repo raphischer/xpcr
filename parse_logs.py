@@ -1,7 +1,8 @@
 from mlprops.load_experiment_logs import load_database
 
 RESULT_PATHS = [
-    ('mnt_data/results', 'results/merged22', 'results/database22.pkl')
+    # ('mnt_data/results', 'results/merged22', 'results/database22.pkl')
+    ('mnt_data/autokeras', 'results/merged_autokeras', 'results/autokeras.pkl')
     # ('mnt_data/results05', 'results/merged05', 'results/database05.pkl')
 ]
 
