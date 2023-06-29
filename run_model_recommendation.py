@@ -238,7 +238,7 @@ def evaluate_recommendation(database):
             to_rate[col] = {'rating': 0} # TODO also assess compound rating with help of boundaries
             to_rate[col]['weight'] = row[col]['weight']
             to_rate[col]['index'] = row[col + '_pred']
-        compounds_pred.append(calculate_single_compound_rating(to_rate, 'optimistic median')['index'])
+        compounds_pred.append(calculate_single_compound_rating(to_rate)['index'])
     database['compound_index_pred'] = compounds_pred
     database['compound_index_pred_error'] = np.abs(database['compound_index_pred'] - database['compound_index_true'] )
 

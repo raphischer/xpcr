@@ -41,7 +41,7 @@ class Visualization(dash.Dash):
             'sub_database': None,
             'indexmode': index_mode,
             'update_on_change': False,
-            'rating_mode': 'optimistic median',
+            'rating_mode': 'optimistic mean',
             'model': None,
             'label': None
         }

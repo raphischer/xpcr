@@ -98,7 +98,7 @@ def create_page(datasets, dataset_meta, indexmode):
                 ),
                 html.H4('Rating Mode'),
                 dbc.RadioItems(
-                    id='rating', value='optimistic median',
+                    id='rating', value='optimistic mean',
                     options=[{'label': opt, 'value': opt.lower()} for opt in ['Optimistic Median', 'Pessimistic Median', 'Optimistic Mean', 'Pessimistic Mean', 'Best', 'Worst']],
                 )
             ], title = 'More Graph Options')

@@ -8,7 +8,7 @@ from mlprops.unit_reformatting import CustomUnitReformater
 from mlprops.load_experiment_logs import find_sub_database
 
 
-def calculate_compound_rating(ratings, mode='optimistic median'):
+def calculate_compound_rating(ratings, mode='optimistic mean'):
     if isinstance(ratings, pd.DataFrame): # full database to rate
         for idx, log in ratings.iterrows():
             try:
@@ -34,7 +34,7 @@ def weighted_median(values, weights):
     raise RuntimeError
 
 
-def calculate_single_compound_rating(input, mode):
+def calculate_single_compound_rating(input, mode='optimistic mean'):
     # extract lists of values
     if isinstance(input, pd.Series):
         input = input.to_dict()
@@ -229,7 +229,7 @@ def update_weights(database, weights):
     return update_db
 
 
-def rate_database(database, properties_meta, boundaries=None, indexmode='best', references=None, unit_fmt=None, rating_mode='optimistic median'):
+def rate_database(database, properties_meta, boundaries=None, indexmode='best', references=None, unit_fmt=None, rating_mode='optimistic mean'):
     # load defaults
     boundaries = load_boundaries(boundaries)
     unit_fmt = unit_fmt or CustomUnitReformater()

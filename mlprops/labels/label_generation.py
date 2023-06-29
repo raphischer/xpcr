@@ -162,36 +162,3 @@ class PropertyLabel(fitz.Document):
         label_bytes = self.load_page(0).get_pixmap().tobytes()
         base64_enc = base64.b64encode(label_bytes).decode('ascii')
         return 'data:image/png;base64,{}'.format(base64_enc)
-
-
-# if __name__ == "__main__":
-
-    # parser = argparse.ArgumentParser(description="Generate an energy label (.pdf) for tasks on ImageNet data")
-
-    # # data and model input
-    # parser.add_argument("--task", "-t", default="inference", choices=['inference', 'training'])
-    # parser.add_argument("--model", "-m", default="ResNet101", type=str)
-    # parser.add_argument("--environment", "-e", default='A100 x8 - TensorFlow 2.8.0', type=str)
-    # parser.add_argument("--directory", "-d", default='results', type=str, help="Directory with .json result files")
-    # parser.add_argument("--filename", "-f", default="", type=str, help="name of json logfile")
-    # parser.add_argument("--output", "-o", default="label.pdf", type=str, help="name of output file")
-      
-    # args = parser.parse_args()
-
-    # _, summaries = load_results(args.directory)
-    # summaries, _, _ = rate_results(summaries)
-
-    # # generate label for given filename
-    # if os.path.isfile(os.path.join(args.directory, args.filename)):
-    #     with open(os.path.join(args.directory, args.filename), 'r') as rf:
-    #         log = json.load(rf)
-    #         environment = get_environment_key(log)
-    #         task = TASK_TYPES[args.filename.split('_')[0]]
-    #         model = log['config']['model']
-    # else:
-    #     task, model, environment = args.task, args.model, args.environment
-    
-    # for summary in summaries[task][environment]:
-    #     if summary['name'] == model:
-    #         pdf_doc = PropertyLabel(summary, 'optimistic median')
-    #         pdf_doc.save(args.output)

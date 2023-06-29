@@ -74,13 +74,6 @@ if __name__ == '__main__':
         from create_paper_results import create_all
         create_all(rated_database, boundaries, real_boundaries, meta)
 
-    if args.mode == 'label':
-        from mlprops.labels.label_generation import PropertyLabel
-        from mlprops.elex.util import fill_meta
-        summary = fill_meta(rated_database.iloc[0].to_dict(), meta)
-        pdf_doc = PropertyLabel(summary, 'optimistic median')
-        pdf_doc.save('label.pdf')
-
     if args.mode == 'stats':
         grouped_by = rated_database.groupby(['environment', 'dataset'])
         ds_stats = []
