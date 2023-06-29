@@ -62,6 +62,8 @@ if __name__ == '__main__':
                 meta['dataset'][ds] = meta['dataset'][orig].copy()
                 meta['dataset'][ds]['name'] = meta['dataset'][ds]['name'] + ds.replace(orig + '_', '') # append the ds seed to name
 
+    # TODO check why there is an issue here?
+    database = database[database['dataset_orig'] != 'bitcoin_dataset_without_missing_values']
     rated_database, boundaries, real_boundaries, _ = rate_database(database, properties_meta=meta['properties'], boundaries=args.boundaries)
     print(f'Database constructed from logs has {rated_database.shape} entries')
 
@@ -140,8 +142,6 @@ if __name__ == '__main__':
                 rated_database.loc[data.index,'contain_equal_length'] = contain_equal_length
             rated_database.to_pickle(meta_database_path)
 
-        # TODO check why there is an issue here?
-        rated_database = rated_database[rated_database['dataset_orig'] != 'bitcoin_dataset_without_missing_values']
         models = pd.unique(rated_database["model"])
         shape = rated_database.shape
         ds = pd.unique(rated_database["dataset"])
