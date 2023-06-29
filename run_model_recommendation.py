@@ -235,7 +235,7 @@ def evaluate_recommendation(database):
     for _, row in database.iterrows():
         to_rate = {}
         for col in pred_cols:
-            to_rate[col] = {'rating': 0} # TODO also assess compound rating with help of boundaries
+            to_rate[col] = {'rating': 0} # TODO also assess predicted compound rating with help of boundaries
             to_rate[col]['weight'] = row[col]['weight']
             to_rate[col]['index'] = row[col + '_pred']
         compounds_pred.append(calculate_single_compound_rating(to_rate)['index'])

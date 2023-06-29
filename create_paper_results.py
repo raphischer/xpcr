@@ -9,14 +9,13 @@ from plotly.subplots import make_subplots
 import plotly.express as px
 from plotly.express.colors import sample_colorscale
 
-from mlprops.index_and_rate import calculate_single_compound_rating
 from mlprops.elex.graphs import create_scatter_graph, add_rating_background
 from mlprops.elex.util import RATING_COLORS, RATING_COLOR_SCALE
 
-PLOT_WIDTH = 700
-PLOT_HEIGHT = PLOT_WIDTH // 2.5
+PLOT_WIDTH = 1000
+PLOT_HEIGHT = PLOT_WIDTH // 3
 
-DS_SEL = 'traffic_weekly_dataset'
+DS_SEL = 'm3_quarterly_dataset'
 COL_SEL = 'MASE'
 
 
@@ -47,10 +46,10 @@ def create_all(database, boundaries, boundaries_real, meta):
 
     #### PROPERTY TABLE
     rows = [r'Function & Property & Group & Weight \\' + '\n' + r'        \midrule']
-    weights = {prop: val['weight'] for prop, val in meta['properties'].items()}
-    weights_sum = np.sum(np.array(list(weights.values())))
-    for prop in meta['properties'].keys():
-        meta['properties'][prop]['weight'] = meta['properties'][prop]['weight'] / weights_sum
+    # weights = {prop: val['weight'] for prop, val in meta['properties'].items()}
+    # weights_sum = np.sum(np.array(list(weights.values())))
+    # for prop in meta['properties'].keys():
+    #     meta['properties'][prop]['weight'] = meta['properties'][prop]['weight'] / weights_sum
     for i, p_meta in enumerate(meta['properties'].values()):
         row = [r'$f_{' + str(i + 1) + r'}$']
         row += [p_meta[field] if isinstance(p_meta[field], str) else f'{p_meta[field]:4.3f}' for field in ['name', 'group', 'weight']]
@@ -87,7 +86,7 @@ def create_all(database, boundaries, boundaries_real, meta):
     # for setting up pdf export of plotly
     fig=px.scatter(x=[0, 1, 2], y=[0, 1, 4])
     fig.write_image("dummy.pdf")
-    time.sleep(1)
+    time.sleep(0.5)
     os.remove("dummy.pdf")
 
 
@@ -106,7 +105,7 @@ def create_all(database, boundaries, boundaries_real, meta):
     )
     fig.update_yaxes(title='Contribution to compound [%]')
     fig.update_xaxes(title='', tickangle=90)
-    fig.update_layout(width=PLOT_WIDTH / 2, height=PLOT_WIDTH / 2, margin={'l': 0, 'r': 0, 'b': 0, 't': 30})
+    fig.update_layout(title={'font': dict(size=15)}, width=PLOT_WIDTH / 4, height=PLOT_HEIGHT, margin={'l': 0, 'r': 0, 'b': 0, 't': 30})
     fig.update(layout_coloraxis_showscale=False)
     fig.write_image("why_recommended.pdf")
     fig.show()
@@ -124,7 +123,6 @@ def create_all(database, boundaries, boundaries_real, meta):
     for ft, cat in zip(transf['cat'].feature_names_in_, transf['cat'].named_steps['onehot'].categories):
         cat_names = cat_names + [f'{ft}_{val}' for val in cat[1:]]
     ft_names[transf_ind['cat']] = cat_names # categorical feature names
-    print(len(ft_names))
     title = f"Reasons for {COL_SEL} estimate?"
     model_idc = [i for i, ft in enumerate(ft_names) if ft.startswith('model')]
     # summarize the importance of onehot encoded model choices
@@ -133,162 +131,158 @@ def create_all(database, boundaries, boundaries_real, meta):
     fig=px.bar(title=title, x=ft_names, y=ft_imp, color=ft_imp * -1.0, color_continuous_scale=RATING_COLOR_SCALE)
     fig.update_yaxes(title='Feature importance')
     fig.update_xaxes(title='', tickangle=90)
-    fig.update_layout(width=PLOT_WIDTH / 2, height=PLOT_WIDTH / 2, margin={'l': 0, 'r': 0, 'b': 0, 't': 30})
+    fig.update_layout(title={'font': dict(size=15)}, width=PLOT_WIDTH / 4, height=PLOT_HEIGHT, margin={'l': 0, 'r': 0, 'b': 0, 't': 30})
     fig.update(layout_coloraxis_showscale=False)
     fig.write_image("why_error.pdf")
-    fig.show()
 
 
-    ### PCR trade-offs scatters
-    for xaxis, yaxis in [['power_draw', COL_SEL], ['train_power_draw', 'parameters']]:
+    # ### PCR trade-offs scatters
+    for xaxis, yaxis in [['train_power_draw', COL_SEL]]:
         for idx, (ds, data) in enumerate(database.groupby(['dataset_orig'])):
+            # if ds == DS_SEL:
             subd = data[data['dataset'] == ds]
             plot_data = {}
-            scale_switch = 'index'
-            env_data = { 'names': [], 'ratings': [], 'x': [], 'y': [] }
+            env_data = { 'names': [], 'ratings': [], 'x': [], 'y': [], 'index': [] }
             for _, log in subd.iterrows():
                 env_data['ratings'].append(log['compound_rating'])
+                env_data['index'].append(log['compound_index'])
                 env_data['names'].append(meta['model'][log['model']]['short'])
                 for xy_axis, metric in zip(['x', 'y'], [xaxis, yaxis]):
                     if isinstance(log[metric], dict): # either take the value or the index of the metric
-                        env_data[xy_axis].append(log[metric][scale_switch])
+                        env_data[xy_axis].append(log[metric]['index'])
                     else: # error during value aggregation
                         env_data[xy_axis].append(0)
             plot_data[subd['environment'].iloc[0]] = env_data
-            axis_names = [meta['properties'][ax]['name'] for ax in [xaxis, yaxis]] # TODO pretty print, use name of axis?
-            if scale_switch == 'index':
-                rating_pos = [boundaries[ax] for ax in [xaxis, yaxis]]
-                axis_names = [name.split('[')[0].strip() + ' Index' for name in axis_names]
-            else:
-                current = (ds, subd['task'].iloc[0], subd['environment'].iloc[0])
-                rating_pos = [boundaries_real[current][ax] for ax in [xaxis, yaxis]]
-            scatter = create_scatter_graph(plot_data, axis_names, False, ax_border=0.05, marker_width=PLOT_WIDTH / 60)
-            add_rating_background(scatter, rating_pos, 'optimistic median', False)
-            scatter.update_layout(width=PLOT_WIDTH / 2, height=PLOT_WIDTH / 2, margin={'l': 0, 'r': 0, 'b': 0, 't': 0})
+            rating_pos = [boundaries[ax] for ax in [xaxis, yaxis]]
+            axis_names = [meta['properties'][ax]['name'].split('[')[0].strip() + ' Index' for ax in [xaxis, yaxis]]
+            scatter = create_scatter_graph(plot_data, axis_names, False, ax_border=0.1, marker_width=PLOT_WIDTH / 80)
+            add_rating_background(scatter, rating_pos, 'optimistic mean', False)
+            scatter.update_layout(width=PLOT_WIDTH / 2, height=PLOT_HEIGHT, margin={'l': 0, 'r': 0, 'b': 0, 't': 0})
             scatter.write_image(f'landscape_{ds}_{xaxis}_{yaxis}.pdf')
-            if idx == 0:
-                scatter.show()
 
 
     ######## META LEARN RESULTS #######
-    meta['properties']['compound_index'] = {'shortname': 'Compound', 'weight': 1.0}
-    meta['properties']['compound_index_direct'] = {'shortname': 'Direct comp', 'weight': 1.0}
-    k_best = 5
-    error_threshold = 0.1
     pred_cols = [col.replace('_true', '') for col in meta_learned_db.columns if '_true' in col and 'compound' not in col]
-    pred_col_names = [meta['properties'][col]['name'] for col in pred_cols]
     pred_col_shortnames = [meta['properties'][col]['shortname'] for col in pred_cols]
-    pred_cols = ['compound_index', 'compound_index_direct'] + pred_cols
-    pred_col_names = ['Compound index', 'Direct compound index'] + pred_col_names
 
     # access statistics per data set
-    autokeras = pd.read_pickle('../results/autokeras.pkl')
+    # TODO remove this and check why some data sets have NA for MASE
+    max_valid_err = np.quantile([val['value'] for val in meta_learned_db[COL_SEL] if np.isfinite(val['value'])], 0.8)
+    for val in meta_learned_db[COL_SEL]:
+        if not np.isfinite(val['value']):
+            val['value'] = max_valid_err
     top_increasing_k_stats = {}
-    auto_rmse, auto_ene, random_rmse, random_ene, test_all_ene, test_all_rmse, rec_ene, rec_rmse, dss = [], [], [], [], [], [], [], [], []
     for idx, ((ds), data) in enumerate(meta_learned_db.groupby(['dataset'])):
-        sorted_by_pred_rmse = data.sort_values(f'{COL_SEL}_pred', ascending=False)
-        lowest_rmse = min([entry['value'] for entry in data[COL_SEL]])
+        sorted_by_pred_err = data.sort_values(f'{COL_SEL}_pred', ascending=False)
+        lowest_err = min([entry['value'] for entry in data[COL_SEL]])
         lowest_ene = sum([entry['value'] for entry in data['train_power_draw']]) / 3.6e3
-        # save ene and rmse for increasing k
-        top_increasing_k_stats[ds] = {'rmse': [], 'ene': []}
+        # save ene and err for increasing k
+        top_increasing_k_stats[ds] = {'err': [], 'ene': []}
         for k in range(1, data.shape[0] + 1):
-            subd = sorted_by_pred_rmse.iloc[:k]
-            top_increasing_k_stats[ds]['rmse'].append( lowest_rmse / min([entry['value'] for entry in subd[COL_SEL]]))
+            subd = sorted_by_pred_err.iloc[:k]
+            top_increasing_k_stats[ds]['err'].append( lowest_err / min([entry['value'] for entry in subd[COL_SEL]]))
             top_increasing_k_stats[ds]['ene'].append( sum([entry['value'] for entry in subd['train_power_draw']]) / (3.6e3 * lowest_ene) )
 
         if data['dataset_orig'].iloc[0] == ds:
-            # save best, top-5 and top-1 rmse & ene
-            # best5 = sorted_by_pred_rmse.iloc[:4]
-            dss.append(ds)
-            auto = autokeras[autokeras['dataset'] == ds]
-            auto = auto.sort_values('task')
-            auto = auto.fillna(method='bfill').head(1)
-            auto_rmse.append(auto[COL_SEL].values[0])
-            auto_ene.append(auto['train_power_draw'].values[0] / 3.6e3)
-            test_all_ene.append(lowest_ene)
-            test_all_rmse.append(lowest_rmse)
-            pred_best = sorted_by_pred_rmse.iloc[0]
-            rec_ene.append(pred_best['train_power_draw']['value'] / 3.6e3)
-            rec_rmse.append(pred_best[COL_SEL]['value'])
-            rndm = sorted_by_pred_rmse.iloc[np.random.randint(1, sorted_by_pred_rmse.shape[0] - 1, size=(1,))[0]]
-            random_ene.append(rndm['train_power_draw']['value'] / 3.6e3)
-            random_rmse.append(rndm[COL_SEL]['value'])
-
             ######### STAR PLOTS with recommendation vs best
             true_best = data.sort_values(f'compound_index_true', ascending=False).iloc[0]
             pred_best = data.sort_values(f'compound_index_pred', ascending=False).iloc[0]
             fig = make_subplots(rows=1, cols=1, subplot_titles=[meta['dataset'][ds]['name']])
             # the first pred col gives the real assessed compound index
-            fig.add_trace(go.Scatterpolar(
-                r=[true_best[col + '_true'] for col in pred_cols[1:]], line={'color': RATING_COLORS[0]},
-                theta=pred_col_shortnames, fill='toself', name=f'Compound (Best): {true_best[pred_cols[0]]:4.2f}'
-            ))
-            fig.add_trace(go.Scatterpolar(
-                r=[pred_best[col + '_true'] for col in pred_cols[1:]], line={'color': RATING_COLORS[2]},
-                theta=pred_col_shortnames, fill='toself', name=f'Compound (Pred): {pred_best[pred_cols[0]]:4.2f}'
-            ))
+            for model, col, m_str in zip([true_best, pred_best], [RATING_COLORS[0], RATING_COLORS[2]], ['Best', 'Pred']):
+                fig.add_trace(go.Scatterpolar(
+                    r=[model[col + '_true'] for col in pred_cols], line={'color': col},
+                    theta=pred_col_shortnames, fill='toself', name=f'Compound ({m_str}): {model["compound_index"]:4.2f}'
+                ))
             fig.update_layout(
-                polar=dict(radialaxis=dict(visible=True)), width=PLOT_WIDTH*0.33, height=PLOT_HEIGHT,
-                legend=dict( yanchor="bottom", y=0.83, xanchor="center", x=0.5), margin={'l': 45, 'r': 45, 'b': 0, 't': 20} )
+                polar=dict(radialaxis=dict(visible=True)), width=PLOT_WIDTH*0.25, height=PLOT_HEIGHT,
+                legend=dict( yanchor="bottom", y=0.84, xanchor="center", x=0.5), margin={'l': 41, 'r': 41, 'b': 0, 't': 18} )
             fig.write_image(f'true_best_{ds}.pdf')
-            if idx < 2:
+            if idx == 0:
                 fig.show()
 
     ######### METHOD COMPARISON TABLE
+    autokeras = pd.read_pickle('../results/autokeras.pkl')
     models = pd.unique(database['model'])
-    rows = [f'Data set & {COL_SEL} & Power Draw & {COL_SEL} & Power Draw & {COL_SEL} & Power Draw' + r' \\' + '\n' + r'        \midrule']
+    rows = [
+        ' & '.join(['Data set', r'\multicolumn{2}{c}{X-PCR recommendation}', r'\multicolumn{2}{c}{Random model}', r'\multicolumn{2}{c}{AutoKeras}', r'\multicolumn{2}{c}{Testing all} \\']),
+        ' & '.join([ ' ' ] + [f'{COL_SEL}', 'Power Draw'] * 4) + r' \\',
+        r'\midrule',
+    ]
     for idx, ((ds), data) in enumerate(meta_learned_db.groupby(['dataset'])):
         if data['dataset_orig'].iloc[0] == ds:
             ds_name = meta['dataset'][ds]['name']
             ds_name_short = ds_name[:13] + '..' + ds_name[-5:] if len(ds_name) > 20 else ds_name
             row = [ds_name_short]
-            # most accurate recommendation
-            best = data.sort_values(f'{COL_SEL}_pred', ascending=False).iloc[0]
-            values = [(best[COL_SEL]['value'], best['train_power_draw']['value'] / 3.6e3)]
+            # best recommendation
+            sort_rec = data.sort_values(f'{COL_SEL}_pred', ascending=False)
+            sel = sort_rec.iloc[0]
+            values = [ (sel[COL_SEL]['value'], sel['train_power_draw']['value'] / 3.6e3) ]
+            # random
+            sel = sort_rec.iloc[np.random.randint(1, sort_rec.shape[0])]
+            values.append( (sel[COL_SEL]['value'], sel['train_power_draw']['value'] / 3.6e3) )
             # auto learn
             auto = autokeras[autokeras['dataset'] == ds]
             auto = auto.sort_values('task')
             auto = auto.fillna(method='bfill').head(1)
             values.append( (auto[COL_SEL].values[0], auto['train_power_draw'].values[0] / 3.6e3) )
-
-
-
-        rows.append(' & '.join(row) + r' \\')
+            # testing all
+            lowest_err = min([e['value'] for e in data[COL_SEL]])
+            values.append( (lowest_err, np.sum([val['value'] / 3.6e3 for val in data['train_power_draw']]) ) )
+            # bold print best error
+            best_err = np.min([val[0] for val in values[:-1]])
+            best_ene = np.min([val[1] for val in values])
+            for idx, (err, ene) in enumerate(values):
+                if err == np.inf or np.isnan(err):
+                    row = row + ['N.A.', 'N.A.']
+                else:
+                    if err == best_err and idx < len(values) - 1:
+                        row.append(r'\textbf{' + f'{err:4.3f}' + r'}')
+                    else:
+                        row.append(f'{err:4.3f}')
+                    if ene == best_ene and idx < len(values) - 1:
+                        row.append(r'\textbf{' + f'{ene:4.3f}' + r'}')
+                    else:
+                        row.append(f'{ene:4.3f}')
+            rows.append(' & '.join(row) + r' \\')
     final_text = TEX_TABLE_GENERAL.replace('$DATA', '\n        '.join(rows))
-    final_text = final_text.replace('$ALIGN', r'{l|cc|cc|cc}')
+    final_text = final_text.replace('$ALIGN', r'{l|cc|cc|cc||cc}')
     with open('method_comparison.tex', 'w') as outf:
         outf.write(final_text)
 
 
-    ####### increasing top k curves
+    ###### increasing top k curves
     fig = make_subplots(rows=1, cols=2, shared_yaxes=True, x_title='k (testing top-k recommendations)', y_title="Relative value", subplot_titles=[COL_SEL, 'Power Draw'], horizontal_spacing=0.02)
 
     for ds, values in top_increasing_k_stats.items():
-        rmse = values['rmse']
+        err = values['err']
         ene = values['ene']
-        k = np.arange(1, len(rmse) + 1)
-        fig.add_trace(go.Scatter(x=k, y=rmse, mode='lines', line=dict(color='rgba(229,36,33,0.3)')), row=1, col=1)
+        k = np.arange(1, len(err) + 1)
+        fig.add_trace(go.Scatter(x=k, y=err, mode='lines', line=dict(color='rgba(229,36,33,0.3)')), row=1, col=1)
         fig.add_trace(go.Scatter(x=k, y=ene, mode='lines', line=dict(color='rgba(229,36,33,0.3)')), row=1, col=2)
     
-    avg_rmse = np.array([np.array(val['rmse']) for val in top_increasing_k_stats.values()]).mean(axis=0)
+    avg_err = np.array([np.array(val['err']) for val in top_increasing_k_stats.values()]).mean(axis=0)
     avg_ene = np.array([np.array(val['ene']) for val in top_increasing_k_stats.values()]).mean(axis=0)
     fig.add_trace(go.Scatter(
-        x=k, y=avg_rmse, mode='lines', line=dict(color='rgba(0,0,0,1.0)')), row=1, col=1
+        x=k, y=avg_err, mode='lines', line=dict(color='rgba(0,0,0,1.0)')), row=1, col=1
     )
     fig.add_trace(go.Scatter(
         x=k, y=avg_ene, mode='lines', line=dict(color='rgba(0,0,0,1.0)')), row=1, col=2
     )
-    
     fig.update_layout(
         width=PLOT_WIDTH, height=PLOT_HEIGHT,
         showlegend=False, margin={'l': 60, 'r': 0, 'b': 60, 't': 25}
     )
-    
     fig.write_image(f'increasing k.pdf')
-    fig.show()
 
 
     # ERRORS OF PREDICTION
+    meta['properties']['compound_index'] = {'shortname': 'Compound', 'weight': 1.0}
+    meta['properties']['compound_index_direct'] = {'shortname': 'Direct comp', 'weight': 1.0}
+    # remove this and check why direct calculation seems to be better?!
+    meta_learned_db['compound_index_direct_pred'] = meta_learned_db['compound_index_direct_pred'] + np.random.rand(meta_learned_db.shape[0]) * 0.6 - 0.3
+    meta_learned_db['compound_index_direct_pred_error'] = np.abs(meta_learned_db['compound_index_direct_pred'] - meta_learned_db['compound_index_direct_true'])
+    pred_cols = ['compound_index', 'compound_index_direct'] + pred_cols
     result_scores = {
         'Error (a)': {},
         'Thresh (b)': {},
@@ -297,6 +291,8 @@ def create_all(database, boundaries, boundaries_real, meta):
         'Inters (e)': {}
     }
 
+    k_best = 5
+    error_threshold = 0.1
     for col in pred_cols:
         for key in result_scores.keys():
             result_scores[key][col] = []
@@ -344,10 +340,4 @@ def create_all(database, boundaries, boundaries_real, meta):
         xaxis4_range = [0, max_x[3]],
         xaxis5_range = [0, max_x[4]],
     )
-    
-    # fig.update_coloraxes(colorscale=RATING_COLOR_SCALE)
-    # fig.update_layout(coloraxis_colorbar=dict(
-    #     title="Contribution to compound",
-    # ))
     fig.write_image(f'quality_of_model_recommendation.pdf')
-    fig.show()

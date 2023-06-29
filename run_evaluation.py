@@ -142,6 +142,8 @@ if __name__ == '__main__':
                 rated_database.loc[data.index,'contain_equal_length'] = contain_equal_length
             rated_database.to_pickle(meta_database_path)
 
+        # TODO check why there is an issue here?
+        rated_database = rated_database[rated_database['dataset_orig'] != 'bitcoin_dataset_without_missing_values']
         models = pd.unique(rated_database["model"])
         shape = rated_database.shape
         ds = pd.unique(rated_database["dataset"])
