@@ -1,5 +1,4 @@
 import os
-import json
 import pickle
 
 import pandas as pd
@@ -14,18 +13,6 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 from sklearn.base import clone, BaseEstimator, TransformerMixin
 
-from data_loader import TIMEDELTA_MAP, FREQUENCY_MAP
-FREQ_TO_SECS = {v: TIMEDELTA_MAP[k].total_seconds() for k, v in FREQUENCY_MAP.items()}
-    
-
-class FreqTransformer(BaseEstimator, TransformerMixin):
-    def fit(self, X, y=None):
-        return self
-
-    def transform(self, X, y=None):
-        return X.applymap(lambda val: FREQ_TO_SECS[val])
-
-
 # ML methods
 from sklearn.linear_model import LinearRegression, Ridge, Lasso, ElasticNet
 from sklearn.svm import LinearSVR, SVR
@@ -33,6 +20,16 @@ from sklearn.tree import DecisionTreeRegressor
 
 from mlprops.index_and_rate import calculate_single_compound_rating
 from create_paper_results import COL_SEL
+from data_loader import TIMEDELTA_MAP, FREQUENCY_MAP
+FREQ_TO_SECS = {v: TIMEDELTA_MAP[k].total_seconds() for k, v in FREQUENCY_MAP.items()}
+
+
+class FreqTransformer(BaseEstimator, TransformerMixin):
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X, y=None):
+        return X.applymap(lambda val: FREQ_TO_SECS[val])
 
 
 # suppress warnings
