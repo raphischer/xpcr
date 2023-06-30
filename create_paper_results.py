@@ -136,7 +136,7 @@ def create_all(database, boundaries, boundaries_real, meta):
 
 
     # ### PCR trade-offs scatters
-    for xaxis, yaxis in [['train_power_draw', COL_SEL], ['running_time', 'RMSE']]:
+    for xaxis, yaxis in [['running_time', COL_SEL], ['train_power_draw', 'RMSE'], ['parameters', 'MAPE']]:
         for idx, (ds, data) in enumerate(database.groupby(['dataset_orig'])):
             # if ds == DS_SEL:
             subd = data[data['dataset'] == ds]
@@ -152,12 +152,16 @@ def create_all(database, boundaries, boundaries_real, meta):
                     else: # error during value aggregation
                         env_data[xy_axis].append(0)
             max_index, min_index = max(env_data['index']), min(env_data['index'])
-            env_data['index'] = [val / ]
+            env_data['index'] = [(val - min_index) / (max_index - min_index) for val in env_data['index']]
             plot_data[subd['environment'].iloc[0]] = env_data
-            rating_pos = [boundaries[ax] for ax in [xaxis, yaxis]]
+            rating_pos2 = []
+            for ax in ['x', 'y']:
+                q = np.quantile(plot_data[subd['environment'].iloc[0]][ax], [0.8, 0.6, 0.4, 0.2])
+                rating_pos2.append([[10000, q[0]], [q[0], q[1]], [q[1], q[2]], [q[2], q[3]], [q[3], -100]])
             axis_names = [meta['properties'][ax]['name'].split('[')[0].strip() + ' Index' for ax in [xaxis, yaxis]]
-            scatter = create_scatter_graph(plot_data, axis_names, False, ax_border=0.1, marker_width=PLOT_WIDTH / 80)
-            add_rating_background(scatter, rating_pos, 'optimistic mean', False)
+            scatter = create_scatter_graph(plot_data, axis_names, False, ax_border=0.15, marker_width=PLOT_WIDTH / 90)
+            scatter.update_traces(textposition='top center', textfont_size=16, textfont_color='black')
+            add_rating_background(scatter, rating_pos2, 'optimistic mean', False)
             scatter.update_layout(width=PLOT_WIDTH / 2, height=PLOT_HEIGHT * 0.8, margin={'l': 0, 'r': 0, 'b': 0, 't': 0})
             scatter.write_image(f'landscape_{ds}_{xaxis}_{yaxis}.pdf')
 
