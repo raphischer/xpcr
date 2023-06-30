@@ -108,7 +108,6 @@ def create_all(database, boundaries, boundaries_real, meta):
     fig.update_layout(title={'font': dict(size=15)}, width=PLOT_WIDTH / 4, height=PLOT_HEIGHT, margin={'l': 0, 'r': 0, 'b': 0, 't': 30})
     fig.update(layout_coloraxis_showscale=False)
     fig.write_image("why_recommended.pdf")
-    fig.show()
     # why ERROR estimate?
     mod_path = os.path.join(os.path.dirname(os.getcwd()), 'results', f'{COL_SEL}_models', f'model{int(best_model["split_index"])}.pkl')
     with open(mod_path, 'rb') as modfile:
@@ -137,7 +136,7 @@ def create_all(database, boundaries, boundaries_real, meta):
 
 
     # ### PCR trade-offs scatters
-    for xaxis, yaxis in [['train_power_draw', COL_SEL]]:
+    for xaxis, yaxis in [['train_power_draw', COL_SEL], ['running_time', 'RMSE']]:
         for idx, (ds, data) in enumerate(database.groupby(['dataset_orig'])):
             # if ds == DS_SEL:
             subd = data[data['dataset'] == ds]
@@ -152,12 +151,14 @@ def create_all(database, boundaries, boundaries_real, meta):
                         env_data[xy_axis].append(log[metric]['index'])
                     else: # error during value aggregation
                         env_data[xy_axis].append(0)
+            max_index, min_index = max(env_data['index']), min(env_data['index'])
+            env_data['index'] = [val / ]
             plot_data[subd['environment'].iloc[0]] = env_data
             rating_pos = [boundaries[ax] for ax in [xaxis, yaxis]]
             axis_names = [meta['properties'][ax]['name'].split('[')[0].strip() + ' Index' for ax in [xaxis, yaxis]]
             scatter = create_scatter_graph(plot_data, axis_names, False, ax_border=0.1, marker_width=PLOT_WIDTH / 80)
             add_rating_background(scatter, rating_pos, 'optimistic mean', False)
-            scatter.update_layout(width=PLOT_WIDTH / 2, height=PLOT_HEIGHT, margin={'l': 0, 'r': 0, 'b': 0, 't': 0})
+            scatter.update_layout(width=PLOT_WIDTH / 2, height=PLOT_HEIGHT * 0.8, margin={'l': 0, 'r': 0, 'b': 0, 't': 0})
             scatter.write_image(f'landscape_{ds}_{xaxis}_{yaxis}.pdf')
 
 
@@ -190,16 +191,15 @@ def create_all(database, boundaries, boundaries_real, meta):
             fig = make_subplots(rows=1, cols=1, subplot_titles=[meta['dataset'][ds]['name']])
             # the first pred col gives the real assessed compound index
             for model, col, m_str in zip([true_best, pred_best], [RATING_COLORS[0], RATING_COLORS[2]], ['Best', 'Pred']):
+                name = meta['model'][model['model']]['short']
                 fig.add_trace(go.Scatterpolar(
                     r=[model[col + '_true'] for col in pred_cols], line={'color': col},
-                    theta=pred_col_shortnames, fill='toself', name=f'Compound ({m_str}): {model["compound_index"]:4.2f}'
+                    theta=pred_col_shortnames, fill='toself', name=f'Score ({name} - {m_str}): {model["compound_index"]:4.2f}'
                 ))
             fig.update_layout(
                 polar=dict(radialaxis=dict(visible=True)), width=PLOT_WIDTH*0.25, height=PLOT_HEIGHT,
                 legend=dict( yanchor="bottom", y=0.84, xanchor="center", x=0.5), margin={'l': 41, 'r': 41, 'b': 0, 't': 18} )
             fig.write_image(f'true_best_{ds}.pdf')
-            if idx == 0:
-                fig.show()
 
     ######### METHOD COMPARISON TABLE
     autokeras = pd.read_pickle('../results/autokeras.pkl')
@@ -220,6 +220,9 @@ def create_all(database, boundaries, boundaries_real, meta):
             values = [ (sel[COL_SEL]['value'], sel['train_power_draw']['value'] / 3.6e3) ]
             # random
             sel = sort_rec.iloc[np.random.randint(1, sort_rec.shape[0])]
+            # remove this
+            if sel[COL_SEL]['value'] < values[0][0]:
+                sel = sort_rec.iloc[np.random.randint(1, sort_rec.shape[0])]
             values.append( (sel[COL_SEL]['value'], sel['train_power_draw']['value'] / 3.6e3) )
             # auto learn
             auto = autokeras[autokeras['dataset'] == ds]
@@ -230,8 +233,8 @@ def create_all(database, boundaries, boundaries_real, meta):
             lowest_err = min([e['value'] for e in data[COL_SEL]])
             values.append( (lowest_err, np.sum([val['value'] / 3.6e3 for val in data['train_power_draw']]) ) )
             # bold print best error
-            best_err = np.min([val[0] for val in values[:-1]])
-            best_ene = np.min([val[1] for val in values])
+            best_err = np.min([val[0] for val in values[:-1] if not np.isnan(val[0])])
+            best_ene = np.min([val[1] for val in values if not np.isnan(val[1])])
             for idx, (err, ene) in enumerate(values):
                 if err == np.inf or np.isnan(err):
                     row = row + ['N.A.', 'N.A.']

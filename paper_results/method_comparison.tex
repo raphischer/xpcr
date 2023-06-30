@@ -1,0 +1,25 @@
+
+    \begin{tabular}{l|cc|cc|cc||cc}
+        \toprule 
+        Data set & \multicolumn{2}{c}{X-PCR recommendation} & \multicolumn{2}{c}{Random model} & \multicolumn{2}{c}{AutoKeras} & \multicolumn{2}{c}{Testing all} \\
+          & MASE & Power Draw & MASE & Power Draw & MASE & Power Draw & MASE & Power Draw \\
+        \midrule
+        CIF 2016 & \textbf{1.029} & \textbf{0.763} & 1.138 & 1.877 & 20.776 & 1.710 & 1.029 & 38.927 \\
+        COVID-19 Deaths & \textbf{6.217} & \textbf{3.985} & \textbf{6.217} & 5.284 & N.A. & N.A. & 6.217 & 61.933 \\
+        Electricity Weekly & 3.042 & \textbf{4.210} & \textbf{2.656} & 11.685 & N.A. & N.A. & 1.978 & 79.650 \\
+        FRED-MD & \textbf{2.209} & \textbf{0.501} & 9.114 & 4.110 & 20825.049 & 6.653 & 0.671 & 55.745 \\
+        Hospital & \textbf{0.835} & 4.111 & 0.840 & \textbf{1.779} & 25.084 & 20.802 & 0.822 & 82.612 \\
+        M1 Monthly & \textbf{1.498} & 6.791 & 1.670 & \textbf{1.089} & 10065.688 & 22.415 & 1.250 & 130.051 \\
+        M1 Quarterly & \textbf{2.507} & \textbf{1.399} & 2.527 & 1.951 & 11293.791 & 8.672 & 1.799 & 39.570 \\
+        M3 Quarterly & 2.276 & \textbf{4.885} & \textbf{1.619} & 22.023 & 3.785 & 8.050 & 1.320 & 96.797 \\
+        M4 Weekly & \textbf{3.040} & 27.910 & 3.117 & 49.737 & N.A. & N.A. & 2.881 & 177.568 \\
+        NN5 Daily & \textbf{0.631} & 2.400 & 0.762 & \textbf{0.717} & 1.208 & 31.251 & 0.568 & 72.293 \\
+        NN5 Weekly & \textbf{0.880} & 3.513 & 1.062 & 2.866 & N.A. & N.A. & 0.866 & 86.496 \\
+        Melbourne Ped..ounts & 1.107 & \textbf{10.787} & \textbf{0.260} & 50.198 & N.A. & N.A. & 0.248 & 314.361 \\
+        Solar Weekly & 1.784 & 3.447 & 3.560 & \textbf{0.476} & \textbf{1.519} & 1.301 & 0.829 & 50.056 \\
+        Tourism Monthly & \textbf{1.778} & 6.460 & 61.903 & \textbf{0.763} & 27.261 & 42.620 & 1.420 & 176.383 \\
+        Tourism Quarterly & \textbf{3.304} & 1.757 & 4.620 & \textbf{0.869} & 733.900 & 12.657 & 1.670 & 54.758 \\
+        Traffic Weekly & \textbf{1.644} & 8.704 & 2.052 & \textbf{3.488} & N.A. & N.A. & 1.454 & 156.598 \\
+        Vehicle Trips & \textbf{6.217} & 3.021 & \textbf{6.217} & \textbf{2.235} & N.A. & N.A. & 6.217 & 64.160 \\
+        \bottomrule
+    \end{tabular}
