@@ -46,7 +46,7 @@ if __name__ == '__main__':
         merged.loc[:,'task'] = 'Train and Test'
         merged_database.append(merged)
     database = pd.concat(merged_database)
-    # # retrieve original dataset from all subsampled versions, and recalculate the configuration
+    # retrieve original dataset from all subsampled versions, and recalculate the configuration
     database['dataset_orig'] = database['dataset'].map(subsampled_to_orig)
     database['configuration'] = database.aggregate(lambda row: ' - '.join([row['task'], row['dataset'], row['model']]), axis=1)
     database.reset_index()

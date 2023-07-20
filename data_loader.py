@@ -1,11 +1,15 @@
 from datetime import datetime, timedelta
 import re
+import os
 from distutils.util import strtobool
-
-from mlprops.util import fix_seed
 
 import numpy as np
 import pandas as pd
+
+from mlprops.util import fix_seed
+
+from data_lookup_info import LOOKUP
+
 
 
 # most of this code, except for the CUSTOM SUBSAMPLING of datasets, is taken from the original TSForecast repository
@@ -71,7 +75,8 @@ def convert_tsf_to_dataframe(
     value_column_name="series_value",
     ds_sample_seed=-1,
     amount_of_series=0.5,
-    amount_of_length=0.5
+    amount_of_length=0.5,
+    ext_fc_horizon=None
 ):
     col_names = []
     col_types = []
@@ -194,14 +199,17 @@ def convert_tsf_to_dataframe(
 
                 line_count = line_count + 1
 
+        if forecast_horizon is None:
+            if ext_fc_horizon is None:
+                raise Exception("Please provide the required forecast horizon")
+            forecast_horizon = ext_fc_horizon
+
         if line_count == 0:
             raise Exception("Empty file.")
         if len(col_names) == 0:
             raise Exception("Missing attribute section.")
         if not found_data_section:
             raise Exception("Missing series information under data section.")
-
-        all_data[value_column_name] = all_series
 
         if frequency is not None:
             freq = FREQUENCY_MAP[frequency]
@@ -216,6 +224,23 @@ def convert_tsf_to_dataframe(
 
         if "start_timestamp" not in all_data:
             all_data["start_timestamp"] = [datetime(1900, 1, 1, 0, 0, 0) for _ in range(len(all_data['series_name']))]
+        
+        # check for constant series in dataset (in forecast range) and remove them
+        to_remove = []
+        for idx, ser in enumerate(all_series):
+            for idx_s in range(len(ser) - forecast_horizon):
+                # check all windows in series for contant values
+                if np.unique(ser[idx_s:(idx_s + forecast_horizon)]).size == 1:
+                    to_remove.append(idx)
+                    break
+        if len(to_remove) > 0:
+            print(f'Not considering {len(to_remove)} constant series', [all_data['series_name'][idx] for idx in to_remove])
+            for idx in reversed(to_remove):
+                all_data['series_name'].pop(idx)
+                all_data['start_timestamp'].pop(idx)
+                all_series.pop(idx)
+
+        all_data[value_column_name] = all_series
 
         # CUSTOM SUBSAMPLING
         if ds_sample_seed != -1:
@@ -269,3 +294,26 @@ def convert_tsf_to_dataframe(
             contain_missing_values,
             contain_equal_length,
         )
+
+if __name__ == '__main__':
+
+    datadir = 'mnt_data/data'
+    ds_stats = []
+    ds_n_vals = []
+    for dataset in LOOKUP.keys():
+        lag = LOOKUP[dataset][0]
+        if len(LOOKUP[dataset]) > 1:
+            external_forecast_horizon = LOOKUP[dataset][1]
+        if len(LOOKUP[dataset]) > 2:
+            integer_conversion = LOOKUP[dataset][2]
+        full_path = os.path.join(datadir, dataset + '.tsf')
+        try:
+            ds, freq, seasonality, forecast_horizon, contain_missing_values, contain_equal_length = convert_tsf_to_dataframe(full_path, ds_sample_seed=-1, ext_fc_horizon=external_forecast_horizon)
+            lengths = [len(ser) for ser in ds['series_value']]
+            ds_stats.append(f'{dataset:<40} {ds.shape[0]*np.mean(lengths):<3} values - {str(ds.shape[0]):<3} x {np.mean(lengths)} series (max length {np.max(lengths)})')
+            ds_n_vals.append(ds.shape[0]*np.mean(lengths))
+        except Exception as e:
+            print('ERROR', dataset, e)
+
+    for idx in np.argsort(ds_n_vals):
+        print(ds_stats[idx])

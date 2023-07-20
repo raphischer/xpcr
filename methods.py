@@ -199,14 +199,9 @@ def init_model_and_data(args):
         model_cls = getattr(module, model_props['class'])
 
     full_path = os.path.join(args.datadir, dataset + '.tsf')
-    ds, freq, seasonality, forecast_horizon, contain_missing_values, contain_equal_length = load_data(full_path, ds_sample_seed=args.ds_seed)
 
-    # forecast horizon might not be available from tsf
-    if forecast_horizon is None:
-        if not hasattr(args, "external_forecast_horizon"):
-            raise Exception("Please provide the required forecast horizon")
-        else:
-            forecast_horizon = args.external_forecast_horizon
+    hc = None if not hasattr(args, "external_forecast_horizon") else args.external_forecast_horizon
+    ds, freq, seasonality, forecast_horizon, contain_missing_values, contain_equal_length = load_data(full_path, ds_sample_seed=args.ds_seed, ext_fc_horizon=hc)
 
     all_train_ts = []
     all_fcast_ts = []

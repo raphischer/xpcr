@@ -1,12 +1,8 @@
 #!/bin/bash
-# TODO full command
-# for d in "bitcoin_dataset_without_missing_values" "m1_quarterly_dataset" "solar_weekly_dataset" "tourism_quarterly_dataset" "fred_md_dataset" "nn5_daily_dataset_without_missing_values" "electricity_weekly_dataset" "nn5_weekly_dataset" "hospital_dataset" "m3_quarterly_dataset" "m1_monthly_dataset" "traffic_weekly_dataset" "m4_weekly_dataset" "tourism_monthly_dataset" "covid_deaths_dataset" "cif_2016_dataset" "pedestrian_counts_dataset" "vehicle_trips_dataset_without_missing_values"
-# TODO ws022
-# ------------------
-# TODO GPU
-# TODO ws05
 
-for d in "bitcoin_dataset_without_missing_values" "m1_quarterly_dataset" "solar_weekly_dataset" "tourism_quarterly_dataset" "fred_md_dataset" "nn5_daily_dataset_without_missing_values" "electricity_weekly_dataset" "nn5_weekly_dataset" "hospital_dataset" "m3_quarterly_dataset" "m1_monthly_dataset" "traffic_weekly_dataset" "m4_weekly_dataset" "tourism_monthly_dataset" "covid_deaths_dataset" "cif_2016_dataset" "pedestrian_counts_dataset" "vehicle_trips_dataset_without_missing_values"
+# for d in "m1_quarterly_dataset" "solar_weekly_dataset" "tourism_quarterly_dataset" "fred_md_dataset" "nn5_daily_dataset_without_missing_values" "electricity_weekly_dataset" "nn5_weekly_dataset" "hospital_dataset" "m3_quarterly_dataset" "m1_monthly_dataset" "traffic_weekly_dataset" "m4_weekly_dataset" "tourism_monthly_dataset" "covid_deaths_dataset" "cif_2016_dataset" "pedestrian_counts_dataset" "vehicle_trips_dataset_without_missing_values"
+
+for d in "m1_yearly_dataset" "cif_2016_dataset" "solar_weekly_dataset" "m1_quarterly_dataset" "nn5_weekly_dataset" "tourism_yearly_dataset" "m3_other_dataset" "m3_yearly_dataset" "m3_quarterly_dataset" "tourism_quarterly_dataset" "electricity_weekly_dataset" "car_parts_dataset_without_missing_values" "m1_monthly_dataset" "hospital_dataset" "fred_md_dataset" "traffic_weekly_dataset" "nn5_daily_dataset_without_missing_values" "tourism_monthly_dataset" "m3_monthly_dataset" "m4_weekly_dataset"
 do
     for m in "deepar" "deepstate" "deepfactor" "deeprenewal" "gpforecaster" "mqcnn" "mqrnn" "nbeats" "tempfus" "wavenet" "feedforward"
     do
