@@ -1,0 +1,286 @@
+{
+    "directory_name": "train_2023_07_23_12_55_39",
+    "config": {
+        "dataset": "m1_monthly_dataset",
+        "model": "mqrnn",
+        "output_dir": "mnt_data/results_new03",
+        "ds_seed": 468,
+        "epochs": 100,
+        "datadir": "mnt_data/data",
+        "cpu_monitor_interval": 0.5,
+        "seed": 42,
+        "timestamp": "2023_07_23_12_55_39"
+    },
+    "emissions": {
+        "timestamp": {
+            "0": "2023-07-23T13:00:32"
+        },
+        "project_name": {
+            "0": "codecarbon"
+        },
+        "run_id": {
+            "0": "a4a7056f-21c7-44a6-a97e-f231e4ee9e7b"
+        },
+        "duration": {
+            "0": 272.6968097686768
+        },
+        "emissions": {
+            "0": 0.0005515341380297
+        },
+        "emissions_rate": {
+            "0": 0.0020225177496488
+        },
+        "cpu_power": {
+            "0": 4.278201657243687
+        },
+        "gpu_power": {
+            "0": 0.0
+        },
+        "ram_power": {
+            "0": 11.714675903320314
+        },
+        "cpu_energy": {
+            "0": 0.0010443980846844
+        },
+        "gpu_energy": {
+            "0": 0
+        },
+        "ram_energy": {
+            "0": 0.000787941244318
+        },
+        "energy_consumed": {
+            "0": 0.0018323393290025
+        },
+        "country_name": {
+            "0": "Germany"
+        },
+        "country_iso_code": {
+            "0": "DEU"
+        },
+        "region": {
+            "0": NaN
+        },
+        "cloud_provider": {
+            "0": NaN
+        },
+        "cloud_region": {
+            "0": NaN
+        },
+        "os": {
+            "0": "Linux-5.19.0-35-generic-x86_64-with-debian-bookworm-sid"
+        },
+        "python_version": {
+            "0": "3.7.7"
+        },
+        "cpu_count": {
+            "0": 8
+        },
+        "cpu_model": {
+            "0": "Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz"
+        },
+        "gpu_count": {
+            "0": NaN
+        },
+        "gpu_model": {
+            "0": NaN
+        },
+        "longitude": {
+            "0": NaN
+        },
+        "latitude": {
+            "0": NaN
+        },
+        "ram_total_size": {
+            "0": 31.2391357421875
+        },
+        "tracking_mode": {
+            "0": "machine"
+        },
+        "on_cloud": {
+            "0": "N"
+        }
+    },
+    "execution_platform": {
+        "System": "Linux",
+        "Node Name": "lamarrws03",
+        "Release": "5.19.0-35-generic",
+        "Version": "#36~22.04.1-Ubuntu SMP PREEMPT_DYNAMIC Fri Feb 17 15:17:25 UTC 2",
+        "Machine": "x86_64",
+        "Processor": "Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz",
+        "Physical cores": 4,
+        "Total cores": 8,
+        "Max Frequency": 4000.0,
+        "Min Frequency": 800.0,
+        "Current Frequency": 1912.5698750000001,
+        "Total": 33542766592,
+        "Available": 32134889472,
+        "Used": 899477504
+    },
+    "results": {
+        "history": {
+            "loss": [
+                707.3880398220487,
+                693.102744140625,
+                692.9316493055555,
+                677.0899674479167,
+                665.1712825520833,
+                651.7290657552084,
+                641.8314756944444,
+                625.7749031575521,
+                618.0449915907118,
+                604.1444574652778,
+                612.0469449869792,
+                595.0815478515625,
+                592.9845844184027,
+                577.7259365505643,
+                574.1146492513021,
+                572.6344482421875,
+                567.6307854546441,
+                572.4938069661458,
+                570.2417306857639,
+                559.5659864637587,
+                559.1252918836806,
+                551.7516206868489,
+                543.8021801757812,
+                566.558772515191,
+                558.7905329047309,
+                551.5462634277344,
+                543.7499266221788,
+                544.976657172309,
+                540.6690528700087,
+                556.166689453125,
+                550.4790380859375,
+                570.9469761827257,
+                569.3445526801215,
+                566.711204155816,
+                560.2866861979167,
+                539.1033580186632,
+                540.5265968153212,
+                535.2898162163629,
+                540.2701722547743,
+                542.828760172526,
+                548.9702705891928,
+                540.0689425998264,
+                529.0120696343316,
+                529.4139493815104,
+                527.2668991427952,
+                530.6631416829428,
+                528.0180080837673,
+                520.5148624674479,
+                518.6056137424046,
+                507.6725568305122,
+                508.66686360677085,
+                511.49673828125,
+                520.5609427897135,
+                503.76003038194443,
+                501.13886990017363,
+                500.3018708631727,
+                508.0014572482639,
+                508.79848225911456,
+                520.4427785915799,
+                510.0764895290799,
+                491.98349026150174,
+                494.0434372287326,
+                497.14725504557293
+            ]
+        },
+        "start": 1690109759.4200532,
+        "end": 1690110032.1155014,
+        "model": null
+    },
+    "requirements": [
+        "# 3.7.7 (default, Mar 23 2020, 22:36:06)",
+        "# [GCC 7.3.0]",
+        "wrapt==1.11.2",
+        "typed-ast==1.4.0",
+        "six==1.12.0",
+        "setuptools==41.6.0",
+        "pytz==2019.3",
+        "python-dateutil==2.8.0",
+        "pyparsing==2.4.2",
+        "pylint==2.4.3",
+        "mccabe==0.6.1",
+        "matplotlib==3.1.1",
+        "lazy-object-proxy==1.4.3",
+        "kiwisolver==1.1.0",
+        "isort==4.3.21",
+        "cycler==0.10.0",
+        "astroid==2.3.2",
+        "zipp==3.14.0",
+        "zict==2.2.0",
+        "xgboost==1.6.2",
+        "wheel==0.37.1",
+        "werkzeug==2.2.3",
+        "urllib3==1.26.14",
+        "typing-extensions==4.4.0",
+        "tqdm==4.64.1",
+        "tornado==6.2",
+        "toolz==0.12.0",
+        "threadpoolctl==3.1.0",
+        "tenacity==8.2.2",
+        "tblib==1.7.0",
+        "sortedcontainers==2.4.0",
+        "smac==1.2",
+        "scipy==1.7.3",
+        "scikit-learn==0.24.2",
+        "rpy2==2.9.4",
+        "requests==2.28.2",
+        "reportlab==3.6.12",
+        "qrcode==7.4.2",
+        "pyyaml==6.0",
+        "pyrfr==0.8.3",
+        "pypng==0.20220715.0",
+        "pynvml==11.4.1",
+        "pynisher==0.6.4",
+        "pymupdf==1.21.1",
+        "pydantic==1.10.4",
+        "pyarrow==8.0.0",
+        "py-rapl==0.1",
+        "py-cpuinfo==9.0.0",
+        "psutil==5.9.4",
+        "plotly==5.13.1",
+        "pip==22.3.1",
+        "pint==0.18",
+        "pillow==9.4.0",
+        "partd==1.4.0",
+        "pandas==1.3.5",
+        "packaging==23.0",
+        "orjson==3.8.5",
+        "numpy==1.21.6",
+        "mxnet==1.9.1",
+        "msgpack==1.0.5",
+        "markupsafe==2.1.1",
+        "locket==1.0.0",
+        "liac-arff==2.5.0",
+        "joblib==1.2.0",
+        "jinja2==3.1.2",
+        "itsdangerous==2.1.2",
+        "importlib-metadata==6.0.0",
+        "idna==3.4",
+        "heapdict==1.0.1",
+        "graphviz==0.8.4",
+        "gluonts==0.11.8",
+        "fuzzywuzzy==0.18.0",
+        "fsspec==2023.1.0",
+        "flask==2.2.3",
+        "emcee==3.1.4",
+        "distro==1.8.0",
+        "distributed==2022.2.0",
+        "dask==2022.2.0",
+        "dash==2.8.1",
+        "dash-table==5.0.0",
+        "dash-html-components==2.0.0",
+        "dash-core-components==2.0.0",
+        "dash-bootstrap-components==1.4.0",
+        "cython==0.29.35",
+        "configspace==0.4.21",
+        "codecarbon==2.1.4",
+        "cloudpickle==2.2.1",
+        "click==8.1.3",
+        "charset-normalizer==3.0.1",
+        "certifi==2022.12.7",
+        "auto-sklearn==0.15.0",
+        "arrow==1.2.3"
+    ],
+    "full_log": "results/merged_new03/train_2023_07_23_12_55_39.tar.gz"
+}

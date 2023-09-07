@@ -1,0 +1,287 @@
+{
+    "directory_name": "train_2023_07_24_04_31_17",
+    "emissions": {
+        "timestamp": {
+            "0": "2023-07-24T04:36:34"
+        },
+        "project_name": {
+            "0": "codecarbon"
+        },
+        "run_id": {
+            "0": "55165c41-937f-4657-a6a2-5529b58fa570"
+        },
+        "duration": {
+            "0": 116.0564022064209
+        },
+        "emissions": {
+            "0": 0.0002773949731699
+        },
+        "emissions_rate": {
+            "0": 0.0023901738111486
+        },
+        "cpu_power": {
+            "0": 4.268176016236049
+        },
+        "gpu_power": {
+            "0": 0.0
+        },
+        "ram_power": {
+            "0": 11.714675903320314
+        },
+        "cpu_energy": {
+            "0": 0.000563686785949
+        },
+        "gpu_energy": {
+            "0": 0
+        },
+        "ram_energy": {
+            "0": 0.0003578911980041
+        },
+        "energy_consumed": {
+            "0": 0.0009215779839532
+        },
+        "country_name": {
+            "0": "Germany"
+        },
+        "country_iso_code": {
+            "0": "DEU"
+        },
+        "region": {
+            "0": NaN
+        },
+        "cloud_provider": {
+            "0": NaN
+        },
+        "cloud_region": {
+            "0": NaN
+        },
+        "os": {
+            "0": "Linux-5.19.0-35-generic-x86_64-with-debian-bookworm-sid"
+        },
+        "python_version": {
+            "0": "3.7.7"
+        },
+        "cpu_count": {
+            "0": 8
+        },
+        "cpu_model": {
+            "0": "Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz"
+        },
+        "gpu_count": {
+            "0": NaN
+        },
+        "gpu_model": {
+            "0": NaN
+        },
+        "longitude": {
+            "0": NaN
+        },
+        "latitude": {
+            "0": NaN
+        },
+        "ram_total_size": {
+            "0": 31.2391357421875
+        },
+        "tracking_mode": {
+            "0": "machine"
+        },
+        "on_cloud": {
+            "0": "N"
+        }
+    },
+    "requirements": [
+        "# 3.7.7 (default, Mar 23 2020, 22:36:06)",
+        "# [GCC 7.3.0]",
+        "wrapt==1.11.2",
+        "typed-ast==1.4.0",
+        "six==1.12.0",
+        "setuptools==41.6.0",
+        "pytz==2019.3",
+        "python-dateutil==2.8.0",
+        "pyparsing==2.4.2",
+        "pylint==2.4.3",
+        "mccabe==0.6.1",
+        "matplotlib==3.1.1",
+        "lazy-object-proxy==1.4.3",
+        "kiwisolver==1.1.0",
+        "isort==4.3.21",
+        "cycler==0.10.0",
+        "astroid==2.3.2",
+        "zipp==3.14.0",
+        "zict==2.2.0",
+        "xgboost==1.6.2",
+        "wheel==0.37.1",
+        "werkzeug==2.2.3",
+        "urllib3==1.26.14",
+        "typing-extensions==4.4.0",
+        "tqdm==4.64.1",
+        "tornado==6.2",
+        "toolz==0.12.0",
+        "threadpoolctl==3.1.0",
+        "tenacity==8.2.2",
+        "tblib==1.7.0",
+        "sortedcontainers==2.4.0",
+        "smac==1.2",
+        "scipy==1.7.3",
+        "scikit-learn==0.24.2",
+        "rpy2==2.9.4",
+        "requests==2.28.2",
+        "reportlab==3.6.12",
+        "qrcode==7.4.2",
+        "pyyaml==6.0",
+        "pyrfr==0.8.3",
+        "pypng==0.20220715.0",
+        "pynvml==11.4.1",
+        "pynisher==0.6.4",
+        "pymupdf==1.21.1",
+        "pydantic==1.10.4",
+        "pyarrow==8.0.0",
+        "py-rapl==0.1",
+        "py-cpuinfo==9.0.0",
+        "psutil==5.9.4",
+        "plotly==5.13.1",
+        "pip==22.3.1",
+        "pint==0.18",
+        "pillow==9.4.0",
+        "partd==1.4.0",
+        "pandas==1.3.5",
+        "packaging==23.0",
+        "orjson==3.8.5",
+        "numpy==1.21.6",
+        "mxnet==1.9.1",
+        "msgpack==1.0.5",
+        "markupsafe==2.1.1",
+        "locket==1.0.0",
+        "liac-arff==2.5.0",
+        "joblib==1.2.0",
+        "jinja2==3.1.2",
+        "itsdangerous==2.1.2",
+        "importlib-metadata==6.0.0",
+        "idna==3.4",
+        "heapdict==1.0.1",
+        "graphviz==0.8.4",
+        "gluonts==0.11.8",
+        "fuzzywuzzy==0.18.0",
+        "fsspec==2023.1.0",
+        "flask==2.2.3",
+        "emcee==3.1.4",
+        "distro==1.8.0",
+        "distributed==2022.2.0",
+        "dask==2022.2.0",
+        "dash==2.8.1",
+        "dash-table==5.0.0",
+        "dash-html-components==2.0.0",
+        "dash-core-components==2.0.0",
+        "dash-bootstrap-components==1.4.0",
+        "cython==0.29.35",
+        "configspace==0.4.21",
+        "codecarbon==2.1.4",
+        "cloudpickle==2.2.1",
+        "click==8.1.3",
+        "charset-normalizer==3.0.1",
+        "certifi==2022.12.7",
+        "auto-sklearn==0.15.0",
+        "arrow==1.2.3"
+    ],
+    "execution_platform": {
+        "System": "Linux",
+        "Node Name": "lamarrws03",
+        "Release": "5.19.0-35-generic",
+        "Version": "#36~22.04.1-Ubuntu SMP PREEMPT_DYNAMIC Fri Feb 17 15:17:25 UTC 2",
+        "Machine": "x86_64",
+        "Processor": "Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz",
+        "Physical cores": 4,
+        "Total cores": 8,
+        "Max Frequency": 4000.0,
+        "Min Frequency": 800.0,
+        "Current Frequency": 2384.255625,
+        "Total": 33542766592,
+        "Available": 32125321216,
+        "Used": 909991936
+    },
+    "config": {
+        "dataset": "fred_md_dataset",
+        "model": "mqrnn",
+        "output_dir": "mnt_data/results_new03",
+        "ds_seed": 135,
+        "epochs": 100,
+        "datadir": "mnt_data/data",
+        "cpu_monitor_interval": 0.5,
+        "seed": 42,
+        "timestamp": "2023_07_24_04_31_17"
+    },
+    "results": {
+        "history": {
+            "loss": [
+                1766.2573128255208,
+                1750.0332731119793,
+                1740.7789664713541,
+                1746.5315755208333,
+                1744.9229069010416,
+                1701.0814501953125,
+                1698.0907893880208,
+                1670.9454239908855,
+                1672.1588232421875,
+                1675.6823673502604,
+                1646.0253662109376,
+                1655.1710595703125,
+                1634.115859375,
+                1636.0234521484374,
+                1659.9322965494791,
+                1624.761396484375,
+                1639.3244938151042,
+                1625.6727506510417,
+                1623.3109423828125,
+                1627.8603059895834,
+                1646.4700406901043,
+                1616.0733764648437,
+                1628.5471997070313,
+                1620.021591796875,
+                1633.9135725911458,
+                1641.516044108073,
+                1611.265771484375,
+                1619.8477905273437,
+                1596.2685774739584,
+                1600.745674641927,
+                1628.7070833333332,
+                1598.970859375,
+                1608.8820190429688,
+                1598.105869140625,
+                1611.5142317708332,
+                1640.8894482421874,
+                1607.6243147786458,
+                1617.8567838541667,
+                1614.4892097981772,
+                1600.296736653646,
+                1592.0644995117189,
+                1595.7768994140624,
+                1565.0525968424479,
+                1572.960116373698,
+                1560.2921761067707,
+                1563.4733081054687,
+                1586.3326896158853,
+                1550.8805346679687,
+                1555.379041341146,
+                1542.9923291015625,
+                1543.6519026692708,
+                1572.2337719726563,
+                1541.8622835286458,
+                1554.874383138021,
+                1552.5107088216146,
+                1555.3209545898437,
+                1569.2403149414063,
+                1582.1644653320313,
+                1556.64591796875,
+                1558.8706298828124,
+                1535.7219856770832,
+                1541.679580078125,
+                1565.0897672526041,
+                1546.29427734375
+            ]
+        },
+        "start": 1690166078.0666025,
+        "end": 1690166194.1213756,
+        "model": null
+    },
+    "full_log": "results/merged_new03/train_2023_07_24_04_31_17.tar.gz"
+}

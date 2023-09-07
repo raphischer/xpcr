@@ -1,5 +1,6 @@
 import argparse
 import os
+import sys
 import pandas as pd
 import numpy as np
 import re
@@ -18,7 +19,7 @@ if __name__ == '__main__':
 
     parser.add_argument("--mode", default='interactive', choices=['meta', 'interactive', 'paper', 'label', 'stats'])
     parser.add_argument("--property-extractors-module", default="properties", help="python file with PROPERTIES dictionary, which maps properties to executable extractor functions")
-    parser.add_argument("--database-path", default="results/database22.pkl", help="filename for database, or directories with databases inside")
+    parser.add_argument("--database-path", default="results/new03.pkl", help="filename for database, or directories with databases inside")
     parser.add_argument("--boundaries", default="boundaries.json")
     parser.add_argument("--dropsubsampled", default=False, type=bool)
     # interactive exploration params
@@ -51,6 +52,22 @@ if __name__ == '__main__':
     database['configuration'] = database.aggregate(lambda row: ' - '.join([row['task'], row['dataset'], row['model']]), axis=1)
     database.reset_index()
 
+    if args.mode == 'stats':
+        grouped_by = database.groupby(['environment', 'dataset'])
+        ds_stats, ds_details = [], []
+        max_shape = [0, 0]
+        for i, ((env, ds), data) in enumerate( iter(grouped_by) ):
+            na_vals = np.count_nonzero((data != data).values)
+            na_vals_rel = na_vals / data.select_dtypes('number').size * 100
+            ds_stats.append(f'{i:<3} {env[:10]:<10} {ds[:15]:<15}..{ds[-6:]:<6} shape {data.shape}, {na_vals:<2} N/A values ({na_vals_rel:5.2f}%)')
+            cols = ['model'] + list(data.select_dtypes('number').columns)
+            ds_details.append( '\n' + f'{env} {ds} shape {data.shape}, {na_vals:<2} N/A values ({na_vals_rel:5.2f}%)' + '\n' + str(data[cols]) )
+        for stats in ds_details:
+            print(stats)
+        for stats in ds_stats:
+            print(stats)
+        sys.exit(0)
+
     meta = load_meta()
     for ds in pd.unique(database['dataset']):
         rows = database[database['dataset'] == ds]
@@ -62,8 +79,9 @@ if __name__ == '__main__':
                 meta['dataset'][ds] = meta['dataset'][orig].copy()
                 meta['dataset'][ds]['name'] = meta['dataset'][ds]['name'] + ds.replace(orig + '_', '') # append the ds seed to name
 
-    # TODO check why there is an issue here?
-    database = database[database['dataset_orig'] != 'bitcoin_dataset_without_missing_values']
+
+    # # TODO check why there is an issue here?
+    # database = database[database['dataset_orig'] != 'bitcoin_dataset_without_missing_values']
     rated_database, boundaries, real_boundaries, _ = rate_database(database, properties_meta=meta['properties'], boundaries=args.boundaries)
     print(f'Database constructed from logs has {rated_database.shape} entries')
 
@@ -75,39 +93,6 @@ if __name__ == '__main__':
     if args.mode == 'paper':
         from create_paper_results import create_all
         create_all(rated_database, boundaries, real_boundaries, meta)
-
-    if args.mode == 'stats':
-        grouped_by = rated_database.groupby(['environment', 'dataset'])
-        ds_stats = []
-        max_shape = [0, 0]
-        for i, ((env, ds), data) in enumerate( iter(grouped_by) ):
-            print(f'{i:<3} {env[:15]:<15} {ds[:20]:<20}..{ds[-6:]:<6} {len(pd.unique(data["model"])):<2} models, shape {data.shape}')
-        #     stats = {'ds': ds}
-        #     for col in data.columns:
-        #         if data[col].dropna().size == 0:
-        #             data = data.drop(col, axis=1)
-        #     stats['entries'] = data.shape
-        #     if data.shape[0] > max_shape[0] or data.shape[1] > max_shape[1]:
-        #         max_shape = [data.shape[0], data.shape[1]]
-        #     if "running_time" in data:
-        #         stats['time_infer'] = sum([val['value'] for val in data["running_time"] if isinstance(val, dict)])
-        #     else:
-        #         stats['time_infer'] = -1
-        #     if "train_running_time" in data:
-        #         stats['time_train'] = sum([val['value'] for val in data["train_running_time"] if isinstance(val, dict)])
-        #     else:
-        #         stats['time_train'] = -1
-        #     stats['time_total'] = stats['time_train'] + stats['time_infer']
-        #     ds_stats.append(stats)
-        # print(max_shape)
-        # sorted_ds_stats = sorted(ds_stats, key=lambda d: d['ds'])
-        # for idx, ds_stat in enumerate(sorted_ds_stats):
-        #     if ds_stat["entries"][0] == max_shape[0] and ds_stat["entries"][1] == max_shape[1]: # TODO remove -1
-        #         success = 'FULL RESULTS   '
-        #     else:
-        #         success = 'MISSING RESULTS'
-        #     ds_print = f'{ds_stat["ds"][:20]:<20}' + '....' + ds_stat["ds"][-6:]
-        #     print(f'{idx:<3} {ds_print} {success} {str(ds_stat["entries"]):<8} entries {len(ds_)}, time total {ds_stat["time_total"] / 3600:6.2f} h (train {ds_stat["time_train"] / 3600:6.2f} h, infer {ds_stat["time_infer"] / 3600:6.2f} h)')
     
     if args.mode == 'meta':
         meta_database_path = "results/database_for_meta.pkl"

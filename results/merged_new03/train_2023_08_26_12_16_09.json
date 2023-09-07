@@ -1,0 +1,278 @@
+{
+    "directory_name": "train_2023_08_26_12_16_09",
+    "requirements": [
+        "# 3.7.7 (default, Mar 23 2020, 22:36:06)",
+        "# [GCC 7.3.0]",
+        "wrapt==1.11.2",
+        "typed-ast==1.4.0",
+        "six==1.12.0",
+        "setuptools==41.6.0",
+        "pytz==2019.3",
+        "python-dateutil==2.8.0",
+        "pyparsing==2.4.2",
+        "pylint==2.4.3",
+        "mccabe==0.6.1",
+        "matplotlib==3.1.1",
+        "lazy-object-proxy==1.4.3",
+        "kiwisolver==1.1.0",
+        "isort==4.3.21",
+        "cycler==0.10.0",
+        "astroid==2.3.2",
+        "zipp==3.14.0",
+        "zict==2.2.0",
+        "xgboost==1.6.2",
+        "wheel==0.37.1",
+        "werkzeug==2.2.3",
+        "urllib3==1.26.14",
+        "typing-extensions==4.4.0",
+        "tqdm==4.64.1",
+        "tornado==6.2",
+        "toolz==0.12.0",
+        "threadpoolctl==3.1.0",
+        "tenacity==8.2.2",
+        "tblib==1.7.0",
+        "sortedcontainers==2.4.0",
+        "smac==1.2",
+        "scipy==1.7.3",
+        "scikit-learn==0.24.2",
+        "rpy2==2.9.4",
+        "requests==2.28.2",
+        "reportlab==3.6.12",
+        "qrcode==7.4.2",
+        "pyyaml==6.0",
+        "pyrfr==0.8.3",
+        "pypng==0.20220715.0",
+        "pynvml==11.4.1",
+        "pynisher==0.6.4",
+        "pymupdf==1.21.1",
+        "pydantic==1.10.4",
+        "pyarrow==8.0.0",
+        "py-rapl==0.1",
+        "py-cpuinfo==9.0.0",
+        "psutil==5.9.4",
+        "plotly==5.13.1",
+        "pip==22.3.1",
+        "pint==0.18",
+        "pillow==9.4.0",
+        "partd==1.4.0",
+        "pandas==1.3.5",
+        "packaging==23.0",
+        "orjson==3.8.5",
+        "numpy==1.21.6",
+        "mxnet==1.9.1",
+        "msgpack==1.0.5",
+        "markupsafe==2.1.1",
+        "locket==1.0.0",
+        "liac-arff==2.5.0",
+        "joblib==1.2.0",
+        "jinja2==3.1.2",
+        "itsdangerous==2.1.2",
+        "importlib-metadata==6.0.0",
+        "idna==3.4",
+        "heapdict==1.0.1",
+        "graphviz==0.8.4",
+        "gluonts==0.11.8",
+        "fuzzywuzzy==0.18.0",
+        "fsspec==2023.1.0",
+        "flask==2.2.3",
+        "emcee==3.1.4",
+        "distro==1.8.0",
+        "distributed==2022.2.0",
+        "dask==2022.2.0",
+        "dash==2.8.1",
+        "dash-table==5.0.0",
+        "dash-html-components==2.0.0",
+        "dash-core-components==2.0.0",
+        "dash-bootstrap-components==1.4.0",
+        "cython==0.29.35",
+        "configspace==0.4.21",
+        "codecarbon==2.1.4",
+        "cloudpickle==2.2.1",
+        "click==8.1.3",
+        "charset-normalizer==3.0.1",
+        "certifi==2022.12.7",
+        "auto-sklearn==0.15.0",
+        "arrow==1.2.3"
+    ],
+    "emissions": {
+        "timestamp": {
+            "0": "2023-08-26T13:46:23"
+        },
+        "project_name": {
+            "0": "codecarbon"
+        },
+        "run_id": {
+            "0": "e530cf29-a078-4cc3-b672-d040e142c6c7"
+        },
+        "duration": {
+            "0": 5379.192976474762
+        },
+        "emissions": {
+            "0": 0.0130475568282142
+        },
+        "emissions_rate": {
+            "0": 0.0024255602811195
+        },
+        "cpu_power": {
+            "0": 3.2000777392316717
+        },
+        "gpu_power": {
+            "0": 0.0
+        },
+        "ram_power": {
+            "0": 11.708820819854736
+        },
+        "cpu_energy": {
+            "0": 0.0263117064174038
+        },
+        "gpu_energy": {
+            "0": 0
+        },
+        "ram_energy": {
+            "0": 0.0170356584603842
+        },
+        "energy_consumed": {
+            "0": 0.0433473648777881
+        },
+        "country_name": {
+            "0": "Germany"
+        },
+        "country_iso_code": {
+            "0": "DEU"
+        },
+        "region": {
+            "0": NaN
+        },
+        "cloud_provider": {
+            "0": NaN
+        },
+        "cloud_region": {
+            "0": NaN
+        },
+        "os": {
+            "0": "Linux-6.2.0-26-generic-x86_64-with-debian-bookworm-sid"
+        },
+        "python_version": {
+            "0": "3.7.7"
+        },
+        "cpu_count": {
+            "0": 8
+        },
+        "cpu_model": {
+            "0": "Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz"
+        },
+        "gpu_count": {
+            "0": NaN
+        },
+        "gpu_model": {
+            "0": NaN
+        },
+        "longitude": {
+            "0": NaN
+        },
+        "latitude": {
+            "0": NaN
+        },
+        "ram_total_size": {
+            "0": 31.223522186279297
+        },
+        "tracking_mode": {
+            "0": "machine"
+        },
+        "on_cloud": {
+            "0": "N"
+        }
+    },
+    "execution_platform": {
+        "System": "Linux",
+        "Node Name": "lamarrws03",
+        "Release": "6.2.0-26-generic",
+        "Version": "#26~22.04.1-Ubuntu SMP PREEMPT_DYNAMIC Thu Jul 13 16:27:29 UTC 2",
+        "Machine": "x86_64",
+        "Processor": "Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz",
+        "Physical cores": 4,
+        "Total cores": 8,
+        "Max Frequency": 4000.0,
+        "Min Frequency": 800.0,
+        "Current Frequency": 2146.8455000000004,
+        "Total": 33526001664,
+        "Available": 32443813888,
+        "Used": 647094272
+    },
+    "results": {
+        "history": {
+            "loss": [
+                18633416.50590476,
+                2648317.3710476193,
+                110380.26047619048,
+                46400.62619047619,
+                28395.872904761905,
+                20667.893214285716,
+                16210.147547619048,
+                13265.289309523809,
+                11003.68919047619,
+                9252.390773809524,
+                7869.157809523809,
+                6725.877059523809,
+                5813.741214285715,
+                5103.482613095238,
+                4495.901648809524,
+                4024.106898809524,
+                3658.7584166666666,
+                3339.4158035714286,
+                3078.331625,
+                2858.8661726190476,
+                2643.6574375,
+                2466.445080357143,
+                2316.6558660714286,
+                2164.3835565476193,
+                2034.2249970238095,
+                1922.5602797619047,
+                1807.2270595238094,
+                1708.1323898809524,
+                1623.4213511904761,
+                1534.249568452381,
+                1457.4170297619048,
+                1391.4155014880953,
+                1320.4423497023809,
+                1259.0508348214287,
+                1206.3365044642858,
+                1148.5460238095238,
+                1098.5232589285715,
+                1055.6323392857144,
+                1007.9062291666667,
+                966.6175029761905,
+                931.2973660714285,
+                891.3418526785714,
+                856.8273050595238,
+                827.4722886904761,
+                793.814456845238,
+                764.9128720238095,
+                740.4102232142857,
+                711.8754241071429,
+                687.3071532738095,
+                666.5325200892858,
+                642.0414144345239,
+                620.9370223214286,
+                603.182375,
+                581.9440543154761,
+                563.5780982142857
+            ]
+        },
+        "start": 1693045004.0781775,
+        "end": 1693050383.2697148,
+        "model": null
+    },
+    "config": {
+        "dataset": "australian_electricity_demand_dataset",
+        "model": "deepfactor",
+        "output_dir": "mnt_data/results_new03/",
+        "ds_seed": 135,
+        "epochs": 100,
+        "datadir": "mnt_data/data",
+        "cpu_monitor_interval": 0.5,
+        "seed": 42,
+        "timestamp": "2023_08_26_12_16_09"
+    },
+    "full_log": "results/merged_new03/train_2023_08_26_12_16_09.tar.gz"
+}

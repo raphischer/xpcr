@@ -1,0 +1,464 @@
+{
+    "directory_name": "infer_2023_08_26_21_34_38",
+    "config": {
+        "dataset": "australian_electricity_demand_dataset",
+        "model": "deeprenewal",
+        "output_dir": "mnt_data/results_new03/",
+        "ds_seed": 135,
+        "epochs": 100,
+        "datadir": "mnt_data/data",
+        "cpu_monitor_interval": 0.5,
+        "seed": 42,
+        "timestamp": "2023_08_26_21_34_38",
+        "lag": 420,
+        "external_forecast_horizon": 336,
+        "train_logdir": "mnt_data/results_new03/train_2023_08_26_21_20_27"
+    },
+    "emissions": {
+        "timestamp": {
+            "0": "2023-08-26T21:34:45"
+        },
+        "project_name": {
+            "0": "codecarbon"
+        },
+        "run_id": {
+            "0": "d62d7b93-b4e4-48fc-b6c9-d006188de4bf"
+        },
+        "duration": {
+            "0": 6.233330965042114
+        },
+        "emissions": {
+            "0": 2.533916155457708e-05
+        },
+        "emissions_rate": {
+            "0": 0.0040651076762464
+        },
+        "cpu_power": {
+            "0": 36.50575333515452
+        },
+        "gpu_power": {
+            "0": 0.0
+        },
+        "ram_power": {
+            "0": 11.708820819854736
+        },
+        "cpu_energy": {
+            "0": 6.393372198026936e-05
+        },
+        "gpu_energy": {
+            "0": 0
+        },
+        "ram_energy": {
+            "0": 2.024953899839204e-05
+        },
+        "energy_consumed": {
+            "0": 8.418326097866139e-05
+        },
+        "country_name": {
+            "0": "Germany"
+        },
+        "country_iso_code": {
+            "0": "DEU"
+        },
+        "region": {
+            "0": NaN
+        },
+        "cloud_provider": {
+            "0": NaN
+        },
+        "cloud_region": {
+            "0": NaN
+        },
+        "os": {
+            "0": "Linux-6.2.0-26-generic-x86_64-with-debian-bookworm-sid"
+        },
+        "python_version": {
+            "0": "3.7.7"
+        },
+        "cpu_count": {
+            "0": 8
+        },
+        "cpu_model": {
+            "0": "Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz"
+        },
+        "gpu_count": {
+            "0": NaN
+        },
+        "gpu_model": {
+            "0": NaN
+        },
+        "longitude": {
+            "0": NaN
+        },
+        "latitude": {
+            "0": NaN
+        },
+        "ram_total_size": {
+            "0": 31.223522186279297
+        },
+        "tracking_mode": {
+            "0": "machine"
+        },
+        "on_cloud": {
+            "0": "N"
+        }
+    },
+    "parameters": {
+        "batch_size": 32,
+        "ctx": {
+            "__kind__": "instance",
+            "args": [
+                "cpu",
+                0
+            ],
+            "class": "mxnet.context.Context"
+        },
+        "dtype": {
+            "__kind__": "type",
+            "class": "numpy.float32"
+        },
+        "forecast_generator": {
+            "__kind__": "instance",
+            "args": [],
+            "class": "gluonts.model.forecast_generator.SampleForecastGenerator",
+            "kwargs": {}
+        },
+        "input_names": [
+            "past_target",
+            "time_remaining"
+        ],
+        "lead_time": 0,
+        "prediction_length": 336
+    },
+    "validation_results": {
+        "metrics": {
+            "aggregated": {
+                "MSE": 26395754.666666664,
+                "abs_error": 3425995.0,
+                "abs_target_sum": 3428235.0,
+                "abs_target_mean": 5101.540178571429,
+                "seasonal_error": 301.94373428965855,
+                "MASE": 17.441661969825276,
+                "MAPE": 0.9993221646263486,
+                "sMAPE": 1.9972911108107794,
+                "MSIS": 635.0748742261874,
+                "QuantileLoss[0.1]": 685512.6415039063,
+                "Coverage[0.1]": 0.0,
+                "QuantileLoss[0.5]": 3425995.2075195312,
+                "Coverage[0.5]": 0.0,
+                "QuantileLoss[0.9]": 5988094.5735351555,
+                "Coverage[0.9]": 0.0,
+                "RMSE": 5137.6798914166175,
+                "NRMSE": 1.0070840788428934,
+                "ND": 0.9993466025520421,
+                "wQuantileLoss[0.1]": 0.19996080825961648,
+                "wQuantileLoss[0.5]": 0.9993466630845118,
+                "wQuantileLoss[0.9]": 1.7466989787850469,
+                "mean_absolute_QuantileLoss": 3366534.1408528644,
+                "mean_wQuantileLoss": 0.9820021500430585,
+                "MAE_Coverage": 0.5,
+                "OWA": NaN
+            },
+            "contained_nan": false
+        },
+        "start": 1693078478.0811162,
+        "end": 1693078485.6649137,
+        "num_samples": 100,
+        "model": {
+            "params": 584,
+            "fsize": 6292
+        }
+    },
+    "input_transform": {
+        "__kind__": "instance",
+        "args": [],
+        "class": "gluonts.transform._base.Chain",
+        "kwargs": {
+            "trans": [
+                {
+                    "__kind__": "instance",
+                    "args": [],
+                    "class": "gluonts.transform.feature.AddObservedValuesIndicator",
+                    "kwargs": {
+                        "dtype": {
+                            "__kind__": "type",
+                            "class": "numpy.float32"
+                        },
+                        "imputation_method": {
+                            "__kind__": "instance",
+                            "args": [],
+                            "class": "gluonts.transform.feature.DummyValueImputation",
+                            "kwargs": {
+                                "dummy_value": 0.0
+                            }
+                        },
+                        "output_field": "observed_values",
+                        "target_field": "target"
+                    }
+                },
+                {
+                    "__kind__": "instance",
+                    "args": [],
+                    "class": "gluonts.transform._base.Chain",
+                    "kwargs": {
+                        "trans": [
+                            {
+                                "__kind__": "instance",
+                                "args": [],
+                                "class": "gluonts.transform.split.InstanceSplitter",
+                                "kwargs": {
+                                    "dummy_value": 0.0,
+                                    "forecast_start_field": "forecast_start",
+                                    "future_length": 336,
+                                    "instance_sampler": {
+                                        "__kind__": "instance",
+                                        "class": "gluonts.transform.sampler.PredictionSplitSampler",
+                                        "kwargs": {
+                                            "allow_empty_interval": false,
+                                            "axis": -1,
+                                            "min_future": 0,
+                                            "min_past": 0
+                                        }
+                                    },
+                                    "is_pad_field": "is_pad",
+                                    "lead_time": 0,
+                                    "output_NTC": true,
+                                    "past_length": 420,
+                                    "start_field": "start",
+                                    "target_field": "target",
+                                    "time_series_fields": []
+                                }
+                            },
+                            {
+                                "__kind__": "instance",
+                                "args": [],
+                                "class": "gluonts.transform._base.Chain",
+                                "kwargs": {
+                                    "trans": [
+                                        {
+                                            "__kind__": "instance",
+                                            "args": [],
+                                            "class": "gluonts.transform.feature.CountTrailingZeros",
+                                            "kwargs": {
+                                                "as_array": true,
+                                                "axis": -1,
+                                                "new_field": "time_remaining",
+                                                "target_field": "past_target"
+                                            }
+                                        },
+                                        {
+                                            "__kind__": "instance",
+                                            "args": [],
+                                            "class": "gluonts.transform.convert.ToIntervalSizeFormat",
+                                            "kwargs": {
+                                                "discard_first": true,
+                                                "drop_empty": false,
+                                                "target_field": "past_target"
+                                            }
+                                        },
+                                        {
+                                            "__kind__": "instance",
+                                            "args": [],
+                                            "class": "gluonts.transform.field.RenameFields",
+                                            "kwargs": {
+                                                "mapping": {
+                                                    "future_target": "sparse_future"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "__kind__": "instance",
+                                            "args": [],
+                                            "class": "gluonts.transform.convert.AsNumpyArray",
+                                            "kwargs": {
+                                                "dtype": {
+                                                    "__kind__": "type",
+                                                    "class": "numpy.float32"
+                                                },
+                                                "expected_ndim": 2,
+                                                "field": "past_target"
+                                            }
+                                        },
+                                        {
+                                            "__kind__": "instance",
+                                            "args": [],
+                                            "class": "gluonts.transform.convert.SwapAxes",
+                                            "kwargs": {
+                                                "axes": {
+                                                    "__kind__": "instance",
+                                                    "args": [
+                                                        [
+                                                            0,
+                                                            1
+                                                        ]
+                                                    ],
+                                                    "class": "builtins.tuple"
+                                                },
+                                                "input_fields": [
+                                                    "past_target"
+                                                ]
+                                            }
+                                        },
+                                        {
+                                            "__kind__": "instance",
+                                            "args": [],
+                                            "class": "gluonts.mx.model.renewal._transform.AddAxisLength",
+                                            "kwargs": {
+                                                "axis": 0,
+                                                "output_field": "valid_length",
+                                                "target_field": "past_target"
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    },
+    "requirements": [
+        "# 3.7.7 (default, Mar 23 2020, 22:36:06)",
+        "# [GCC 7.3.0]",
+        "wrapt==1.11.2",
+        "typed-ast==1.4.0",
+        "six==1.12.0",
+        "setuptools==41.6.0",
+        "pytz==2019.3",
+        "python-dateutil==2.8.0",
+        "pyparsing==2.4.2",
+        "pylint==2.4.3",
+        "mccabe==0.6.1",
+        "matplotlib==3.1.1",
+        "lazy-object-proxy==1.4.3",
+        "kiwisolver==1.1.0",
+        "isort==4.3.21",
+        "cycler==0.10.0",
+        "astroid==2.3.2",
+        "zipp==3.14.0",
+        "zict==2.2.0",
+        "xgboost==1.6.2",
+        "wheel==0.37.1",
+        "werkzeug==2.2.3",
+        "urllib3==1.26.14",
+        "typing-extensions==4.4.0",
+        "tqdm==4.64.1",
+        "tornado==6.2",
+        "toolz==0.12.0",
+        "threadpoolctl==3.1.0",
+        "tenacity==8.2.2",
+        "tblib==1.7.0",
+        "sortedcontainers==2.4.0",
+        "smac==1.2",
+        "scipy==1.7.3",
+        "scikit-learn==0.24.2",
+        "rpy2==2.9.4",
+        "requests==2.28.2",
+        "reportlab==3.6.12",
+        "qrcode==7.4.2",
+        "pyyaml==6.0",
+        "pyrfr==0.8.3",
+        "pypng==0.20220715.0",
+        "pynvml==11.4.1",
+        "pynisher==0.6.4",
+        "pymupdf==1.21.1",
+        "pydantic==1.10.4",
+        "pyarrow==8.0.0",
+        "py-rapl==0.1",
+        "py-cpuinfo==9.0.0",
+        "psutil==5.9.4",
+        "plotly==5.13.1",
+        "pip==22.3.1",
+        "pint==0.18",
+        "pillow==9.4.0",
+        "partd==1.4.0",
+        "pandas==1.3.5",
+        "packaging==23.0",
+        "orjson==3.8.5",
+        "numpy==1.21.6",
+        "mxnet==1.9.1",
+        "msgpack==1.0.5",
+        "markupsafe==2.1.1",
+        "locket==1.0.0",
+        "liac-arff==2.5.0",
+        "joblib==1.2.0",
+        "jinja2==3.1.2",
+        "itsdangerous==2.1.2",
+        "importlib-metadata==6.0.0",
+        "idna==3.4",
+        "heapdict==1.0.1",
+        "graphviz==0.8.4",
+        "gluonts==0.11.8",
+        "fuzzywuzzy==0.18.0",
+        "fsspec==2023.1.0",
+        "flask==2.2.3",
+        "emcee==3.1.4",
+        "distro==1.8.0",
+        "distributed==2022.2.0",
+        "dask==2022.2.0",
+        "dash==2.8.1",
+        "dash-table==5.0.0",
+        "dash-html-components==2.0.0",
+        "dash-core-components==2.0.0",
+        "dash-bootstrap-components==1.4.0",
+        "cython==0.29.35",
+        "configspace==0.4.21",
+        "codecarbon==2.1.4",
+        "cloudpickle==2.2.1",
+        "click==8.1.3",
+        "charset-normalizer==3.0.1",
+        "certifi==2022.12.7",
+        "auto-sklearn==0.15.0",
+        "arrow==1.2.3"
+    ],
+    "execution_platform": {
+        "System": "Linux",
+        "Node Name": "lamarrws03",
+        "Release": "6.2.0-26-generic",
+        "Version": "#26~22.04.1-Ubuntu SMP PREEMPT_DYNAMIC Thu Jul 13 16:27:29 UTC 2",
+        "Machine": "x86_64",
+        "Processor": "Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz",
+        "Physical cores": 4,
+        "Total cores": 8,
+        "Max Frequency": 4000.0,
+        "Min Frequency": 800.0,
+        "Current Frequency": 1500.081125,
+        "Total": 33526001664,
+        "Available": 32243564544,
+        "Used": 846290944
+    },
+    "version": {
+        "model": "0.11.8",
+        "gluonts": "0.11.8"
+    },
+    "type": [
+        "gluonts.mx.model.renewal._predictor.DeepRenewalProcessPredictor"
+    ],
+    "prediction_net-network": {
+        "__kind__": "instance",
+        "args": [],
+        "class": "gluonts.mx.model.renewal._network.DeepRenewalPredictionNetwork",
+        "kwargs": {
+            "context_length": 420,
+            "dropout_rate": 0.1,
+            "interval_distr_output": {
+                "__kind__": "instance",
+                "args": [],
+                "class": "gluonts.mx.distribution.neg_binomial.NegativeBinomialOutput",
+                "kwargs": {}
+            },
+            "num_cells": 10,
+            "num_layers": 1,
+            "num_parallel_samples": 100,
+            "prediction_length": 336,
+            "size_distr_output": {
+                "__kind__": "instance",
+                "args": [],
+                "class": "gluonts.mx.distribution.neg_binomial.NegativeBinomialOutput",
+                "kwargs": {}
+            }
+        }
+    },
+    "full_log": "results/merged_new03/infer_2023_08_26_21_34_38.tar.gz"
+}
