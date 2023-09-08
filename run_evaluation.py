@@ -79,9 +79,6 @@ if __name__ == '__main__':
                 meta['dataset'][ds] = meta['dataset'][orig].copy()
                 meta['dataset'][ds]['name'] = meta['dataset'][ds]['name'] + ds.replace(orig + '_', '') # append the ds seed to name
 
-
-    # # TODO check why there is an issue here?
-    # database = database[database['dataset_orig'] != 'bitcoin_dataset_without_missing_values']
     rated_database, boundaries, real_boundaries, _ = rate_database(database, properties_meta=meta['properties'], boundaries=args.boundaries)
     print(f'Database constructed from logs has {rated_database.shape} entries')
 
@@ -106,10 +103,8 @@ if __name__ == '__main__':
                 ds_seed = -1 if len(subsample_str) == 0 else int(subsample_str)
 
                 full_path = os.path.join('mnt_data/data', ds_name + '.tsf')
-                ts_data, freq, seasonality, forecast_horizon, contain_missing_values, contain_equal_length = load_data(full_path, ds_sample_seed=ds_seed)
-                if forecast_horizon is None:
-                    forecast_horizon = LOOKUP[ds_name][1]
-                # rated_database.loc[data.index,'orig_dataset'] = ds_name # ensure no bleeding across subsampled datasets in cross-validation
+                hc = LOOKUP[ds_name][1] if len(LOOKUP[ds_name]) > 1 else None
+                ts_data, freq, seasonality, fh, miss_values, equal_len = load_data(full_path, ds_sample_seed=ds_seed, ext_fc_horizon=hc)
                 rated_database.loc[data.index,'num_ts'] = ts_data.shape[0]
                 rated_database.loc[data.index,'avg_ts_len'] = ts_data['series_value'].map(lambda ts: len(ts)).mean()
                 rated_database.loc[data.index,'std_ts_len'] = ts_data['series_value'].map(lambda ts: len(ts)).std()
@@ -122,13 +117,11 @@ if __name__ == '__main__':
                 rated_database.loc[data.index,'max_ts_max'] = ts_data['series_value'].map(lambda ts: np.max(ts)).max()
                 rated_database.loc[data.index,'seasonality'] = seasonality
                 rated_database.loc[data.index,'freq'] = freq
-                rated_database.loc[data.index,'forecast_horizon'] = forecast_horizon
-                rated_database.loc[data.index,'contain_missing_values'] = contain_missing_values
-                rated_database.loc[data.index,'contain_equal_length'] = contain_equal_length
+                rated_database.loc[data.index,'forecast_horizon'] = fh
+                rated_database.loc[data.index,'contain_missing_values'] = miss_values
+                rated_database.loc[data.index,'contain_equal_length'] = equal_len
             rated_database.to_pickle(meta_database_path)
 
-        # TODO check why there is an issue here?
-        rated_database = rated_database[rated_database['dataset_orig'] != 'bitcoin_dataset_without_missing_values']
         models = pd.unique(rated_database["model"])
         shape = rated_database.shape
         ds = pd.unique(rated_database["dataset"])
