@@ -1,0 +1,240 @@
+{
+    "directory_name": "infer_2023_06_17_07_19_21",
+    "execution_platform": {
+        "System": "Linux",
+        "Node Name": "lamarrws03",
+        "Release": "5.19.0-35-generic",
+        "Version": "#36~22.04.1-Ubuntu SMP PREEMPT_DYNAMIC Fri Feb 17 15:17:25 UTC 2",
+        "Machine": "x86_64",
+        "Processor": "Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz",
+        "Physical cores": 4,
+        "Total cores": 8,
+        "Max Frequency": 4000.0,
+        "Min Frequency": 800.0,
+        "Current Frequency": 2904.712375,
+        "Total": 33542766592,
+        "Available": 31667535872,
+        "Used": 1333174272
+    },
+    "emissions": {
+        "timestamp": {
+            "0": "2023-06-17T07:19:24"
+        },
+        "project_name": {
+            "0": "codecarbon"
+        },
+        "run_id": {
+            "0": "97f11f47-f3e3-468f-a47d-b8e3efbcd8c5"
+        },
+        "duration": {
+            "0": 0.0327327251434326
+        },
+        "emissions": {
+            "0": 6.151933937999045e-08
+        },
+        "emissions_rate": {
+            "0": 1.879444473700763e-06
+        },
+        "cpu_power": {
+            "0": 7.822878688869124
+        },
+        "gpu_power": {
+            "0": 0.0
+        },
+        "ram_power": {
+            "0": 11.714675903320314
+        },
+        "cpu_energy": {
+            "0": 7.032588959440812e-08
+        },
+        "gpu_energy": {
+            "0": 0
+        },
+        "ram_energy": {
+            "0": 1.0330207457324533e-07
+        },
+        "energy_consumed": {
+            "0": 1.7362796416765344e-07
+        },
+        "country_name": {
+            "0": "Germany"
+        },
+        "country_iso_code": {
+            "0": "DEU"
+        },
+        "region": {
+            "0": NaN
+        },
+        "cloud_provider": {
+            "0": NaN
+        },
+        "cloud_region": {
+            "0": NaN
+        },
+        "os": {
+            "0": "Linux-5.19.0-35-generic-x86_64-with-debian-bookworm-sid"
+        },
+        "python_version": {
+            "0": "3.7.12"
+        },
+        "codecarbon_version": {
+            "0": "2.2.3"
+        },
+        "cpu_count": {
+            "0": 8
+        },
+        "cpu_model": {
+            "0": "Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz"
+        },
+        "gpu_count": {
+            "0": NaN
+        },
+        "gpu_model": {
+            "0": NaN
+        },
+        "longitude": {
+            "0": NaN
+        },
+        "latitude": {
+            "0": NaN
+        },
+        "ram_total_size": {
+            "0": 31.2391357421875
+        },
+        "tracking_mode": {
+            "0": "machine"
+        },
+        "on_cloud": {
+            "0": "N"
+        },
+        "pue": {
+            "0": 1.0
+        }
+    },
+    "validation_results": {
+        "metrics": {
+            "aggregated": {
+                "MSE": NaN,
+                "abs_error": 838224708.625,
+                "abs_target_sum": 56576717.36915088,
+                "abs_target_mean": 44062.863994665786,
+                "seasonal_error": 1694.7955323293138,
+                "MASE": 20825.049425916215,
+                "MAPE": 18516.61569584082,
+                "sMAPE": 1.6735418749004138,
+                "MSIS": 833001.9798661568,
+                "QuantileLoss[0.1]": 717708437.0156251,
+                "Coverage[0.1]": 0.9158878504672897,
+                "QuantileLoss[0.5]": 838224688.453125,
+                "Coverage[0.5]": 0.9158878504672897,
+                "QuantileLoss[0.9]": 958740939.890625,
+                "Coverage[0.9]": 0.9158878504672897,
+                "RMSE": NaN,
+                "NRMSE": NaN,
+                "ND": 14.815718330842078,
+                "wQuantileLoss[0.1]": 12.68557934057454,
+                "wQuantileLoss[0.5]": 14.815717974301862,
+                "wQuantileLoss[0.9]": 16.945856608029185,
+                "mean_absolute_QuantileLoss": 838224688.453125,
+                "mean_wQuantileLoss": 14.815717974301862,
+                "MAE_Coverage": 0.41588785046728977,
+                "OWA": NaN
+            },
+            "contained_nan": false
+        },
+        "start": 1686979161.7222927,
+        "end": 1686979161.5757797,
+        "num_samples": 100,
+        "model": {}
+    },
+    "requirements": [
+        "# 3.7.12 | packaged by conda-forge | (default, Oct 26 2021, 06:08:21)",
+        "# [GCC 9.4.0]",
+        "wrapt==1.11.2",
+        "typed-ast==1.4.0",
+        "six==1.12.0",
+        "setuptools==41.6.0",
+        "pytz==2019.3",
+        "python-dateutil==2.8.0",
+        "pyparsing==2.4.2",
+        "pylint==2.4.3",
+        "mccabe==0.6.1",
+        "matplotlib==3.1.1",
+        "lazy-object-proxy==1.4.3",
+        "kiwisolver==1.1.0",
+        "isort==4.3.21",
+        "cycler==0.10.0",
+        "astroid==2.3.2",
+        "zipp==3.15.0",
+        "wheel==0.40.0",
+        "werkzeug==2.2.3",
+        "urllib3==1.26.16",
+        "typing-extensions==4.6.3",
+        "tqdm==4.65.0",
+        "toolz==0.12.0",
+        "termcolor==2.3.0",
+        "tensorflow==2.11.0",
+        "tensorflow-io-gcs-filesystem==0.32.0",
+        "tensorflow-estimator==2.11.0",
+        "tensorboard==2.11.2",
+        "tensorboard-plugin-wit==1.8.1",
+        "tensorboard-data-server==0.6.1",
+        "rsa==4.9",
+        "requests==2.31.0",
+        "requests-oauthlib==1.3.1",
+        "pynvml==11.5.0",
+        "pydantic==1.10.9",
+        "pyasn1==0.5.0",
+        "pyasn1-modules==0.3.0",
+        "py-cpuinfo==9.0.0",
+        "psutil==5.9.5",
+        "protobuf==3.19.6",
+        "pip==23.1.2",
+        "pandas==1.3.5",
+        "packaging==23.1",
+        "opt-einsum==3.3.0",
+        "oauthlib==3.2.2",
+        "numpy==1.21.6",
+        "markupsafe==2.1.3",
+        "markdown==3.4.3",
+        "libclang==16.0.0",
+        "kt-legacy==1.0.5",
+        "keras==2.11.0",
+        "keras-tuner==1.3.5",
+        "importlib-metadata==6.6.0",
+        "idna==3.4",
+        "h5py==3.8.0",
+        "grpcio==1.54.2",
+        "google-pasta==0.2.0",
+        "google-auth==2.20.0",
+        "google-auth-oauthlib==0.4.6",
+        "gluonts==0.13.2",
+        "gast==0.4.0",
+        "fuzzywuzzy==0.18.0",
+        "flatbuffers==23.5.26",
+        "codecarbon==2.2.3",
+        "click==8.1.3",
+        "charset-normalizer==3.1.0",
+        "certifi==2023.5.7",
+        "cachetools==5.3.1",
+        "autokeras==1.0.20",
+        "astunparse==1.6.3",
+        "arrow==1.2.3",
+        "absl-py==1.4.0"
+    ],
+    "config": {
+        "dataset": "fred_md_dataset",
+        "model": "autokeras",
+        "output_dir": "mnt_data/autokeras/",
+        "ds_seed": -1,
+        "epochs": 100,
+        "datadir": "mnt_data/data",
+        "cpu_monitor_interval": 0.5,
+        "seed": 42,
+        "timestamp": "2023_06_17_07_19_21",
+        "lag": 15,
+        "external_forecast_horizon": 12,
+        "train_logdir": "mnt_data/autokeras/train_2023_06_17_07_05_31"
+    },
+    "full_log": "results/merged_autokeras_new/infer_2023_06_17_07_19_21.tar.gz"
+}
