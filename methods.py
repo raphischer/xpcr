@@ -12,45 +12,10 @@ from gluonts.dataset.common import ListDataset
 from gluonts.dataset.field_names import FieldName
 from gluonts.evaluation.backtest import make_evaluation_predictions
 from gluonts.evaluation import Evaluator
-from gluonts.model.forecast import Forecast
-from gluonts.core.component import validated
+from gluonts.model.forecast import SampleForecast
 from gluonts.dataset.util import forecast_start
 
 from data_loader import convert_tsf_to_dataframe as load_data
-
-
-class BasicForecast(Forecast):
-
-    @validated()
-    def __init__(
-        self,
-        models: List,
-        featurized_data: List,
-        start_date: pd.Period,
-        prediction_length: int,
-    ):
-        self.models = models
-        self.featurized_data = featurized_data
-        self.start_date = start_date
-        self.prediction_length = prediction_length
-        self.item_id = None
-        self.lead_time = None
-
-    def quantile(self, q: float) -> np.ndarray:
-        """
-        Returns np.array, where the i^th entry is the estimate of the q
-        quantile of the conditional distribution of the value of the i^th step
-        in the forecast horizon.
-        """
-        assert 0 <= q <= 1
-        return np.array(
-            list(
-                chain.from_iterable(
-                    model.predict(self.featurized_data)
-                    for model in self.models
-                )
-            )
-        )
     
 
 class HorizonFCEnsemble:
@@ -95,17 +60,31 @@ class HorizonFCEnsemble:
         if num_samples:
             print("Forecast is not sample based. Ignoring parameter `num_samples` from predict method.")
 
-        for ts in dataset:
-            starting_index = len(ts["target"]) - self.context_length
-            end_index = starting_index + self.context_length
-            time_series_window = ts["target"][starting_index:end_index]
-            # wrap into basic forecast
-            yield BasicForecast(
-                self.models,
-                [time_series_window],
-                start_date=forecast_start(ts),
-                prediction_length=self.prediction_length,
-            )
+        # fc = []
+        # for i, ts in enumerate( dataset ):
+        #     print('           ', i, '/', len(dataset))
+        #     starting_index = len(ts["target"]) - self.context_length
+        #     end_index = starting_index + self.context_length
+        #     time_series_window = ts["target"][starting_index:end_index]
+        #     prediction = np.array(
+        #         list(
+        #             chain.from_iterable(
+        #                 model.predict([time_series_window])
+        #                 for model in self.models
+        #             )
+        #         )
+        #     )
+        #     fc.append( SampleForecast(samples=np.swapaxes(prediction, 0, 1), start_date=forecast_start(ts)) )
+        #     if i > 4:
+        #         break
+
+        # muuuuch faster than the weird gluonts code above (every nn is already run once)
+        X_test = np.array([ts['target'][-self.context_length:] for ts in dataset])
+        ys = np.array([model.predict(X_test)[:,0] for model in self.models])
+        fc = [ SampleForecast(samples=np.expand_dims(ys[:,i], 0), start_date=forecast_start(ts)) for i, ts in enumerate(dataset) ]
+
+        return fc
+        
 
 
 class AutoSklearn(HorizonFCEnsemble):
@@ -166,14 +145,7 @@ class AutoKerasForecaster(HorizonFCEnsemble):
         X = np.concatenate([X, np.zeros((self.prediction_length, len(dataset)))])
         print('TEST DATA', X.shape, len(dataset))
         prediction = self.model.predict(X)
-        print(a)
-            # wrap into basic forecast
-            # yield BasicForecast(
-            #     self.models,
-            #     [time_series_window],
-            #     start_date=forecast_start(ts),
-            #     prediction_length=self.prediction_length,
-            # )
+        print(1)
 
     
 
@@ -227,7 +199,8 @@ def init_model_and_data(args):
     args = {
         'freq': freq,
         'context_length': lag,
-        'prediction_length': forecast_horizon
+        'prediction_length': forecast_horizon,
+        'epochs': epochs
     }
     exp_args = inspect.signature(model_cls).parameters
     for key in list(args.keys()):
