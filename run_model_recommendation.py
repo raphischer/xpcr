@@ -18,9 +18,9 @@ from sklearn.linear_model import LinearRegression, Ridge, Lasso, ElasticNet
 from sklearn.svm import LinearSVR, SVR
 from sklearn.tree import DecisionTreeRegressor
 
-from mlprops.index_and_rate import calculate_single_compound_rating
 from create_paper_results import COL_SEL
 from data_loader import TIMEDELTA_MAP, FREQUENCY_MAP
+from mlprops.util import fix_seed
 FREQ_TO_SECS = {v: TIMEDELTA_MAP[k].total_seconds() for k, v in FREQUENCY_MAP.items()}
 
 
@@ -136,7 +136,8 @@ GROUP_BY =          'dataset_orig' # 'model'
 METRIC_FIELD =      'index'
 
 
-def evaluate_recommendation(database):
+def evaluate_recommendation(database, seed=0):
+    fix_seed(seed)
     # custom CV to ensure splitting y labels only on training y
     group_info = LabelEncoder().fit_transform(database[GROUP_BY].values)
     cv_splitted = list(CV.split(np.zeros((database.shape[0], 1)), None, group_info))
@@ -236,14 +237,16 @@ def evaluate_recommendation(database):
     y = database['compound_index_true'].values
     y_pred = np.zeros_like(y)
 
-    for _, data in database.groupby('split_index'):
+    for split, data in database.groupby('split_index'):
         anti_index = np.array(list(set(database.index.tolist()) - set(data.index)))
         X_train = X[anti_index]
         y_train = y[anti_index]
         X_test = X[data.index]
+        y_test = y[data.index]
         model = Pipeline(steps=[ ('scaler', StandardScaler()), ('regressor', LinearRegression()) ])
         model.fit(X_train, y_train)
         y_pred[data.index] = model.predict(X_test)
+        print(split, np.mean(np.abs(y_test - y_pred[data.index])), np.mean(data['compound_index_direct_pred_error']))
     database['compound_index_ensemble_true'] = database['compound_index_true']
     database['compound_index_pred'] = y_pred
     database['compound_index_pred_error'] = np.abs(database['compound_index_pred'] - database['compound_index_true'] )
