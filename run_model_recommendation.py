@@ -114,9 +114,9 @@ REGRESSORS = {
     'SVR rbf':                  SVR(),
     'SVR poly':                 SVR(kernel='poly'),
     'SVR sigmoid':              SVR(kernel='sigmoid'),
-    'DecisionTree':             DecisionTreeRegressor(),
-    'FriedmanTree':             DecisionTreeRegressor(criterion='friedman_mse'),
-    'PoissonTree':              DecisionTreeRegressor(criterion='poisson'),
+    'DecisionTree':             DecisionTreeRegressor(max_depth=5),
+    'FriedmanTree':             DecisionTreeRegressor(max_depth=5, criterion='friedman_mse'),
+    'PoissonTree':              DecisionTreeRegressor(max_depth=5, criterion='poisson'),
     # 'Random Forest':            RandomForestRegressor(n_estimators=10),
     # 'Extra RF':                 ExtraTreesRegressor(n_estimators=10),
 }
@@ -229,17 +229,23 @@ def evaluate_recommendation(database):
                     with open(os.path.join(path, f'model{idx}.pkl'), 'wb') as outfile:
                         pickle.dump(model, outfile)
 
-    pred_cols = [col.replace('_true', '') for col in database.columns if '_true' in col and 'compound' not in col]
+    # train regressors to predict compound rating based on the predicted metrics
     database['compound_index_true'] = database['compound_index']
-    compounds_pred = []
-    for _, row in database.iterrows():
-        to_rate = {}
-        for col in pred_cols:
-            to_rate[col] = {'rating': 0} # TODO also assess predicted compound rating with help of boundaries
-            to_rate[col]['weight'] = row[col]['weight']
-            to_rate[col]['index'] = row[col + '_pred']
-        compounds_pred.append(calculate_single_compound_rating(to_rate)['index'])
-    database['compound_index_pred'] = compounds_pred
+    pred_cols = [col for col in database.columns if col.endswith('_pred')]
+    X = database[pred_cols].values
+    y = database['compound_index_true'].values
+    y_pred = np.zeros_like(y)
+
+    for _, data in database.groupby('split_index'):
+        anti_index = np.array(list(set(database.index.tolist()) - set(data.index)))
+        X_train = X[anti_index]
+        y_train = y[anti_index]
+        X_test = X[data.index]
+        model = Pipeline(steps=[ ('scaler', StandardScaler()), ('regressor', LinearRegression()) ])
+        model.fit(X_train, y_train)
+        y_pred[data.index] = model.predict(X_test)
+    database['compound_index_ensemble_true'] = database['compound_index_true']
+    database['compound_index_pred'] = y_pred
     database['compound_index_pred_error'] = np.abs(database['compound_index_pred'] - database['compound_index_true'] )
 
     database.to_pickle('results/meta_learn_results.pkl')
