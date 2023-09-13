@@ -5,8 +5,6 @@ import pickle
 import pandas as pd
 import numpy as np
 
-from mlprops.elex.graphs import create_scatter_graph, add_rating_background
-from mlprops.elex.util import RATING_COLORS, RATING_COLOR_SCALE
 from mlprops.util import fix_seed
 
 PLOT_WIDTH = 900
@@ -33,6 +31,8 @@ def create_all(database, meta, seed=0):
     from plotly.subplots import make_subplots
     import plotly.express as px
     from plotly.express.colors import sample_colorscale
+    from mlprops.elex.graphs import create_scatter_graph, add_rating_background
+    from mlprops.elex.util import RATING_COLORS, RATING_COLOR_SCALE
 
     fix_seed(seed)
     meta_learned_db = pd.read_pickle('results/meta_learn_results.pkl')
