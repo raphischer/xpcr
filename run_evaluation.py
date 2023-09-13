@@ -66,6 +66,13 @@ if __name__ == '__main__':
             print(stats)
         for stats in ds_stats:
             print(stats)
+
+        results = []
+        for group, data in database.groupby('dataset_orig'):
+            results.append((np.sum([d["value"] for d in data["train_running_time"]])/3600, group, np.sum([d["value"] for d in data["running_time"]])))
+        for train, ds, infer in sorted(results):
+            print(f'{ds:<40} {train:6.2f}h training {infer:6.2f}s per inference')
+
         sys.exit(0)
 
     meta = load_meta()
@@ -89,7 +96,7 @@ if __name__ == '__main__':
 
     if args.mode == 'paper':
         from create_paper_results import create_all
-        create_all(rated_database, boundaries, real_boundaries, meta)
+        create_all(rated_database, meta)
     
     if args.mode == 'meta':
         meta_database_path = "results/database_for_meta.pkl"

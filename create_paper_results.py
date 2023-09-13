@@ -4,18 +4,15 @@ import pickle
 
 import pandas as pd
 import numpy as np
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-import plotly.express as px
-from plotly.express.colors import sample_colorscale
 
 from mlprops.elex.graphs import create_scatter_graph, add_rating_background
 from mlprops.elex.util import RATING_COLORS, RATING_COLOR_SCALE
+from mlprops.util import fix_seed
 
-PLOT_WIDTH = 1000
+PLOT_WIDTH = 900
 PLOT_HEIGHT = PLOT_WIDTH // 3
 
-DS_SEL = 'm3_quarterly_dataset'
+DS_SEL = 'car_parts_dataset_without_missing_values'
 COL_SEL = 'MASE'
 
 
@@ -31,8 +28,15 @@ FT_NAMES = {
     'contain_equal_length_True': 'Equally long?'
 }
 
-def create_all(database, boundaries, boundaries_real, meta):
+def create_all(database, meta, seed=0):
+    import plotly.graph_objects as go
+    from plotly.subplots import make_subplots
+    import plotly.express as px
+    from plotly.express.colors import sample_colorscale
+
+    fix_seed(seed)
     meta_learned_db = pd.read_pickle('results/meta_learn_results.pkl')
+    autokeras = pd.read_pickle('results/autokeras.pkl')
     os.chdir('paper_results')
 
     print('Generating tables')
@@ -65,7 +69,7 @@ def create_all(database, boundaries, boundaries_real, meta):
     for ds, data in database.groupby(['dataset_orig']):
         subd = data[data['dataset'] == ds]
         ds_name = meta['dataset'][ds]['name']
-        ds_name_short = ds_name[:13] + '..' + ds_name[-5:] if len(ds_name) > 20 else ds_name
+        ds_name_short = ds_name[:5] + '..' + ds_name[-3:] if len(ds_name) > 10 else ds_name
         row = [ds_name_short]
         results = [subd[subd['model'] == mod]['compound_index'].iloc[0] for mod in models]
         max_r = max(results)
@@ -91,7 +95,7 @@ def create_all(database, boundaries, boundaries_real, meta):
 
 
 
-    ### EXPLANATIONS
+    ## EXPLANATIONS
     data = meta_learned_db[meta_learned_db['dataset'] == DS_SEL]
     best_model = data.iloc[np.argmax(data['compound_index_pred'])]
     cols_to_plot = [col for col in data.columns if col.endswith('_pred') and 'compound' not in col]
@@ -100,12 +104,12 @@ def create_all(database, boundaries, boundaries_real, meta):
     # why recommendation?
     title = f"Why use {meta['model'][best_model['model']]['short']} on {meta['dataset'][DS_SEL]['name']}?"
     fig=px.bar(
-        title=title, x=[meta['properties'][col.replace('_pred', '')]['shortname'] for col in cols_to_plot],
-        y=contrib, color=np.array(contrib) * -1.0, color_continuous_scale=RATING_COLOR_SCALE
+    title=title, x=[meta['properties'][col.replace('_pred', '')]['shortname'] for col in cols_to_plot],
+    y=contrib, color=np.array(contrib) * -1.0, color_continuous_scale=RATING_COLOR_SCALE
     )
     fig.update_yaxes(title='Contribution to compound [%]')
     fig.update_xaxes(title='', tickangle=90)
-    fig.update_layout(title={'font': dict(size=15)}, width=PLOT_WIDTH / 4, height=PLOT_HEIGHT, margin={'l': 0, 'r': 0, 'b': 0, 't': 30})
+    fig.update_layout(title_x=0.5, width=PLOT_WIDTH / 2, height=PLOT_HEIGHT, margin={'l': 0, 'r': 0, 'b': 0, 't': 24})
     fig.update(layout_coloraxis_showscale=False)
     fig.write_image("why_recommended.pdf")
     # why ERROR estimate?
@@ -136,7 +140,7 @@ def create_all(database, boundaries, boundaries_real, meta):
 
 
     # ### PCR trade-offs scatters
-    for xaxis, yaxis in [['running_time', COL_SEL], ['train_power_draw', 'RMSE'], ['parameters', 'MAPE']]:
+    for xaxis, yaxis in [['running_time', COL_SEL], ['train_power_draw', 'RMSE']]:#, ['parameters', 'MAPE']]:
         for idx, (ds, data) in enumerate(database.groupby(['dataset_orig'])):
             # if ds == DS_SEL:
             subd = data[data['dataset'] == ds]
@@ -162,7 +166,7 @@ def create_all(database, boundaries, boundaries_real, meta):
             scatter = create_scatter_graph(plot_data, axis_names, False, ax_border=0.15, marker_width=PLOT_WIDTH / 90)
             scatter.update_traces(textposition='top center', textfont_size=16, textfont_color='black')
             add_rating_background(scatter, rating_pos2, 'optimistic mean', False)
-            scatter.update_layout(width=PLOT_WIDTH / 2, height=PLOT_HEIGHT * 0.8, margin={'l': 0, 'r': 0, 'b': 0, 't': 0})
+            scatter.update_layout(width=PLOT_WIDTH / 2, height=PLOT_HEIGHT, margin={'l': 0, 'r': 0, 'b': 0, 't': 0})
             scatter.write_image(f'landscape_{ds}_{xaxis}_{yaxis}.pdf')
 
 
@@ -171,11 +175,6 @@ def create_all(database, boundaries, boundaries_real, meta):
     pred_col_shortnames = [meta['properties'][col]['shortname'] for col in pred_cols]
 
     # access statistics per data set
-    # TODO remove this and check why some data sets have NA for MASE
-    max_valid_err = np.quantile([val['value'] for val in meta_learned_db[COL_SEL] if np.isfinite(val['value'])], 0.8)
-    for val in meta_learned_db[COL_SEL]:
-        if not np.isfinite(val['value']):
-            val['value'] = max_valid_err
     top_increasing_k_stats = {}
     for idx, ((ds), data) in enumerate(meta_learned_db.groupby(['dataset'])):
         sorted_by_pred_err = data.sort_values(f'{COL_SEL}_pred', ascending=False)
@@ -192,7 +191,7 @@ def create_all(database, boundaries, boundaries_real, meta):
             ######### STAR PLOTS with recommendation vs best
             true_best = data.sort_values(f'compound_index_true', ascending=False).iloc[0]
             pred_best = data.sort_values(f'compound_index_pred', ascending=False).iloc[0]
-            fig = make_subplots(rows=1, cols=1, subplot_titles=[meta['dataset'][ds]['name']])
+            fig = go.Figure()
             # the first pred col gives the real assessed compound index
             for model, col, m_str in zip([true_best, pred_best], [RATING_COLORS[0], RATING_COLORS[2]], ['Best', 'Pred']):
                 name = meta['model'][model['model']]['short']
@@ -201,22 +200,22 @@ def create_all(database, boundaries, boundaries_real, meta):
                     theta=pred_col_shortnames, fill='toself', name=f'Score ({name} - {m_str}): {model["compound_index"]:4.2f}'
                 ))
             fig.update_layout(
-                polar=dict(radialaxis=dict(visible=True)), width=PLOT_WIDTH*0.25, height=PLOT_HEIGHT,
-                legend=dict( yanchor="bottom", y=0.84, xanchor="center", x=0.5), margin={'l': 41, 'r': 41, 'b': 0, 't': 18} )
+                polar=dict(radialaxis=dict(visible=True)), width=PLOT_WIDTH*0.33, height=PLOT_HEIGHT, title_y=1.0, title_x=0.5, title_text=meta['dataset'][ds]['name'],
+                legend=dict( yanchor="bottom", y=1.06, xanchor="center", x=0.5), margin={'l': 0, 'r': 0, 'b': 15, 't': 70}
+            )
             fig.write_image(f'true_best_{ds}.pdf')
 
     ######### METHOD COMPARISON TABLE
-    autokeras = pd.read_pickle('../results/autokeras.pkl')
     models = pd.unique(database['model'])
     rows = [
-        ' & '.join(['Data set', r'\multicolumn{2}{c}{X-PCR recommendation}', r'\multicolumn{2}{c}{Random model}', r'\multicolumn{2}{c}{AutoKeras}', r'\multicolumn{2}{c}{Testing all} \\']),
-        ' & '.join([ ' ' ] + [f'{COL_SEL}', 'Power Draw'] * 4) + r' \\',
+        ' & '.join(['Data set', r'\multicolumn{2}{c}{X-PCR}', r'\multicolumn{2}{c}{Random}', r'\multicolumn{2}{c}{AutoKeras}', r'\multicolumn{2}{c}{Exhaustive} \\']),
+        ' & '.join([ ' ' ] + [f'{COL_SEL}', 'kWh'] * 4) + r' \\',
         r'\midrule',
     ]
     for idx, ((ds), data) in enumerate(meta_learned_db.groupby(['dataset'])):
         if data['dataset_orig'].iloc[0] == ds:
             ds_name = meta['dataset'][ds]['name']
-            ds_name_short = ds_name[:13] + '..' + ds_name[-5:] if len(ds_name) > 20 else ds_name
+            ds_name_short = ds_name[:5] + '..' + ds_name[-3:] if len(ds_name) > 10 else ds_name
             row = [ds_name_short]
             # best recommendation
             sort_rec = data.sort_values(f'{COL_SEL}_pred', ascending=False)
@@ -224,15 +223,12 @@ def create_all(database, boundaries, boundaries_real, meta):
             values = [ (sel[COL_SEL]['value'], sel['train_power_draw']['value'] / 3.6e3) ]
             # random
             sel = sort_rec.iloc[np.random.randint(1, sort_rec.shape[0])]
-            # remove this
-            if sel[COL_SEL]['value'] < values[0][0]:
-                sel = sort_rec.iloc[np.random.randint(1, sort_rec.shape[0])]
             values.append( (sel[COL_SEL]['value'], sel['train_power_draw']['value'] / 3.6e3) )
-            # auto learn
+            # autokeras
             auto = autokeras[autokeras['dataset'] == ds]
             auto = auto.sort_values('task')
-            auto = auto.fillna(method='bfill').head(1)
-            values.append( (auto[COL_SEL].values[0], auto['train_power_draw'].values[0] / 3.6e3) )
+            # auto = auto.fillna(method='bfill').head(1)
+            values.append( (auto[COL_SEL].values[0], auto['train_power_draw'].values[1] / 3.6e3) )
             # testing all
             lowest_err = min([e['value'] for e in data[COL_SEL]])
             values.append( (lowest_err, np.sum([val['value'] / 3.6e3 for val in data['train_power_draw']]) ) )
@@ -244,13 +240,13 @@ def create_all(database, boundaries, boundaries_real, meta):
                     row = row + ['N.A.', 'N.A.']
                 else:
                     if err == best_err and idx < len(values) - 1:
-                        row.append(r'\textbf{' + f'{err:4.3f}' + r'}')
+                        row.append(r'\textbf{' + f'{err:6.3f}'[:6] + r'}')
                     else:
-                        row.append(f'{err:4.3f}')
+                        row.append(f'{err:6.3f}'[:6])
                     if ene == best_ene and idx < len(values) - 1:
-                        row.append(r'\textbf{' + f'{ene:4.3f}' + r'}')
+                        row.append(r'\textbf{' + f'{ene:6.3f}'[:6] + r'}')
                     else:
-                        row.append(f'{ene:4.3f}')
+                        row.append(f'{ene:6.3f}'[:6])
             rows.append(' & '.join(row) + r' \\')
     final_text = TEX_TABLE_GENERAL.replace('$DATA', '\n        '.join(rows))
     final_text = final_text.replace('$ALIGN', r'{l|cc|cc|cc||cc}')
@@ -286,9 +282,6 @@ def create_all(database, boundaries, boundaries_real, meta):
     # ERRORS OF PREDICTION
     meta['properties']['compound_index'] = {'shortname': 'Compound', 'weight': 1.0}
     meta['properties']['compound_index_direct'] = {'shortname': 'Direct comp', 'weight': 1.0}
-    # remove this and check why direct calculation seems to be better?!
-    meta_learned_db['compound_index_direct_pred'] = meta_learned_db['compound_index_direct_pred'] + np.random.rand(meta_learned_db.shape[0]) * 0.6 - 0.3
-    meta_learned_db['compound_index_direct_pred_error'] = np.abs(meta_learned_db['compound_index_direct_pred'] - meta_learned_db['compound_index_direct_true'])
     pred_cols = ['compound_index', 'compound_index_direct'] + pred_cols
     result_scores = {
         'Error (a)': {},
@@ -312,7 +305,8 @@ def create_all(database, boundaries, boundaries_real, meta):
                 sorted_by_pred = data.sort_values(f'{col}_pred', ascending=False)
                 top_5_true = sorted_by_true.iloc[:k_best]['model'].values
                 top_5_pred = sorted_by_pred.iloc[:k_best]['model'].values
-                best_model, err = sorted_by_true.iloc[0][['model', f'{col}_pred_error']]
+                best_model = sorted_by_true.iloc[0]['model']
+                err = data[f'{col}_pred_error'].mean()
 
                 top_1.append(best_model == sorted_by_pred.iloc[0]['model'])
                 top_k.append(best_model in top_5_pred)
