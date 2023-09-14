@@ -8,7 +8,7 @@ import numpy as np
 from mlprops.util import fix_seed
 
 PLOT_WIDTH = 900
-PLOT_HEIGHT = PLOT_WIDTH // 3
+PLOT_HEIGHT = PLOT_WIDTH // 4
 
 DS_SEL = 'car_parts_dataset_without_missing_values'
 COL_SEL = 'MASE'
@@ -49,17 +49,12 @@ def create_all(database, meta, seed=0):
     \end{tabular}'''
 
     #### PROPERTY TABLE
-    rows = [r'Function & Property & Group & Weight \\' + '\n' + r'        \midrule']
-    # weights = {prop: val['weight'] for prop, val in meta['properties'].items()}
-    # weights_sum = np.sum(np.array(list(weights.values())))
-    # for prop in meta['properties'].keys():
-    #     meta['properties'][prop]['weight'] = meta['properties'][prop]['weight'] / weights_sum
+    rows = [r'Property & Group & Weight \\' + '\n' + r'        \midrule']
     for i, p_meta in enumerate(meta['properties'].values()):
-        row = [r'$f_{' + str(i + 1) + r'}$']
-        row += [p_meta[field] if isinstance(p_meta[field], str) else f'{p_meta[field]:4.3f}' for field in ['name', 'group', 'weight']]
+        row = [p_meta[field] if isinstance(p_meta[field], str) else f'{p_meta[field]:4.3f}' for field in ['name', 'group', 'weight']]
         rows.append(' & '.join(row) + r' \\')
     final_text = TEX_TABLE_GENERAL.replace('$DATA', '\n        '.join(rows))
-    final_text = final_text.replace('$ALIGN', r'{llcc}')
+    final_text = final_text.replace('$ALIGN', r'{lcc}')
     with open('properties.tex', 'w') as outf:
         outf.write(final_text)
     
@@ -134,7 +129,7 @@ def create_all(database, meta, seed=0):
     fig=px.bar(title=title, x=ft_names, y=ft_imp, color=ft_imp * -1.0, color_continuous_scale=RATING_COLOR_SCALE)
     fig.update_yaxes(title='Feature importance')
     fig.update_xaxes(title='', tickangle=90)
-    fig.update_layout(title={'font': dict(size=15)}, width=PLOT_WIDTH / 4, height=PLOT_HEIGHT, margin={'l': 0, 'r': 0, 'b': 0, 't': 30})
+    fig.update_layout(title_x=0.5, width=PLOT_WIDTH / 2, height=PLOT_HEIGHT, margin={'l': 0, 'r': 0, 'b': 0, 't': 24})
     fig.update(layout_coloraxis_showscale=False)
     fig.write_image("why_error.pdf")
 
@@ -333,7 +328,7 @@ def create_all(database, meta, seed=0):
             ), row=1, col=plot_idx + 1
         )
         max_x.append(max(x) + (max(x) / 10))
-    fig.update_layout(width=PLOT_WIDTH, height=PLOT_HEIGHT, showlegend=False, margin={'l': 0, 'r': 0, 'b': 0, 't': 25})
+    fig.update_layout(width=PLOT_WIDTH, height=PLOT_HEIGHT, showlegend=False, margin={'l': 0, 'r': 0, 'b': 0, 't': 24})
     fig.update_layout(
         xaxis_range = [0, max_x[0]],
         xaxis2_range = [0, max_x[1]],

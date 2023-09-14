@@ -1,25 +1,27 @@
 
     \begin{tabular}{l|cc|cc|cc||cc}
         \toprule 
-        Data set & \multicolumn{2}{c}{X-PCR recommendation} & \multicolumn{2}{c}{Random model} & \multicolumn{2}{c}{AutoKeras} & \multicolumn{2}{c}{Testing all} \\
-          & MASE & Power Draw & MASE & Power Draw & MASE & Power Draw & MASE & Power Draw \\
+        Data set & \multicolumn{2}{c}{X-PCR} & \multicolumn{2}{c}{Random} & \multicolumn{2}{c}{AutoKeras} & \multicolumn{2}{c}{Exhaustive} \\
+          & MASE & kWh & MASE & kWh & MASE & kWh & MASE & kWh \\
         \midrule
-        CIF 2016 & \textbf{1.029} & \textbf{0.763} & 1.138 & 1.877 & 20.776 & 1.710 & 1.029 & 38.927 \\
-        COVID-19 Deaths & \textbf{6.217} & \textbf{3.985} & \textbf{6.217} & 5.284 & N.A. & N.A. & 6.217 & 61.933 \\
-        Electricity Weekly & 3.042 & \textbf{4.210} & \textbf{2.656} & 11.685 & N.A. & N.A. & 1.978 & 79.650 \\
-        FRED-MD & \textbf{2.209} & \textbf{0.501} & 9.114 & 4.110 & 20825.049 & 6.653 & 0.671 & 55.745 \\
-        Hospital & \textbf{0.835} & 4.111 & 0.840 & \textbf{1.779} & 25.084 & 20.802 & 0.822 & 82.612 \\
-        M1 Monthly & \textbf{1.498} & 6.791 & 1.670 & \textbf{1.089} & 10065.688 & 22.415 & 1.250 & 130.051 \\
-        M1 Quarterly & \textbf{2.507} & \textbf{1.399} & 2.527 & 1.951 & 11293.791 & 8.672 & 1.799 & 39.570 \\
-        M3 Quarterly & 2.276 & \textbf{4.885} & \textbf{1.619} & 22.023 & 3.785 & 8.050 & 1.320 & 96.797 \\
-        M4 Weekly & \textbf{3.040} & 27.910 & 3.117 & 49.737 & N.A. & N.A. & 2.881 & 177.568 \\
-        NN5 Daily & \textbf{0.631} & 2.400 & 0.762 & \textbf{0.717} & 1.208 & 31.251 & 0.568 & 72.293 \\
-        NN5 Weekly & \textbf{0.880} & 3.513 & 1.062 & 2.866 & N.A. & N.A. & 0.866 & 86.496 \\
-        Melbourne Ped..ounts & 1.107 & \textbf{10.787} & \textbf{0.260} & 50.198 & N.A. & N.A. & 0.248 & 314.361 \\
-        Solar Weekly & 1.784 & 3.447 & 3.560 & \textbf{0.476} & \textbf{1.519} & 1.301 & 0.829 & 50.056 \\
-        Tourism Monthly & \textbf{1.778} & 6.460 & 61.903 & \textbf{0.763} & 27.261 & 42.620 & 1.420 & 176.383 \\
-        Tourism Quarterly & \textbf{3.304} & 1.757 & 4.620 & \textbf{0.869} & 733.900 & 12.657 & 1.670 & 54.758 \\
-        Traffic Weekly & \textbf{1.644} & 8.704 & 2.052 & \textbf{3.488} & N.A. & N.A. & 1.454 & 156.598 \\
-        Vehicle Trips & \textbf{6.217} & 3.021 & \textbf{6.217} & \textbf{2.235} & N.A. & N.A. & 6.217 & 64.160 \\
+        Austr..and &  1.687 & \textbf{29.742} & \textbf{ 1.257} & 86.945 & 13.029 & 69.940 &  1.005 & 913.82 \\
+        Car Parts & \textbf{ 0.471} & \textbf{ 1.554} &  0.668 &  2.943 &  0.971 &  8.471 &  0.456 & 56.392 \\
+        CIF 2016 & \textbf{ 1.029} & \textbf{ 0.327} &  1.091 &  3.528 & 16.289 &  2.456 &  1.029 &  9.862 \\
+        Dominick &  1.774 & \textbf{28.917} & \textbf{ 1.580} & 30.666 &  2.535 & 245.08 &  1.469 & 1000.4 \\
+        Elect..kly & \textbf{ 2.793} & \textbf{ 0.971} & 17.452 &  2.213 & 19.886 & 12.232 &  1.653 & 52.556 \\
+        FRED-MD & \textbf{ 1.923} &  0.566 & 32758. & \textbf{ 0.160} & 990.52 &  6.321 &  0.655 & 12.307 \\
+        Hospital & \textbf{ 0.761} & \textbf{ 3.923} &  0.811 & 15.572 & 75.563 & 20.029 &  0.761 & 52.238 \\
+        M1 Monthly & \textbf{ 1.498} & \textbf{ 4.094} &  1.744 & 12.836 & 1171.8 & 21.620 &  1.359 & 55.363 \\
+        M1 Qu..rly & \textbf{ 1.783} &  0.855 &  2.329 & \textbf{ 0.415} & 334.97 &  2.228 &  1.783 & 16.553 \\
+        M3 Monthly &  1.164 & 11.098 & \textbf{ 1.077} & \textbf{ 5.226} &  2.573 & 80.654 &  1.018 & 272.87 \\
+        M3 Qu..rly & \textbf{ 2.085} &  3.202 & 120734 & \textbf{ 0.493} &  2.673 &  7.807 &  1.321 & 86.256 \\
+        M4 Hourly & \textbf{ 3.137} &  7.155 &  9.423 & \textbf{ 5.145} & 77216. & 212.89 &  2.801 & 414.00 \\
+        M4 Weekly & \textbf{ 4.134} &  4.519 & 71.787 & \textbf{ 1.593} & 25.706 & 24.626 &  2.743 & 71.024 \\
+        NN5 Daily & \textbf{ 0.684} &  0.802 &  1.497 & \textbf{ 0.192} &  1.212 & 29.775 &  0.568 & 42.706 \\
+        NN5 Weekly & \textbf{ 0.880} &  1.561 &  0.949 & \textbf{ 0.194} &  1.578 &  2.164 &  0.839 & 38.942 \\
+        Solar..kly & \textbf{ 0.829} & \textbf{ 0.483} &  1.049 &  0.867 &  1.004 &  1.242 &  0.829 & 23.939 \\
+        Touri..hly & \textbf{ 1.435} &  3.296 &  5.711 & \textbf{ 1.446} &  6.941 & 41.297 &  1.435 & 58.523 \\
+        Touri..rly & \textbf{ 1.670} & \textbf{ 0.662} &  5.741 &  3.034 & 12.942 & 11.994 &  1.670 & 24.203 \\
+        Traff..kly & \textbf{ 1.534} & \textbf{ 5.720} &  3.204 & 12.969 &  5.060 &  9.744 &  1.275 & 106.78 \\
         \bottomrule
     \end{tabular}
