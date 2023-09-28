@@ -169,7 +169,6 @@ def create_page(datasets, dataset_meta, indexmode, rating_mode):
     
     row0 = [
         dbc.Col(html.H1('ELEx - AI Energy Label Exploration'))
-        # dbc.Col(html.Img(src="assets/lamarr-logo.svg", className="img-fluid"), width=4)
     ]
 
     row1 = [
