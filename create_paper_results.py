@@ -79,6 +79,54 @@ def create_all(database, meta, seed=0):
     with open('ds_model_index.tex', 'w') as outf:
         outf.write(final_text)
 
+    ######### METHOD COMPARISON TABLE
+    models = pd.unique(database['model'])
+    rows = [
+        ' & '.join(['Data set', r'\multicolumn{2}{c}{X-PCR}', r'\multicolumn{2}{c}{Random}', r'\multicolumn{2}{c}{AutoKeras}', r'\multicolumn{2}{c}{Exhaustive} \\']),
+        ' & '.join([ ' ' ] + [f'{COL_SEL}', 'kWh'] * 4) + r' \\',
+        r'\midrule',
+    ]
+    for idx, ((ds), data) in enumerate(meta_learned_db.groupby(['dataset'])):
+        if data['dataset_orig'].iloc[0] == ds:
+            ds_name = meta['dataset'][ds]['name']
+            ds_name_short = ds_name[:5] + '..' + ds_name[-3:] if len(ds_name) > 10 else ds_name
+            row = [ds_name_short]
+            # best recommendation
+            sort_rec = data.sort_values(f'{COL_SEL}_pred', ascending=False)
+            sel = sort_rec.iloc[0]
+            values = [ (sel[COL_SEL]['value'], sel['train_power_draw']['value'] / 3.6e3) ]
+            # random
+            sel = sort_rec.iloc[np.random.randint(1, sort_rec.shape[0])]
+            values.append( (sel[COL_SEL]['value'], sel['train_power_draw']['value'] / 3.6e3) )
+            # autokeras
+            auto = autokeras[autokeras['dataset'] == ds]
+            auto = auto.sort_values('task')
+            # auto = auto.fillna(method='bfill').head(1)
+            values.append( (auto[COL_SEL].values[0], auto['train_power_draw'].values[1] / 3.6e3) )
+            # testing all
+            lowest_err = min([e['value'] for e in data[COL_SEL]])
+            values.append( (lowest_err, np.sum([val['value'] / 3.6e3 for val in data['train_power_draw']]) ) )
+            # bold print best error
+            best_err = np.min([val[0] for val in values[:-1] if not np.isnan(val[0])])
+            best_ene = np.min([val[1] for val in values if not np.isnan(val[1])])
+            for idx, (err, ene) in enumerate(values):
+                if err == np.inf or np.isnan(err):
+                    row = row + ['N.A.', 'N.A.']
+                else:
+                    if err == best_err and idx < len(values) - 1:
+                        row.append(r'\textbf{' + f'{err:6.3f}'[:6] + r'}')
+                    else:
+                        row.append(f'{err:6.3f}'[:6])
+                    if ene == best_ene and idx < len(values) - 1:
+                        row.append(r'\textbf{' + f'{ene:6.3f}'[:6] + r'}')
+                    else:
+                        row.append(f'{ene:6.3f}'[:6])
+            rows.append(' & '.join(row) + r' \\')
+    final_text = TEX_TABLE_GENERAL.replace('$DATA', '\n        '.join(rows))
+    final_text = final_text.replace('$ALIGN', r'{l|cc|cc|cc||cc}')
+    with open('method_comparison.tex', 'w') as outf:
+        outf.write(final_text)
+
 
     print('Generating figures')
     ####### DUMMY OUTPUT #######
@@ -176,11 +224,12 @@ def create_all(database, meta, seed=0):
         lowest_err = min([entry['value'] for entry in data[COL_SEL]])
         lowest_ene = sum([entry['value'] for entry in data['train_power_draw']]) / 3.6e3
         # save ene and err for increasing k
-        top_increasing_k_stats[ds] = {'err': [], 'ene': []}
-        for k in range(1, data.shape[0] + 1):
-            subd = sorted_by_pred_err.iloc[:k]
-            top_increasing_k_stats[ds]['err'].append( lowest_err / min([entry['value'] for entry in subd[COL_SEL]]))
-            top_increasing_k_stats[ds]['ene'].append( sum([entry['value'] for entry in subd['train_power_draw']]) / (3.6e3 * lowest_ene) )
+        if not np.isinf(lowest_err) and not np.isinf(lowest_ene):
+            top_increasing_k_stats[ds] = {'err': [], 'ene': []}
+            for k in range(1, data.shape[0] + 1):
+                subd = sorted_by_pred_err.iloc[:k]
+                top_increasing_k_stats[ds]['err'].append( lowest_err / min([entry['value'] for entry in subd[COL_SEL]]))
+                top_increasing_k_stats[ds]['ene'].append( sum([entry['value'] for entry in subd['train_power_draw']]) / (3.6e3 * lowest_ene) )
 
         if data['dataset_orig'].iloc[0] == ds:
             ######### STAR PLOTS with recommendation vs best
@@ -200,54 +249,8 @@ def create_all(database, meta, seed=0):
             )
             fig.write_image(f'true_best_{ds}.pdf')
 
-    ######### METHOD COMPARISON TABLE
-    models = pd.unique(database['model'])
-    rows = [
-        ' & '.join(['Data set', r'\multicolumn{2}{c}{X-PCR}', r'\multicolumn{2}{c}{Random}', r'\multicolumn{2}{c}{AutoKeras}', r'\multicolumn{2}{c}{Exhaustive} \\']),
-        ' & '.join([ ' ' ] + [f'{COL_SEL}', 'kWh'] * 4) + r' \\',
-        r'\midrule',
-    ]
-    for idx, ((ds), data) in enumerate(meta_learned_db.groupby(['dataset'])):
-        if data['dataset_orig'].iloc[0] == ds:
-            ds_name = meta['dataset'][ds]['name']
-            ds_name_short = ds_name[:5] + '..' + ds_name[-3:] if len(ds_name) > 10 else ds_name
-            row = [ds_name_short]
-            # best recommendation
-            sort_rec = data.sort_values(f'{COL_SEL}_pred', ascending=False)
-            sel = sort_rec.iloc[0]
-            values = [ (sel[COL_SEL]['value'], sel['train_power_draw']['value'] / 3.6e3) ]
-            # random
-            sel = sort_rec.iloc[np.random.randint(1, sort_rec.shape[0])]
-            values.append( (sel[COL_SEL]['value'], sel['train_power_draw']['value'] / 3.6e3) )
-            # autokeras
-            auto = autokeras[autokeras['dataset'] == ds]
-            auto = auto.sort_values('task')
-            # auto = auto.fillna(method='bfill').head(1)
-            values.append( (auto[COL_SEL].values[0], auto['train_power_draw'].values[1] / 3.6e3) )
-            # testing all
-            lowest_err = min([e['value'] for e in data[COL_SEL]])
-            values.append( (lowest_err, np.sum([val['value'] / 3.6e3 for val in data['train_power_draw']]) ) )
-            # bold print best error
-            best_err = np.min([val[0] for val in values[:-1] if not np.isnan(val[0])])
-            best_ene = np.min([val[1] for val in values if not np.isnan(val[1])])
-            for idx, (err, ene) in enumerate(values):
-                if err == np.inf or np.isnan(err):
-                    row = row + ['N.A.', 'N.A.']
-                else:
-                    if err == best_err and idx < len(values) - 1:
-                        row.append(r'\textbf{' + f'{err:6.3f}'[:6] + r'}')
-                    else:
-                        row.append(f'{err:6.3f}'[:6])
-                    if ene == best_ene and idx < len(values) - 1:
-                        row.append(r'\textbf{' + f'{ene:6.3f}'[:6] + r'}')
-                    else:
-                        row.append(f'{ene:6.3f}'[:6])
-            rows.append(' & '.join(row) + r' \\')
-    final_text = TEX_TABLE_GENERAL.replace('$DATA', '\n        '.join(rows))
-    final_text = final_text.replace('$ALIGN', r'{l|cc|cc|cc||cc}')
-    with open('method_comparison.tex', 'w') as outf:
-        outf.write(final_text)
-
+    
+    
 
     ###### increasing top k curves
     fig = make_subplots(rows=1, cols=2, shared_yaxes=True, x_title='k (testing top-k recommendations)', y_title="Relative value", subplot_titles=[COL_SEL, 'Power Draw'], horizontal_spacing=0.02)
