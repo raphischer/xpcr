@@ -12,9 +12,3 @@ do
 
     python run.py --dataset $d --model autokeras --ds-seed -1 --output-dir $2
 done
-# TODO errors for "m1_yearly_dataset" "tourism_yearly_dataset" "m3_other_dataset" "m3_yearly_dataset"
-# TODO if there is enough time, also run on ""m4_quarterly_dataset"?
-# TODO fix parameter assessment error for "naiveseasonal" "rotbaum"
-# TODO fix error for "transformer"
-# TODO also run "arima" (takes very long)
-# TODO only single series -> no subsampling possible! "us_births_dataset" "saugeenday_dataset" "sunspot_dataset_without_missing_values"
