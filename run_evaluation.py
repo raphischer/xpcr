@@ -3,7 +3,6 @@ import os
 import sys
 import pandas as pd
 import numpy as np
-import re
 
 from mlprops.index_and_rate import rate_database
 from mlprops.util import load_meta

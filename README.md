@@ -1,17 +1,16 @@
-# Explainable Multi-Objective Selection of Deep Neural Networks for Time Series Forecasting
+# Explainable Multi-Objective Model Selection for Time Series Forecasting
 
-Code and results for Explainable Multi-Objective Selection of Deep Neural Networks for Time Series Forecasting.
-The associated research paper is currently under review, this code is anonymously published for reviewers.
+Code and results for the associated research paper (currently under review), this code is anonymously published for reviewers.
 
 ## Structure
 All paper-specific experiments were executed with the top-level Python scripts.
-Our work-in-progress generalized library for [ML properties](./mlprops/) resides within in a separate folder.
+Our work-in-progress [generalized library for ML properties](./mlprops/) resides within in a separate folder.
 The [experiment logs](./results/) and [paper results](./paper_results/) also have their own folders.
 The meta files (.json) contain meta information on data, properties, models and the environment.
 
 ## Installation
-All code was executed with Python 3.7.7 and GluonTS 0.11.8 on Ubuntu 20.04.5, please refer to [requirements](./requirements.txt) for all dependencies.
-You can get more detailed information on the exact setup from the [logs](./results/merged22/).
+All code was executed with Python 3.7, GluonTS 0.11.8 and Scikit-learn 1.0.20 on Ubuntu 22.04.2, please refer to [requirements](./requirements.txt) for all necessary dependencies.
+You can get even more detailed information on the exact setup from the [logs](./results/merged_new03/).
 Depending on how you intend to use this software, only some packages are required.
 
 ## Usage
@@ -35,4 +34,4 @@ The prodedure for reproducing the results is the following:
 6. Explore results via [evaluation script](./run_evaluation.py) and `--mode interactive`
 
 ## Terms of Use
-Copyright (c) 2023 Authors of "Explainable Multi-Objective Selection of Deep Neural Networks for Time Series Forecasting".
+Copyright (c) 2023 authors of paper under review.
