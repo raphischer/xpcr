@@ -1,6 +1,7 @@
 # Explainable Multi-Objective Model Selection for Time Series Forecasting
 
-Code and results for the associated research paper (currently under review), this code is anonymously published for reviewers.
+Code and results for the associated research paper (currently under review).
+To investigate the results you can use our publicly available [Exploration tool](http://167.99.254.41/), so no code needs to be run on your machine (note that results might slightly differ from the submitted paper, which we will update upon acceptance).
 
 ## Structure
 All paper-specific experiments were executed with the top-level Python scripts.
@@ -14,8 +15,6 @@ You can get even more detailed information on the exact setup from the [logs](./
 Depending on how you intend to use this software, only some packages are required.
 
 ## Usage
-To investigate the results you can use our publicly available [Exploration tool](http://167.99.254.41/), so no code needs to be run on your machine.
-
 You can also [run the evaluation](./run_evaluation.py) locally and pass different modes: generate paper results, start the interactive app, run the meta learning, etc.
 All [paper results](./paper_results/) (plots and tables) were generated via this script.
 
@@ -34,4 +33,4 @@ The prodedure for reproducing the results is the following:
 6. Explore results via [evaluation script](./run_evaluation.py) and `--mode interactive`
 
 ## Terms of Use
-Copyright (c) 2023 authors of paper under review.
+Copyright (c) 2023 Raphael Fischer
