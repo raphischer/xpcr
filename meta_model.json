@@ -297,17 +297,5 @@
         "url": "https://www.jmlr.org/papers/v24/20-1355.html",
         "module": null,
         "class": "AutoKeras"
-    },
-    "autokerasforecast": {
-        "name": "AutoKerasForecaster",
-        "short": "AKF",
-        "local/global": "Global",
-        "data": "Univariate",
-        "method": "AutoML",
-        "implementation": "tensorflow",
-        "paper": "Haifeng  et al. 2023",
-        "url": "https://www.jmlr.org/papers/v24/20-1355.html",
-        "module": null,
-        "class": "AutoKerasForecaster"
     }
 }

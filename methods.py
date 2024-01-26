@@ -16,6 +16,7 @@ from gluonts.model.forecast import SampleForecast
 from gluonts.dataset.util import forecast_start
 
 from data_loader import convert_tsf_to_dataframe as load_data
+from mlprops.util import read_json
     
 
 class HorizonFCEnsemble:
@@ -59,40 +60,21 @@ class HorizonFCEnsemble:
     def predict(self, dataset, num_samples):
         if num_samples:
             print("Forecast is not sample based. Ignoring parameter `num_samples` from predict method.")
-
-        # fc = []
-        # for i, ts in enumerate( dataset ):
-        #     print('           ', i, '/', len(dataset))
-        #     starting_index = len(ts["target"]) - self.context_length
-        #     end_index = starting_index + self.context_length
-        #     time_series_window = ts["target"][starting_index:end_index]
-        #     prediction = np.array(
-        #         list(
-        #             chain.from_iterable(
-        #                 model.predict([time_series_window])
-        #                 for model in self.models
-        #             )
-        #         )
-        #     )
-        #     fc.append( SampleForecast(samples=np.swapaxes(prediction, 0, 1), start_date=forecast_start(ts)) )
-        #     if i > 4:
-        #         break
-
-        # muuuuch faster than the weird gluonts code above (every nn is already run once)
         X_test = np.array([ts['target'][-self.context_length:] for ts in dataset])
-        ys = np.array([model.predict(X_test)[:,0] for model in self.models])
+        ys = np.array([self.predict_single(model, X_test) for model in self.models])
         fc = [ SampleForecast(samples=np.expand_dims(ys[:,i], 0), start_date=forecast_start(ts)) for i, ts in enumerate(dataset) ]
-
         return fc
+    
+    def predict_single(self, model, X_test):
+        return model.predict(X_test)
         
-
 
 class AutoSklearn(HorizonFCEnsemble):
 
-    def __init__(self, freq, context_length, prediction_length, samples_per_series=100):
+    def __init__(self, freq, context_length, prediction_length, samples_per_series=100, time_budget=1000):
         super().__init__(freq, context_length, prediction_length, samples_per_series)
         from autosklearn.regression import AutoSklearnRegressor
-        per_regr = 1200 // self.prediction_length # 4500
+        per_regr = max(30, time_budget // self.prediction_length)
         self.models = [AutoSklearnRegressor(per_regr) for _ in range(self.prediction_length)]
 
 
@@ -107,6 +89,9 @@ class AutoKeras(HorizonFCEnsemble):
 
     def fit(self, model_idx, X, y):
         self.models[model_idx].fit(X, y, epochs=self.epochs)
+
+    def predict_single(self, model, X_test):
+        return model.predict(X_test)[:,0]
 
 
 class AutoKerasForecaster(HorizonFCEnsemble):
@@ -146,8 +131,6 @@ class AutoKerasForecaster(HorizonFCEnsemble):
         print('TEST DATA', X.shape, len(dataset))
         prediction = self.model.predict(X)
         print(1)
-
-    
 
 
 with open('meta_model.json', 'r') as meta:
@@ -218,6 +201,10 @@ def init_model_and_data(args):
         args['num_layers'] = 1
         args['num_cells'] = 10
 
+    if model == 'autosklearn':
+        ds_meta = read_json('meta_dataset.json')
+        args['time_budget'] = ds_meta[dataset]['budget']
+        
     if model in ['rotbaum', 'naiveseasonal']: # for some reason the args are not included in sugnature of these methods
         args['freq'] = freq
         args['prediction_length'] = forecast_horizon
