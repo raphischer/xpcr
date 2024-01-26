@@ -15,16 +15,33 @@ COL_SEL = 'MASE'
 
 
 FT_NAMES = {
-    'model_choice': 'Model Choice',
-    'freq': 'Seasoniality',
-    'forecast_horizon': 'Forecast Horizon',
-    'num_ts': 'Number of Series',
-    'avg_ts_len': 'Avg Series Length',
-    'avg_ts_mean': 'Avg Series Mean',
-    'avg_ts_min': 'Avg Series Min',
-    'avg_ts_max': 'Avg Series Max',
-    'contain_equal_length_True': 'Equally long?'
+    'model_choice':                 'Model Choice',
+    'freq':                         'Seasoniality',
+    'forecast_horizon':             'Fc Horizon',
+    'num_ts':                       'Num Series',
+    'avg_ts_len':                   'Avg Length',
+    'avg_ts_mean':                  'Avg Mean',
+    'avg_ts_min':                   'Avg Min',
+    'avg_ts_max':                   'Avg Max',
+    'contain_equal_length_True':    'Equal length'
 }
+
+
+def get_ds_short(ds_name):
+    return ds_name[:4] + '..' + ds_name[-3:] if len(ds_name) > 9 else ds_name
+
+
+def format_val(value):
+    if value >= 1000000:
+        return f'{np.round(value/1000000, 1)}e6'
+    if value >= 100000:
+        return f'{np.round(value/100000, 1)}e5'
+    if value >= 10000:
+        return f'{np.round(value/10000, 1)}e4'
+    if value >= 100:
+        return str(np.round(value))[:-2] 
+    return f'{value:4.2f}'[:4]
+
 
 def create_all(database, meta, seed=0):
     import plotly.graph_objects as go
@@ -63,9 +80,7 @@ def create_all(database, meta, seed=0):
     rows = ['Data set & ' + ' & '.join(meta['model'][mod]['short'] for mod in models) + r' \\' + '\n' + r'        \midrule']
     for ds, data in database.groupby(['dataset_orig']):
         subd = data[data['dataset'] == ds]
-        ds_name = meta['dataset'][ds]['name']
-        ds_name_short = ds_name[:5] + '..' + ds_name[-3:] if len(ds_name) > 10 else ds_name
-        row = [ds_name_short]
+        row = [ get_ds_short(meta['dataset'][ds]['name']) ]
         results = [subd[subd['model'] == mod]['compound_index'].iloc[0] for mod in models]
         max_r = max(results)
         for res in results:
@@ -82,48 +97,59 @@ def create_all(database, meta, seed=0):
     ######### METHOD COMPARISON TABLE
     models = pd.unique(database['model'])
     rows = [
-        ' & '.join(['Data set', r'\multicolumn{2}{c}{X-PCR}', r'\multicolumn{2}{c}{Random}', r'\multicolumn{2}{c}{AutoKeras}', r'\multicolumn{2}{c}{Exhaustive} \\']),
-        ' & '.join([ ' ' ] + [f'{COL_SEL}', 'kWh'] * 4) + r' \\',
+        ' & '.join(['Data set', r'\multicolumn{3}{c}{AutoXPCR}', r'\multicolumn{3}{c}{AutoForecast}', r'\multicolumn{3}{c}{Exhaustive}', r'\multicolumn{2}{c}{AutoKeras} \\']),
+        ' & '.join([ ' ' ] + ['F(x)', f'{COL_SEL}', 'kWh'] * 3 + [f'{COL_SEL}', 'kWh'] * 1) + r' \\',
         r'\midrule',
     ]
     for idx, ((ds), data) in enumerate(meta_learned_db.groupby(['dataset'])):
         if data['dataset_orig'].iloc[0] == ds:
-            ds_name = meta['dataset'][ds]['name']
-            ds_name_short = ds_name[:5] + '..' + ds_name[-3:] if len(ds_name) > 10 else ds_name
-            row = [ds_name_short]
-            # best recommendation
-            sort_rec = data.sort_values(f'{COL_SEL}_pred', ascending=False)
-            sel = sort_rec.iloc[0]
-            values = [ (sel[COL_SEL]['value'], sel['train_power_draw']['value'] / 3.6e3) ]
+            row = [ get_ds_short(meta['dataset'][ds]['name']) ]
+            # best XPCR
+            sort_xpcr = data.sort_values('compound_index_pred', ascending=False)
+            sel_xpcr = sort_xpcr.iloc[0]
+            values = [ (sel_xpcr['compound_index_true'], sel_xpcr[COL_SEL]['value'], sel_xpcr['train_power_draw']['value'] / 3.6e3) ]
+            # best error
+            sort_error = data.sort_values(f'{COL_SEL}_pred', ascending=False)
+            sel_error = sort_error.iloc[0]
+            values.append( (sel_error['compound_index_true'], sel_error[COL_SEL]['value'], sel_error['train_power_draw']['value'] / 3.6e3) )
             # random
-            sel = sort_rec.iloc[np.random.randint(1, sort_rec.shape[0])]
-            values.append( (sel[COL_SEL]['value'], sel['train_power_draw']['value'] / 3.6e3) )
+            # sel_rand = sort_xpcr.iloc[np.random.randint(1, sort_xpcr.shape[0])]
+            # values.append( (sel_rand['compound_index_true'], sel_rand[COL_SEL]['value'], sel_rand['train_power_draw']['value'] / 3.6e3) )
+            # testing all
+            sort_exha = data.sort_values('compound_index_true', ascending=False)
+            sel_exha = sort_exha.iloc[0]
+            values.append( (sel_exha['compound_index_true'], sel_exha[COL_SEL]['value'], np.sum([val['value'] / 3.6e3 for val in data['train_power_draw']]) ) )
             # autokeras
             auto = autokeras[autokeras['dataset'] == ds]
             auto = auto.sort_values('task')
-            # auto = auto.fillna(method='bfill').head(1)
             values.append( (auto[COL_SEL].values[0], auto['train_power_draw'].values[1] / 3.6e3) )
-            # testing all
-            lowest_err = min([e['value'] for e in data[COL_SEL]])
-            values.append( (lowest_err, np.sum([val['value'] / 3.6e3 for val in data['train_power_draw']]) ) )
             # bold print best error
-            best_err = np.min([val[0] for val in values[:-1] if not np.isnan(val[0])])
-            best_ene = np.min([val[1] for val in values if not np.isnan(val[1])])
-            for idx, (err, ene) in enumerate(values):
-                if err == np.inf or np.isnan(err):
-                    row = row + ['N.A.', 'N.A.']
+            best_idx = np.max([val[0] for val in values[:3]])
+            best_err = np.min([val[1] for val in values[:3]] + [val[0] for val in values[3:]])
+            best_ene = np.min([val[2] for val in values[:3]] + [val[1] for val in values[3:]])
+            for results in values:
+                format_results = [ format_val(res) for res in results ]
+                if len(results) == 3:
+                    format_results[0] = f'{results[0]:3.2f}'
+                    for val_idx, best in enumerate([best_idx, best_err, best_ene]):
+                        if best == results[val_idx]:
+                            format_results[val_idx] = r'\textbf{' + format_results[val_idx] + r'}'
                 else:
-                    if err == best_err and idx < len(values) - 1:
-                        row.append(r'\textbf{' + f'{err:6.3f}'[:6] + r'}')
-                    else:
-                        row.append(f'{err:6.3f}'[:6])
-                    if ene == best_ene and idx < len(values) - 1:
-                        row.append(r'\textbf{' + f'{ene:6.3f}'[:6] + r'}')
-                    else:
-                        row.append(f'{ene:6.3f}'[:6])
+                    for val_idx, best in enumerate([best_err, best_ene]):
+                        if best == results[val_idx]:
+                            format_results[val_idx] = r'\textbf{' + format_results[val_idx] + r'}'
+                row += format_results
+                    # if err == best_err and idx < len(values) - 1:
+                    #     row.append(r'\textbf{' + f'{err:6.3f}'[:5] + r'}')
+                    # else:
+                    #     row.append(f'{err:6.3f}'[:6])
+                    # if ene == best_ene and idx < len(values) - 1:
+                    #     row.append(r'\textbf{' + f'{ene:6.3f}'[:5] + r'}')
+                    # else:
+                    #     row.append(f'{ene:6.3f}'[:6])
             rows.append(' & '.join(row) + r' \\')
     final_text = TEX_TABLE_GENERAL.replace('$DATA', '\n        '.join(rows))
-    final_text = final_text.replace('$ALIGN', r'{l|cc|cc|cc||cc}')
+    final_text = final_text.replace('$ALIGN', r'{l|ccc|ccc||ccc||cc}')
     with open('method_comparison.tex', 'w') as outf:
         outf.write(final_text)
 
@@ -150,9 +176,9 @@ def create_all(database, meta, seed=0):
     title=title, x=[meta['properties'][col.replace('_pred', '')]['shortname'] for col in cols_to_plot],
     y=contrib, color=np.array(contrib) * -1.0, color_continuous_scale=RATING_COLOR_SCALE
     )
-    fig.update_yaxes(title='Contribution to compound [%]')
+    fig.update_yaxes(title='Contribution [%]')
     fig.update_xaxes(title='', tickangle=90)
-    fig.update_layout(title_x=0.5, width=PLOT_WIDTH / 2, height=PLOT_HEIGHT, margin={'l': 0, 'r': 0, 'b': 0, 't': 24})
+    fig.update_layout(title_x=0.5, width=PLOT_WIDTH / 2, height=PLOT_HEIGHT, margin={'l': 0, 'r': 0, 'b': 0, 't': 30})
     fig.update(layout_coloraxis_showscale=False)
     fig.write_image("why_recommended.pdf")
     # why ERROR estimate?
@@ -173,11 +199,11 @@ def create_all(database, meta, seed=0):
     model_idc = [i for i, ft in enumerate(ft_names) if ft.startswith('model')]
     # summarize the importance of onehot encoded model choices
     ft_names = ['Model Choice'] + [FT_NAMES[ft] for i, ft in enumerate(ft_names) if i not in model_idc]
-    ft_imp = np.array( [np.sum([ft_imp[i] for i in model_idc])] + [imp for i, imp in enumerate(ft_imp) if i not in model_idc] )
+    ft_imp = np.array( [np.sum([ft_imp[i] for i in model_idc])] + [imp for i, imp in enumerate(ft_imp) if i not in model_idc] ) * 100
     fig=px.bar(title=title, x=ft_names, y=ft_imp, color=ft_imp * -1.0, color_continuous_scale=RATING_COLOR_SCALE)
-    fig.update_yaxes(title='Feature importance')
+    fig.update_yaxes(title='Importance [%]')
     fig.update_xaxes(title='', tickangle=90)
-    fig.update_layout(title_x=0.5, width=PLOT_WIDTH / 2, height=PLOT_HEIGHT, margin={'l': 0, 'r': 0, 'b': 0, 't': 24})
+    fig.update_layout(title_x=0.5, width=PLOT_WIDTH / 2, height=PLOT_HEIGHT, margin={'l': 0, 'r': 0, 'b': 0, 't': 30})
     fig.update(layout_coloraxis_showscale=False)
     fig.write_image("why_error.pdf")
 
@@ -245,7 +271,7 @@ def create_all(database, meta, seed=0):
                 ))
             fig.update_layout(
                 polar=dict(radialaxis=dict(visible=True)), width=PLOT_WIDTH*0.33, height=PLOT_HEIGHT, title_y=1.0, title_x=0.5, title_text=meta['dataset'][ds]['name'],
-                legend=dict( yanchor="bottom", y=1.06, xanchor="center", x=0.5), margin={'l': 0, 'r': 0, 'b': 15, 't': 70}
+                legend=dict( yanchor="bottom", y=1.13, xanchor="center", x=0.5), margin={'l': 0, 'r': 0, 'b': 15, 't': 80}
             )
             fig.write_image(f'true_best_{ds}.pdf')
 
