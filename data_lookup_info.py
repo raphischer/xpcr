@@ -41,3 +41,26 @@ LOOKUP = { # taken from https://github.com/rakshitha123/TSForecasting
     "rideshare_dataset_without_missing_values": ( 210, 168),
     "temperature_rain_dataset_without_missing_values": ( 9, 30)
 }
+
+def set_temporal_budget():
+    import json
+    import pandas as pd
+    from mlprops.util import read_json
+
+    ds_meta = 'meta_dataset.json'
+    dataset_meta = read_json(ds_meta)
+    database = pd.read_pickle('results/new03.pkl')
+
+    for ds in dataset_meta.keys():
+        ds_results = database[database['dataset'] == ds]
+        train_times = ds_results['train_running_time'].dropna()
+        if train_times.size > 0:
+            dataset_meta[ds]['budget'] = int(train_times.max())
+        else: # dataset not processed yet
+            dataset_meta[ds]['budget'] = int(database['train_running_time'].dropna().max())
+
+    with open(ds_meta, 'w') as meta:
+        json.dump(dataset_meta, meta, indent=4)
+
+if __name__ == "__main__":
+    set_temporal_budget()
