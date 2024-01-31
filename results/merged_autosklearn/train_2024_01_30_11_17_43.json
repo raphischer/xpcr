@@ -1,0 +1,208 @@
+{
+    "directory_name": "train_2024_01_30_11_17_43",
+    "config": {
+        "dataset": "dominick_dataset",
+        "model": "autosklearn",
+        "output_dir": "mnt_data/autosklearn",
+        "ds_seed": -1,
+        "epochs": 100,
+        "datadir": "mnt_data/data",
+        "cpu_monitor_interval": 0.5,
+        "seed": 42,
+        "timestamp": "2024_01_30_11_17_43"
+    },
+    "execution_platform": {
+        "System": "Linux",
+        "Node Name": "lamarrws03",
+        "Release": "6.5.0-15-generic",
+        "Version": "#15~22.04.1-Ubuntu SMP PREEMPT_DYNAMIC Fri Jan 12 18:54:30 UTC 2",
+        "Machine": "x86_64",
+        "Processor": "Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz",
+        "Physical cores": 4,
+        "Total cores": 8,
+        "Max Frequency": 4000.0,
+        "Min Frequency": 800.0,
+        "Current Frequency": 2222.2718749999995,
+        "Total": 33525596160,
+        "Available": 32305598464,
+        "Used": 749924352
+    },
+    "results": {
+        "history": {
+            "loss": null
+        },
+        "start": 1706609953.6861951,
+        "end": 1706642605.1590912,
+        "model": null
+    },
+    "requirements": [
+        "# 3.7.12 | packaged by conda-forge | (default, Oct 26 2021, 06:08:21)",
+        "# [GCC 9.4.0]",
+        "wrapt==1.11.2",
+        "typed-ast==1.4.0",
+        "six==1.12.0",
+        "setuptools==41.6.0",
+        "pytz==2019.3",
+        "python-dateutil==2.8.0",
+        "pyparsing==2.4.2",
+        "pylint==2.4.3",
+        "mccabe==0.6.1",
+        "matplotlib==3.1.1",
+        "lazy-object-proxy==1.4.3",
+        "kiwisolver==1.1.0",
+        "isort==4.3.21",
+        "cycler==0.10.0",
+        "astroid==2.3.2",
+        "zict==2.2.0",
+        "wheel==0.40.0",
+        "urllib3==2.0.3",
+        "typing-extensions==4.6.3",
+        "tqdm==4.65.0",
+        "tornado==6.1",
+        "toolz==0.12.0",
+        "threadpoolctl==3.1.0",
+        "tblib==1.7.0",
+        "sortedcontainers==2.4.0",
+        "smac==1.2",
+        "scipy==1.7.3",
+        "scikit-learn==0.24.2",
+        "requests==2.31.0",
+        "pyyaml==6.0",
+        "pyrfr==0.8.3",
+        "pynvml==11.5.0",
+        "pynisher==0.6.4",
+        "pydantic==1.10.9",
+        "py-cpuinfo==9.0.0",
+        "psutil==5.9.3",
+        "pip==23.1.2",
+        "pillow==9.2.0",
+        "partd==1.4.0",
+        "pandas==1.3.5",
+        "packaging==23.1",
+        "numpy==1.21.6",
+        "mxnet==1.9.1",
+        "msgpack==1.0.4",
+        "markupsafe==2.1.1",
+        "locket==1.0.0",
+        "liac-arff==2.5.0",
+        "joblib==1.2.0",
+        "jinja2==3.1.2",
+        "idna==3.4",
+        "heapdict==1.0.1",
+        "graphviz==0.8.4",
+        "gluonts==0.13.2",
+        "fuzzywuzzy==0.18.0",
+        "fsspec==2023.1.0",
+        "emcee==3.1.4",
+        "distro==1.8.0",
+        "distributed==2022.2.0",
+        "dask==2022.2.0",
+        "cytoolz==0.12.0",
+        "cython==0.29.32",
+        "configspace==0.4.21",
+        "codecarbon==2.2.3",
+        "cloudpickle==2.2.1",
+        "click==8.0.0",
+        "charset-normalizer==3.1.0",
+        "certifi==2023.5.7",
+        "bokeh==2.4.3",
+        "auto-sklearn==0.15.0",
+        "arrow==1.2.3"
+    ],
+    "emissions": {
+        "timestamp": {
+            "0": "2024-01-30T20:23:25"
+        },
+        "project_name": {
+            "0": "codecarbon"
+        },
+        "run_id": {
+            "0": "2e7715b8-fbb1-4f03-ae90-ed6e02b1baae"
+        },
+        "duration": {
+            "0": 32651.47465634346
+        },
+        "emissions": {
+            "0": 0.0861051046375266
+        },
+        "emissions_rate": {
+            "0": 2.6370969625042128e-06
+        },
+        "cpu_power": {
+            "0": 3.4844545126479534
+        },
+        "gpu_power": {
+            "0": 0.0
+        },
+        "ram_power": {
+            "0": 11.70867919921875
+        },
+        "cpu_energy": {
+            "0": 0.1369412526143036
+        },
+        "gpu_energy": {
+            "0": 0
+        },
+        "ram_energy": {
+            "0": 0.1060758892037295
+        },
+        "energy_consumed": {
+            "0": 0.2430171418179952
+        },
+        "country_name": {
+            "0": "Germany"
+        },
+        "country_iso_code": {
+            "0": "DEU"
+        },
+        "region": {
+            "0": NaN
+        },
+        "cloud_provider": {
+            "0": NaN
+        },
+        "cloud_region": {
+            "0": NaN
+        },
+        "os": {
+            "0": "Linux-6.5.0-15-generic-x86_64-with-debian-bookworm-sid"
+        },
+        "python_version": {
+            "0": "3.7.12"
+        },
+        "codecarbon_version": {
+            "0": "2.2.3"
+        },
+        "cpu_count": {
+            "0": 8
+        },
+        "cpu_model": {
+            "0": "Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz"
+        },
+        "gpu_count": {
+            "0": NaN
+        },
+        "gpu_model": {
+            "0": NaN
+        },
+        "longitude": {
+            "0": NaN
+        },
+        "latitude": {
+            "0": NaN
+        },
+        "ram_total_size": {
+            "0": 31.22314453125
+        },
+        "tracking_mode": {
+            "0": "machine"
+        },
+        "on_cloud": {
+            "0": "N"
+        },
+        "pue": {
+            "0": 1.0
+        }
+    },
+    "full_log": "results/merged_autosklearn/train_2024_01_30_11_17_43.tar.gz"
+}

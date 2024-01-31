@@ -1,0 +1,242 @@
+{
+    "directory_name": "infer_2024_01_29_21_39_00",
+    "execution_platform": {
+        "System": "Linux",
+        "Node Name": "lamarrws03",
+        "Release": "6.5.0-15-generic",
+        "Version": "#15~22.04.1-Ubuntu SMP PREEMPT_DYNAMIC Fri Jan 12 18:54:30 UTC 2",
+        "Machine": "x86_64",
+        "Processor": "Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz",
+        "Physical cores": 4,
+        "Total cores": 8,
+        "Max Frequency": 4000.0,
+        "Min Frequency": 800.0,
+        "Current Frequency": 2621.9327500000004,
+        "Total": 33525596160,
+        "Available": 30986854400,
+        "Used": 2083311616
+    },
+    "emissions": {
+        "timestamp": {
+            "0": "2024-01-29T21:39:02"
+        },
+        "project_name": {
+            "0": "codecarbon"
+        },
+        "run_id": {
+            "0": "18e37a4f-d031-44ca-9f1e-4984e9ce0656"
+        },
+        "duration": {
+            "0": 1.1399168968200684
+        },
+        "emissions": {
+            "0": 5.625210984189181e-06
+        },
+        "emissions_rate": {
+            "0": 4.934755331622302e-06
+        },
+        "cpu_power": {
+            "0": 39.58595370871564
+        },
+        "gpu_power": {
+            "0": 0.0
+        },
+        "ram_power": {
+            "0": 11.70867919921875
+        },
+        "cpu_energy": {
+            "0": 1.218225669023798e-05
+        },
+        "gpu_energy": {
+            "0": 0
+        },
+        "ram_energy": {
+            "0": 3.69395298694144e-06
+        },
+        "energy_consumed": {
+            "0": 1.5876209677179423e-05
+        },
+        "country_name": {
+            "0": "Germany"
+        },
+        "country_iso_code": {
+            "0": "DEU"
+        },
+        "region": {
+            "0": NaN
+        },
+        "cloud_provider": {
+            "0": NaN
+        },
+        "cloud_region": {
+            "0": NaN
+        },
+        "os": {
+            "0": "Linux-6.5.0-15-generic-x86_64-with-debian-bookworm-sid"
+        },
+        "python_version": {
+            "0": "3.7.12"
+        },
+        "codecarbon_version": {
+            "0": "2.2.3"
+        },
+        "cpu_count": {
+            "0": 8
+        },
+        "cpu_model": {
+            "0": "Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz"
+        },
+        "gpu_count": {
+            "0": NaN
+        },
+        "gpu_model": {
+            "0": NaN
+        },
+        "longitude": {
+            "0": NaN
+        },
+        "latitude": {
+            "0": NaN
+        },
+        "ram_total_size": {
+            "0": 31.22314453125
+        },
+        "tracking_mode": {
+            "0": "machine"
+        },
+        "on_cloud": {
+            "0": "N"
+        },
+        "pue": {
+            "0": 1.0
+        }
+    },
+    "config": {
+        "dataset": "nn5_weekly_dataset",
+        "model": "autosklearn",
+        "output_dir": "mnt_data/autosklearn",
+        "ds_seed": -1,
+        "epochs": 100,
+        "datadir": "mnt_data/data",
+        "cpu_monitor_interval": 0.5,
+        "seed": 42,
+        "timestamp": "2024_01_29_21_39_00",
+        "lag": 65,
+        "external_forecast_horizon": 8,
+        "train_logdir": "mnt_data/autosklearn/train_2024_01_29_21_09_14"
+    },
+    "requirements": [
+        "# 3.7.12 | packaged by conda-forge | (default, Oct 26 2021, 06:08:21)",
+        "# [GCC 9.4.0]",
+        "wrapt==1.11.2",
+        "typed-ast==1.4.0",
+        "six==1.12.0",
+        "setuptools==41.6.0",
+        "pytz==2019.3",
+        "python-dateutil==2.8.0",
+        "pyparsing==2.4.2",
+        "pylint==2.4.3",
+        "mccabe==0.6.1",
+        "matplotlib==3.1.1",
+        "lazy-object-proxy==1.4.3",
+        "kiwisolver==1.1.0",
+        "isort==4.3.21",
+        "cycler==0.10.0",
+        "astroid==2.3.2",
+        "zict==2.2.0",
+        "wheel==0.40.0",
+        "urllib3==2.0.3",
+        "typing-extensions==4.6.3",
+        "tqdm==4.65.0",
+        "tornado==6.1",
+        "toolz==0.12.0",
+        "threadpoolctl==3.1.0",
+        "tblib==1.7.0",
+        "sortedcontainers==2.4.0",
+        "smac==1.2",
+        "scipy==1.7.3",
+        "scikit-learn==0.24.2",
+        "requests==2.31.0",
+        "pyyaml==6.0",
+        "pyrfr==0.8.3",
+        "pynvml==11.5.0",
+        "pynisher==0.6.4",
+        "pydantic==1.10.9",
+        "py-cpuinfo==9.0.0",
+        "psutil==5.9.3",
+        "pip==23.1.2",
+        "pillow==9.2.0",
+        "partd==1.4.0",
+        "pandas==1.3.5",
+        "packaging==23.1",
+        "numpy==1.21.6",
+        "mxnet==1.9.1",
+        "msgpack==1.0.4",
+        "markupsafe==2.1.1",
+        "locket==1.0.0",
+        "liac-arff==2.5.0",
+        "joblib==1.2.0",
+        "jinja2==3.1.2",
+        "idna==3.4",
+        "heapdict==1.0.1",
+        "graphviz==0.8.4",
+        "gluonts==0.13.2",
+        "fuzzywuzzy==0.18.0",
+        "fsspec==2023.1.0",
+        "emcee==3.1.4",
+        "distro==1.8.0",
+        "distributed==2022.2.0",
+        "dask==2022.2.0",
+        "cytoolz==0.12.0",
+        "cython==0.29.32",
+        "configspace==0.4.21",
+        "codecarbon==2.2.3",
+        "cloudpickle==2.2.1",
+        "click==8.0.0",
+        "charset-normalizer==3.1.0",
+        "certifi==2023.5.7",
+        "bokeh==2.4.3",
+        "auto-sklearn==0.15.0",
+        "arrow==1.2.3"
+    ],
+    "validation_results": {
+        "metrics": {
+            "aggregated": {
+                "MSE": 491.01846725893466,
+                "abs_error": 13683.40406036377,
+                "abs_target_sum": 120931.51177978516,
+                "abs_target_mean": 136.18413488714543,
+                "seasonal_error": 15.985615027752173,
+                "MASE": 0.9602508089019174,
+                "MAPE": 0.12422215069188451,
+                "sMAPE": 0.1169484338175872,
+                "MSIS": 38.41003235607669,
+                "QuantileLoss[0.1]": 14965.047503280639,
+                "Coverage[0.1]": 0.5281531531531531,
+                "QuantileLoss[0.5]": 13683.40406036377,
+                "Coverage[0.5]": 0.5281531531531531,
+                "QuantileLoss[0.9]": 12401.7606174469,
+                "Coverage[0.9]": 0.5281531531531531,
+                "RMSE": 22.158936510106585,
+                "NRMSE": 0.16271305411947945,
+                "ND": 0.11315002896251794,
+                "wQuantileLoss[0.1]": 0.12374812224734122,
+                "wQuantileLoss[0.5]": 0.11315002896251794,
+                "wQuantileLoss[0.9]": 0.10255193567769465,
+                "mean_absolute_QuantileLoss": 13683.40406036377,
+                "mean_wQuantileLoss": 0.11315002896251793,
+                "MAE_Coverage": 0.27605105105105104,
+                "OWA": NaN
+            },
+            "contained_nan": false
+        },
+        "start": 1706560740.1802824,
+        "end": 1706560742.6357706,
+        "num_samples": 100,
+        "model": {
+            "params": -1,
+            "fsize": 1149935518
+        }
+    },
+    "full_log": "results/merged_autosklearn/infer_2024_01_29_21_39_00.tar.gz"
+}
