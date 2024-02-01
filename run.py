@@ -18,7 +18,8 @@ def main(args):
 
     ############## TRAINING ##############
     output_dir = create_output_dir(args.output_dir, 'train', args.__dict__)
-
+    setattr(args, 'train_logdir', output_dir)
+    
     try:
 
         setattr(args, 'lag', LOOKUP[args.dataset][0])
@@ -59,10 +60,7 @@ def main(args):
             with open(os.path.join(output_dir, f'results.json'), 'w') as rf:
                 json.dump(results, rf, indent=4, cls=PatchedJSONEncoder)
 
-
-
         split = 'validation' ############## INFERENCE ##############
-        setattr(args, 'train_logdir', output_dir)
         output_dir = create_output_dir(args.output_dir, 'infer', args.__dict__)
         start_time = time.time()
 
@@ -73,16 +71,21 @@ def main(args):
         forecast = list(forecast)
         groundtruth = list(groundtruth)
         emissions_tracker.stop()
+        end_time = time.time()
 
         try:
-            model.serialize(Path(output_dir))
-            relevant_files = [os.path.join(output_dir, fname) for fname in ['input_transform.json', 'parameters.json', 'prediction_net-0000.params', 'prediction_net-network.json', 'type.txt', 'version.json']]
-            end_time = time.time()
+            try:
+                num_params = model.get_param_count()
+            except Exception: # GluonTS model
+                num_params = sum([val._reduce().size for val in model.network._collect_params_with_prefix().values()])
+            try:
+                fsize = model.get_fsize(output_dir)
+            except Exception: # GluonTS model
+                model.serialize(Path(output_dir))
+                relevant_files = [os.path.join(output_dir, fname) for fname in ['input_transform.json', 'parameters.json', 'prediction_net-0000.params', 'prediction_net-network.json', 'type.txt', 'version.json']]
+                fsize = sum([os.path.getsize(fname) for fname in relevant_files])
 
-            model_stats = {
-                'params': sum([val._reduce().size for val in model.network._collect_params_with_prefix().values()]),
-                'fsize': sum([os.path.getsize(fname) for fname in relevant_files])
-            }
+            model_stats = { 'params': num_params, 'fsize': fsize }
         except Exception:
             model_stats = {}
 

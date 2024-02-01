@@ -6,9 +6,13 @@ do
     do
         for s in "42" "135" "468" "129" "124" "-1"
         do
-        python run.py --dataset $d --model $m --ds-seed $s --output-dir $1
+        python run.py --dataset $d --model $m --ds-seed $s --output-dir mnt_data/autoxpcr
         done
     done
 
-    python run.py --dataset $d --model autokeras --ds-seed -1 --output-dir $2
+    python run.py --dataset $d --model autokeras --ds-seed -1 --output-dir mnt_data/autokeras
+    python run.py --dataset $d --model autosklearn --ds-seed -1 --output-dir mnt_data/autosklearn
+    python run.py --dataset $d --model autogluon --ds-seed -1 --output-dir mnt_data/autogluon
 done
+
+python parse_logs.py

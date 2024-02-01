@@ -2,6 +2,7 @@ import os
 import inspect
 import json
 import importlib
+import pickle
 from itertools import chain
 from typing import List
 
@@ -17,7 +18,7 @@ from gluonts.dataset.util import forecast_start
 
 from data_loader import convert_tsf_to_dataframe as load_data
 from mlprops.util import read_json
-    
+
 
 class HorizonFCEnsemble:
 
@@ -67,7 +68,48 @@ class HorizonFCEnsemble:
     
     def predict_single(self, model, X_test):
         return model.predict(X_test)
-        
+
+
+class AutoGluon(HorizonFCEnsemble):
+    
+    def __init__(self, freq, context_length, prediction_length, samples_per_series=100, time_budget=1000, output_dir=None):
+        if output_dir is None:
+            output_dir = os.environ['TMPDIR']
+        super().__init__(freq, context_length, prediction_length, samples_per_series)
+        from autogluon.timeseries import TimeSeriesDataFrame, TimeSeriesPredictor
+        self.time_budget = time_budget
+        self.data_class = TimeSeriesDataFrame
+        self.model = TimeSeriesPredictor(prediction_length=self.prediction_length, path=output_dir, target="target", eval_metric="MASE")
+
+    def as_tsdf(self, data):
+        data_list = []
+        for idx, series in enumerate(data):
+            data_list.append(pd.DataFrame(series['target'], columns=['target']))
+            data_list[-1]['item_id'] = idx
+            try:
+                data_list[-1]['timestamp'] = pd.date_range(start=series['start'], periods=len(series['target']), freq=self.freq)
+            except ValueError: # start might also be a period (e.g., a day)
+                data_list[-1]['timestamp'] = pd.date_range(start=series['start'].start_time, periods=len(series['target']), freq=self.freq)
+        return self.data_class( pd.concat(data_list) )
+
+    def train(self, training_data):
+        train_data = self.as_tsdf(training_data)
+        self.model.fit(train_data, presets="medium_quality", time_limit=self.time_budget)
+        return self
+
+    def predict(self, dataset, num_samples):
+        test_data = self.as_tsdf(dataset)
+        predictions = self.model.predict(test_data)
+        ys = predictions['mean'].values.reshape(len(dataset), self.prediction_length)
+        fc = [ SampleForecast(samples=np.expand_dims(ys[i,:], 0), start_date=forecast_start(ts)) for i, ts in enumerate(dataset) ]
+        return fc
+    
+    def get_param_count(self):
+        return -1
+
+    def get_fsize(self, output_path=None):
+        return sum([os.path.getsize(os.path.join(dp, f)) for dp, _, filenames in os.walk(self.model.path) for f in filenames])
+
 
 class AutoSklearn(HorizonFCEnsemble):
 
@@ -76,6 +118,39 @@ class AutoSklearn(HorizonFCEnsemble):
         from autosklearn.regression import AutoSklearnRegressor
         per_regr = max(30, time_budget // self.prediction_length)
         self.models = [AutoSklearnRegressor(per_regr) for _ in range(self.prediction_length)]
+
+    def get_param_count(self):
+        param_lookup = {
+            'MyDummyRegressor': lambda clf: 1,
+            'AdaboostRegressor': lambda clf: sum([tree.tree_.node_count * 2 for tree in clf.estimators_]),
+            'DecisionTree': lambda clf: sum([clf.tree_.node_count * 2]),
+            'ExtraTreesRegressor': lambda clf: sum([tree.tree_.node_count * 2 for tree in clf.estimators_]),
+            'KNearestNeighborsRegressor': lambda clf: clf.n_features_in_ * clf.n_samples_fit_,
+            'MLPRegressor': lambda clf: sum([layer_w.size for layer_w in clf.coefs_] + [layer_i.size for layer_i in clf.intercepts_]),
+            'RandomForest': lambda clf: sum([tree.tree_.node_count * 2 for tree in clf.estimators_]),
+            'SGD': lambda clf: sum([clf.coef_.size, clf.intercept_.size]),
+            'GradientBoosting': lambda clf: sum([len(tr[0].nodes[0]) * tr[0].nodes.size for tr in clf.estimator._predictors])
+        }
+        params = 0
+        try:
+            for model in self.models:
+                for _, ens_mod in model.get_models_with_weights():
+                    params += 1 # ensemble member weight
+                    if hasattr(ens_mod, 'named_steps'): # filter away the preprocessing
+                        ens_mod = ens_mod.named_steps['regressor'].choice
+                    params += param_lookup[ens_mod.__class__.__name__](ens_mod)
+        except Exception:
+            params = -1
+        return params
+
+    def get_fsize(self, output_path):
+        fsize = 0
+        for idx, mod in enumerate(self.models):
+            fname = os.path.join(output_path, f"model_{idx}")
+            with open(fname, 'wb') as modelfile:
+                pickle.dump(mod, modelfile)
+            fsize += os.path.getsize(fname)
+        return fsize
 
 
 class AutoKeras(HorizonFCEnsemble):
@@ -93,44 +168,53 @@ class AutoKeras(HorizonFCEnsemble):
     def predict_single(self, model, X_test):
         return model.predict(X_test)[:,0]
 
+    def get_param_count(self):
+        params = sum( [ mod.export_model().count_params() for mod in self.models ] )
+        return params
 
-class AutoKerasForecaster(HorizonFCEnsemble):
+    def get_fsize(self, output_path):
+        fsize = 0
+        for idx, mod in enumerate(self.models):
+            fname = os.path.join(output_path, f"model_{idx}")
+            mod.export_model().save(fname, save_format="tf")
+            fsize += os.path.getsize(fname)
+        return fsize
 
-    def __init__(self, freq, context_length, prediction_length, samples_per_series=100, epochs=5, max_trials=1):
+
+class AutoPyTorch(HorizonFCEnsemble):
+    
+    def __init__(self, freq, context_length, prediction_length, samples_per_series=100):
         super().__init__(freq, context_length, prediction_length, samples_per_series)
-        self.epochs = epochs
-        self.max_trials = max_trials
-        import autokeras as ak
-        self.model = ak.TimeseriesForecaster(
-            lookback=self.context_length,
-            predict_from=self.lead_time + 1,
-            predict_until=self.prediction_length,
-            max_trials=self.max_trials,
-            objective="val_loss",
-        )
+        
 
     def train(self, training_data):
-        min_length = min([len(ser['target']) for ser in training_data])
-        X = np.swapaxes(np.array([ser['target'][:min_length] for ser in training_data]), 0, 1)
-        self.model.fit(X, X, epochs=self.epochs)
-        print('TRAIN DATA', X.shape, len(training_data))
-        return self
+        sampled_window_starts = []
+        # identify context windows to train on
+        for ser in training_data:
+            valid_starts = np.arange(ser['target'].size - self.context_length - self.prediction_length + 1)
+            if valid_starts.size == 0:
+                continue
+            if valid_starts.size > self.samples_per_series:
+                sampled_window_starts.append( (ser['target'], np.random.choice(valid_starts, size=self.samples_per_series)) )
+            else:
+                sampled_window_starts.append( (ser['target'], valid_starts) )
+        n_samples = int(np.sum([starts.size for _, starts in sampled_window_starts]))
+        # run a training step for each individual model
+        print(f'Training AutoLearn regressor {pred_idx+1} / {self.prediction_length}')
+        y = np.zeros((n_samples), dtype=training_data[0]['target'].dtype)
+        X = np.zeros((n_samples, self.context_length), dtype=training_data[0]['target'].dtype)
+        idx = 0
+        for ser, starts in sampled_window_starts:
+            for start in starts:
+                X[idx,:] = ser[start:(start + self.context_length)]
+                y[idx] = ser[start + self.context_length + pred_idx]
+                idx += 1
+        self.fit(pred_idx, X, y)
+
+        print(1)
 
     def predict(self, dataset, num_samples):
-        if num_samples:
-            print("Forecast is not sample based. Ignoring parameter `num_samples` from predict method.")
-
-        min_length = min([len(ser['target']) for ser in dataset])
-        X = np.swapaxes(np.array([ser['target'][:min_length] for ser in dataset]), 0, 1)
-        for ts in dataset:
-            starting_index = len(ts["target"]) - self.context_length
-            end_index = starting_index + self.context_length
-            X.append(ts["target"][starting_index:end_index])
-        X = np.swapaxes(np.array(X), 0, 1)
-        X = np.concatenate([X, np.zeros((self.prediction_length, len(dataset)))])
-        print('TEST DATA', X.shape, len(dataset))
-        prediction = self.model.predict(X)
-        print(1)
+        print(2)
 
 
 with open('meta_model.json', 'r') as meta:
@@ -179,38 +263,41 @@ def init_model_and_data(args):
     train_gluonts_ds = ListDataset(all_train_ts, freq=freq)
     fcast_gluonts_ds = ListDataset(all_fcast_ts, freq=freq)
 
-    args = {
+    model_args = {
         'freq': freq,
         'context_length': lag,
         'prediction_length': forecast_horizon,
         'epochs': epochs
     }
     exp_args = inspect.signature(model_cls).parameters
-    for key in list(args.keys()):
+    for key in list(model_args.keys()):
         if key not in exp_args:
-            del(args[key])
+            del(model_args[key])
 
     if model == 'deepstate': # described in https://github.com/awslabs/gluonts/issues/794
-        args['cardinality'] = [1]
-        args['use_feat_static_cat'] = False
+        model_args['cardinality'] = [1]
+        model_args['use_feat_static_cat'] = False
 
     if model == 'gpforecaster':
-        args['cardinality'] = len(train_gluonts_ds)
+        model_args['cardinality'] = len(train_gluonts_ds)
 
     if model == 'deeprenewal': # following the paper experiments setup
-        args['num_layers'] = 1
-        args['num_cells'] = 10
+        model_args['num_layers'] = 1
+        model_args['num_cells'] = 10
 
-    if model == 'autosklearn':
+    if model == 'autosklearn' or model == 'autogluon':
         ds_meta = read_json('meta_dataset.json')
-        args['time_budget'] = ds_meta[dataset]['budget']
+        model_args['time_budget'] = ds_meta[dataset]['budget']
+
+    if model == 'autogluon':
+        model_args['output_dir'] = os.path.join(args.train_logdir, 'autogluon')
         
     if model in ['rotbaum', 'naiveseasonal']: # for some reason the args are not included in sugnature of these methods
-        args['freq'] = freq
-        args['prediction_length'] = forecast_horizon
+        model_args['freq'] = freq
+        model_args['prediction_length'] = forecast_horizon
 
     # already init estimator & predictor for early stopping callback
-    estimator = model_cls(**args)
+    estimator = model_cls(**model_args)
 
     if not isinstance(estimator, HorizonFCEnsemble):
         from early_stopping import MetricInferenceEarlyStopping
