@@ -11,6 +11,10 @@ from data_lookup_info import LOOKUP
 from data_loader import convert_tsf_to_dataframe as load_data
 from data_loader import subsampled_to_orig
 
+from sklearn.impute import KNNImputer
+
+DB_PATH = 'results'
+DATABASES = ['autokeras.pkl', 'autosklearn.pkl', 'autogluon.pkl', 'new03.pkl']
 
 if __name__ == '__main__':
 
@@ -18,7 +22,6 @@ if __name__ == '__main__':
 
     parser.add_argument("--mode", default='interactive', choices=['meta', 'interactive', 'paper', 'label', 'stats'])
     parser.add_argument("--property-extractors-module", default="properties", help="python file with PROPERTIES dictionary, which maps properties to executable extractor functions")
-    parser.add_argument("--database-path", default="results/new03.pkl", help="filename for database, or directories with databases inside")
     parser.add_argument("--boundaries", default="boundaries.json")
     parser.add_argument("--dropsubsampled", default=False, type=bool)
     # interactive exploration params
@@ -28,15 +31,11 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    if os.path.isfile(args.database_path): # read just the single database
-        database = pd.read_pickle(args.database_path)
-    elif os.path.isdir(args.database_path): # directory with multiple databases
-        databases = []
-        for fname in os.listdir(args.database_path):
-            if 'pkl' in fname:
-                databases.append(pd.read_pickle(os.path.join(args.database_path, fname)))
-                print(f'{fname:<20} shape {databases[-1].shape}, env {pd.unique(databases[-1]["environment"])} {len(pd.unique(databases[-1]["dataset"]))} datasets')
-        database = pd.concat(databases)
+    database = []
+    for fname in DATABASES:
+        database.append(pd.read_pickle(os.path.join(DB_PATH, fname)))
+        print(f'{fname:<20} shape {database[-1].shape}, env {pd.unique(database[-1]["environment"])} {len(pd.unique(database[-1]["dataset"]))} datasets')
+    database = pd.concat(database)
     # merge infer and train tasks
     merged_database = []
     for group_field_vals, data in database.groupby(['dataset', 'environment', 'model']):
@@ -46,10 +45,18 @@ if __name__ == '__main__':
         merged.loc[:,'task'] = 'Train and Test'
         merged_database.append(merged)
     database = pd.concat(merged_database)
-    # retrieve original dataset from all subsampled versions, and recalculate the configuration
-    database['dataset_orig'] = database['dataset'].map(subsampled_to_orig)
+    # impute missing values (only few corner cases)
+    database.loc[database['parameters'] <= 0, 'parameters'] = np.nan
+    numeric = database.select_dtypes('number')
+    numeric[np.isinf(numeric)] = np.nan
+    imputer = KNNImputer(n_neighbors=5, weights="uniform")
+    database.loc[:,numeric.columns] = imputer.fit_transform(numeric)
+    assert not np.any(np.isnan(database.select_dtypes('number')))
+    # prepare for rating
     database['configuration'] = database.aggregate(lambda row: ' - '.join([row['task'], row['dataset'], row['model']]), axis=1)
-    database.reset_index()
+    database['environment'] = database['environment'].map(lambda env: env.split(' - ')[0])
+    database['dataset_orig'] = database['dataset'].map(subsampled_to_orig) # retrieve original dataset from all subsampled versions
+    database = database.reset_index()
 
     if args.mode == 'stats':
         grouped_by = database.groupby(['environment', 'dataset'])

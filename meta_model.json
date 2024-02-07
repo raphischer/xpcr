@@ -276,7 +276,7 @@
     },
     "autosklearn": {
         "name": "AutoSklearn",
-        "short": "ASK",
+        "short": "ASk",
         "local/global": "Global",
         "data": "Univariate",
         "method": "AutoML",
@@ -288,7 +288,7 @@
     },
     "autokeras": {
         "name": "AutoKeras",
-        "short": "AKR",
+        "short": "AKe",
         "local/global": "Global",
         "data": "Univariate",
         "method": "AutoML",
@@ -312,7 +312,7 @@
     },
     "autogluon": {
         "name": "AutoGluon",
-        "short": "AGL",
+        "short": "AGl",
         "local/global": "Global",
         "data": "Univariate",
         "method": "AutoML",
