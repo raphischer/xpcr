@@ -109,6 +109,8 @@ if __name__ == '__main__':
         if os.path.isfile(meta_database_path): # read just the single database
             rated_database = pd.read_pickle(meta_database_path)
         else:
+            # drop the automl competitor results and calculate the meta-features
+            rated_database = rated_database.drop(rated_database[rated_database['model'].str.contains('auto')].index)
             for idx, ((ds), data) in enumerate(iter(rated_database.groupby(['dataset']))):
                 # store dataset specific meta features
                 ds_name = data['dataset_orig'].iloc[0]
@@ -134,7 +136,8 @@ if __name__ == '__main__':
                 rated_database.loc[data.index,'contain_missing_values'] = miss_values
                 rated_database.loc[data.index,'contain_equal_length'] = equal_len
             rated_database.to_pickle(meta_database_path)
-
+        # run meta learning
+        rated_database = rated_database.reset_index()
         models = pd.unique(rated_database["model"])
         shape = rated_database.shape
         ds = pd.unique(rated_database["dataset"])
