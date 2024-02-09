@@ -215,7 +215,7 @@ def create_all(database, meta, seed=0):
     )
     fig.update_yaxes(title='E1 - Importance [%]')
     fig.update_xaxes(title='Property', tickangle=90)
-    fig.update_layout(title_x=0.5, width=PLOT_WIDTH / 2, height=PLOT_HEIGHT, margin={'l': 0, 'r': 0, 'b': 0, 't': 24})
+    fig.update_layout(title_x=0.5, title_y=0.99, width=PLOT_WIDTH / 2, height=PLOT_HEIGHT, margin={'l': 0, 'r': 0, 'b': 0, 't': 24})
     fig.update(layout_coloraxis_showscale=False)
     fig.write_image("why_recommended.pdf")
     # why ERROR estimate?
@@ -240,7 +240,7 @@ def create_all(database, meta, seed=0):
     fig=px.bar(title=title, x=ft_names, y=ft_imp, color=ft_imp * -1.0, color_continuous_scale=RATING_COLOR_SCALE)
     fig.update_yaxes(title='E2 - Importance [%]')
     fig.update_xaxes(title='Meta-feature', tickangle=90)
-    fig.update_layout(title_x=0.5, width=PLOT_WIDTH / 2, height=PLOT_HEIGHT, margin={'l': 0, 'r': 0, 'b': 0, 't': 24})
+    fig.update_layout(title_x=0.5, title_y=0.99, width=PLOT_WIDTH / 2, height=PLOT_HEIGHT, margin={'l': 0, 'r': 0, 'b': 0, 't': 24})
     fig.update(layout_coloraxis_showscale=False)
     fig.write_image("why_error.pdf")
 
