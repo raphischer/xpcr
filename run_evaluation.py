@@ -14,7 +14,7 @@ from data_loader import subsampled_to_orig
 from sklearn.impute import KNNImputer
 
 DB_PATH = 'results'
-DATABASES = ['autokeras.pkl', 'autosklearn.pkl', 'autogluon.pkl', 'new03.pkl']
+DATABASES = ['autokeras.pkl', 'autosklearn.pkl', 'autogluon.pkl', 'dnns.pkl']
 
 if __name__ == '__main__':
 

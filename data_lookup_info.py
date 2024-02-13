@@ -49,7 +49,7 @@ def set_temporal_budget():
 
     ds_meta = 'meta_dataset.json'
     dataset_meta = read_json(ds_meta)
-    database = pd.read_pickle('results/new03.pkl')
+    database = pd.read_pickle('results/dnns.pkl')
 
     for ds in dataset_meta.keys():
         ds_results = database[database['dataset'] == ds]

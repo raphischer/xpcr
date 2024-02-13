@@ -1,28 +1,27 @@
 # Explainable Multi-Objective Model Selection for Time Series Forecasting
 
 Code and results for the associated research paper (currently under review).
-To investigate the results you can use our publicly available [Exploration tool](http://167.99.254.41/), so no code needs to be run on your machine (note that results might slightly differ from the submitted paper, which we will update upon acceptance).
+To investigate the results you can use our publicly available [Exploration tool](http://167.99.254.41/), so no code needs to be run on your machine (note that single results might slightly differ from the submitted paper, which will be updated upon acceptance).
 
 ## Structure
 All paper-specific experiments were executed with the top-level Python scripts.
-Our work-in-progress [generalized library for ML properties](./mlprops/) resides within in a separate folder.
+Our work-in-progress [generalized library for ML properties](./mlprops/) resides within in a separate folder, and implements the relative index scaling, among other parts.
 The [experiment logs](./results/) and [paper results](./paper_results/) also have their own folders.
-The meta files (.json) contain meta information on data, properties, models and the environment.
+Several additional `.json` and `.csv` files contain information on data, properties, models and the environment.
 
 ## Installation
-All code was executed with Python 3.7, GluonTS 0.11.8 and Scikit-learn 1.0.20 on Ubuntu 22.04.2, please refer to [requirements](./requirements.txt) for all necessary dependencies.
-You can get even more detailed information on the exact setup from the [logs](./results/merged_new03/).
-Depending on how you intend to use this software, only some packages are required.
+All necessary libraries for running the exploration tool locally can be installed via the [requirements](./requirements.txt).
+For performing the ML experiments, detailed information on environment and libraries is given in the [merged logs](./results/merged_dnns/).
 
 ## Usage
-You can also [run the evaluation](./run_evaluation.py) locally and pass different modes: generate paper results, start the interactive app, run the meta learning, etc.
+You can [run our evaluation](./run_evaluation.py) locally and pass different modes: start the interactive app (default), generate paper results, run the meta learning, etc.
 All [paper results](./paper_results/) (plots and tables) were generated via this script.
 
-New experiments can also be executed with the designated [script](run.py) - pass the chosen method, software backend and more configuration options via command line.
+The ML experiments can be executed with the [designated script](run.py) - pass the chosen method, software backend and more configuration options via command line.
 We included a [script to download the Monash TS data](./zenodo_forecasting_bulk_download.py).
 If facing problems with profiling, refer to the `CodeCarbon` info pages.
-A folder is created for each experiment run, and can be [merged](./parse_logs.py) into more compact `.json` and `pandas dataframe` format representing our "database".
-For extracting the properties, mlprops uses [a script with user-defined functions](./properties.py).
+A folder is created for each experiment run, and can be [merged](./parse_logs.py) into more compact `.json` and `pandas dataframe` format, as given in the [experiment logs](./results/).
+For extracting the properties, `mlprops` uses [a special script with user-defined functions](./properties.py).
 
 The prodedure for reproducing the results is the following:
 1. Install software
@@ -33,4 +32,4 @@ The prodedure for reproducing the results is the following:
 6. Explore results via [evaluation script](./run_evaluation.py) and `--mode interactive`
 
 ## Terms of Use
-Copyright (c) 2023 Raphael Fischer
+Copyright (c) 2024 tmplxz

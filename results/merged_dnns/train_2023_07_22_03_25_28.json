@@ -1,0 +1,280 @@
+{
+    "directory_name": "train_2023_07_22_03_25_28",
+    "config": {
+        "dataset": "m3_quarterly_dataset",
+        "model": "gpforecaster",
+        "output_dir": "mnt_data/results_dnns",
+        "ds_seed": 468,
+        "epochs": 100,
+        "datadir": "mnt_data/data",
+        "cpu_monitor_interval": 0.5,
+        "seed": 42,
+        "timestamp": "2023_07_22_03_25_28"
+    },
+    "emissions": {
+        "timestamp": {
+            "0": "2023-07-22T03:29:43"
+        },
+        "project_name": {
+            "0": "codecarbon"
+        },
+        "run_id": {
+            "0": "c99ace5c-9354-43e7-a03d-80113a6ba2c3"
+        },
+        "duration": {
+            "0": 234.2619390487671
+        },
+        "emissions": {
+            "0": 0.000443638723579
+        },
+        "emissions_rate": {
+            "0": 0.0018937720970828
+        },
+        "cpu_power": {
+            "0": 4.094425801781491
+        },
+        "gpu_power": {
+            "0": 0.0
+        },
+        "ram_power": {
+            "0": 11.714675903320314
+        },
+        "cpu_energy": {
+            "0": 0.0007297577115834
+        },
+        "gpu_energy": {
+            "0": 0
+        },
+        "ram_energy": {
+            "0": 0.0007441250910048
+        },
+        "energy_consumed": {
+            "0": 0.0014738828025882
+        },
+        "country_name": {
+            "0": "Germany"
+        },
+        "country_iso_code": {
+            "0": "DEU"
+        },
+        "region": {
+            "0": NaN
+        },
+        "cloud_provider": {
+            "0": NaN
+        },
+        "cloud_region": {
+            "0": NaN
+        },
+        "os": {
+            "0": "Linux-5.19.0-35-generic-x86_64-with-debian-bookworm-sid"
+        },
+        "python_version": {
+            "0": "3.7.7"
+        },
+        "cpu_count": {
+            "0": 8
+        },
+        "cpu_model": {
+            "0": "Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz"
+        },
+        "gpu_count": {
+            "0": NaN
+        },
+        "gpu_model": {
+            "0": NaN
+        },
+        "longitude": {
+            "0": NaN
+        },
+        "latitude": {
+            "0": NaN
+        },
+        "ram_total_size": {
+            "0": 31.2391357421875
+        },
+        "tracking_mode": {
+            "0": "machine"
+        },
+        "on_cloud": {
+            "0": "N"
+        }
+    },
+    "results": {
+        "history": {
+            "loss": [
+                10789.620790912602,
+                9986.881792691156,
+                8142.1550102648935,
+                7086.145268983637,
+                6049.765001530267,
+                5226.86816745472,
+                4772.649274263908,
+                3852.1176862570996,
+                3304.1467543322274,
+                2884.115497406173,
+                2671.5467018906875,
+                2191.4090053212803,
+                2004.4986465524714,
+                1768.5136843461282,
+                1682.9925832632944,
+                1434.2980267254825,
+                1313.7142082016621,
+                1198.661180711755,
+                1179.9077646408214,
+                1012.1143355633566,
+                945.1267816386063,
+                872.8262403065174,
+                817.1728833878436,
+                810.3066304929413,
+                722.8516781392564,
+                668.4695249293051,
+                634.1675350386388,
+                635.2091244421067,
+                559.7058619420027,
+                542.7442213158256,
+                509.08745411794075,
+                511.3642787246471,
+                459.2285816302531,
+                440.78342209929536,
+                417.99580458368206,
+                400.9950400111921,
+                408.3978838451154,
+                370.9211938640363,
+                353.76695652651046,
+                339.02535094011574,
+                347.4193310612169,
+                311.8796027659999,
+                308.40754745446725,
+                293.88695995457255,
+                299.0125441876324,
+                273.76848902413417,
+                267.0150115125765,
+                257.05741062760706,
+                266.1073734600919,
+                241.89600390271696,
+                236.59008392813237,
+                229.25274553178872,
+                223.3152119177181,
+                229.27027179564112,
+                210.13008337686625,
+                210.20178687943192,
+                202.18453758182113
+            ]
+        },
+        "start": 1689989149.5282996,
+        "end": 1689989383.7887518,
+        "model": null
+    },
+    "requirements": [
+        "# 3.7.7 (default, Mar 23 2020, 22:36:06)",
+        "# [GCC 7.3.0]",
+        "wrapt==1.11.2",
+        "typed-ast==1.4.0",
+        "six==1.12.0",
+        "setuptools==41.6.0",
+        "pytz==2019.3",
+        "python-dateutil==2.8.0",
+        "pyparsing==2.4.2",
+        "pylint==2.4.3",
+        "mccabe==0.6.1",
+        "matplotlib==3.1.1",
+        "lazy-object-proxy==1.4.3",
+        "kiwisolver==1.1.0",
+        "isort==4.3.21",
+        "cycler==0.10.0",
+        "astroid==2.3.2",
+        "zipp==3.14.0",
+        "zict==2.2.0",
+        "xgboost==1.6.2",
+        "wheel==0.37.1",
+        "werkzeug==2.2.3",
+        "urllib3==1.26.14",
+        "typing-extensions==4.4.0",
+        "tqdm==4.64.1",
+        "tornado==6.2",
+        "toolz==0.12.0",
+        "threadpoolctl==3.1.0",
+        "tenacity==8.2.2",
+        "tblib==1.7.0",
+        "sortedcontainers==2.4.0",
+        "smac==1.2",
+        "scipy==1.7.3",
+        "scikit-learn==0.24.2",
+        "rpy2==2.9.4",
+        "requests==2.28.2",
+        "reportlab==3.6.12",
+        "qrcode==7.4.2",
+        "pyyaml==6.0",
+        "pyrfr==0.8.3",
+        "pypng==0.20220715.0",
+        "pynvml==11.4.1",
+        "pynisher==0.6.4",
+        "pymupdf==1.21.1",
+        "pydantic==1.10.4",
+        "pyarrow==8.0.0",
+        "py-rapl==0.1",
+        "py-cpuinfo==9.0.0",
+        "psutil==5.9.4",
+        "plotly==5.13.1",
+        "pip==22.3.1",
+        "pint==0.18",
+        "pillow==9.4.0",
+        "partd==1.4.0",
+        "pandas==1.3.5",
+        "packaging==23.0",
+        "orjson==3.8.5",
+        "numpy==1.21.6",
+        "mxnet==1.9.1",
+        "msgpack==1.0.5",
+        "markupsafe==2.1.1",
+        "locket==1.0.0",
+        "liac-arff==2.5.0",
+        "joblib==1.2.0",
+        "jinja2==3.1.2",
+        "itsdangerous==2.1.2",
+        "importlib-metadata==6.0.0",
+        "idna==3.4",
+        "heapdict==1.0.1",
+        "graphviz==0.8.4",
+        "gluonts==0.11.8",
+        "fuzzywuzzy==0.18.0",
+        "fsspec==2023.1.0",
+        "flask==2.2.3",
+        "emcee==3.1.4",
+        "distro==1.8.0",
+        "distributed==2022.2.0",
+        "dask==2022.2.0",
+        "dash==2.8.1",
+        "dash-table==5.0.0",
+        "dash-html-components==2.0.0",
+        "dash-core-components==2.0.0",
+        "dash-bootstrap-components==1.4.0",
+        "cython==0.29.35",
+        "configspace==0.4.21",
+        "codecarbon==2.1.4",
+        "cloudpickle==2.2.1",
+        "click==8.1.3",
+        "charset-normalizer==3.0.1",
+        "certifi==2022.12.7",
+        "auto-sklearn==0.15.0",
+        "arrow==1.2.3"
+    ],
+    "execution_platform": {
+        "System": "Linux",
+        "Node Name": "lamarrws03",
+        "Release": "5.19.0-35-generic",
+        "Version": "#36~22.04.1-Ubuntu SMP PREEMPT_DYNAMIC Fri Feb 17 15:17:25 UTC 2",
+        "Machine": "x86_64",
+        "Processor": "Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz",
+        "Physical cores": 4,
+        "Total cores": 8,
+        "Max Frequency": 4000.0,
+        "Min Frequency": 800.0,
+        "Current Frequency": 2133.7081249999997,
+        "Total": 33542766592,
+        "Available": 32136814592,
+        "Used": 897552384
+    },
+    "full_log": "results/merged_dnns/train_2023_07_22_03_25_28.tar.gz"
+}
