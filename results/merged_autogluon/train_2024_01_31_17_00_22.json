@@ -1,0 +1,384 @@
+{
+    "directory_name": "train_2024_01_31_17_00_22",
+    "results": {
+        "history": {
+            "loss": null
+        },
+        "start": 1706716826.0536249,
+        "end": 1706717026.2918615,
+        "model": null
+    },
+    "requirements": [
+        "# 3.8.18 | packaged by conda-forge | (default, Dec 23 2023, 17:21:28)",
+        "# [GCC 12.3.0]",
+        "tzdata==2022.7",
+        "cryptography==38.0.4",
+        "isort==5.6.4",
+        "tzlocal==4.2",
+        "async-timeout==4.0.2",
+        "bcrypt==4.0.1",
+        "pycparser==2.21",
+        "paramiko==2.12.0",
+        "pylint==2.6.0",
+        "astroid==2.4.2",
+        "six==1.16.0",
+        "cffi==1.15.1",
+        "wrapt==1.12.1",
+        "mendel-development-tool==1.5.2",
+        "pynacl==1.5.0",
+        "lazy-object-proxy==1.4.3",
+        "pxpy==1.0a20",
+        "zeroconf==0.39.4",
+        "toml==0.10.1",
+        "mccabe==0.6.1",
+        "backports.zoneinfo==0.2.1",
+        "ifaddr==0.2.0",
+        "pytz-deprecation-shim==0.1.0.post0",
+        "regex==2023.12.25",
+        "fsspec==2023.10.0",
+        "tifffile==2023.7.10",
+        "pytz==2023.4",
+        "certifi==2022.12.7",
+        "setuptools==60.2.0",
+        "pip==23.3.2",
+        "attrs==23.2.0",
+        "packaging==23.2",
+        "virtualenv==20.21.0",
+        "pyarrow==15.0.0",
+        "rich==13.4.2",
+        "nvidia-ml-py==12.535.133",
+        "websockets==12.0",
+        "pynvml==11.5.0",
+        "pillow==10.2.0",
+        "py-cpuinfo==9.0.0",
+        "tenacity==8.2.3",
+        "thinc==8.2.2",
+        "click==8.1.7",
+        "nvidia-ml-py3==7.352.0",
+        "importlib-metadata==7.0.1",
+        "deepdiff==6.7.1",
+        "smart-open==6.4.0",
+        "importlib-resources==6.1.1",
+        "multidict==6.0.4",
+        "pyyaml==6.0.1",
+        "plotly==5.18.0",
+        "traitlets==5.14.1",
+        "psutil==5.9.8",
+        "cachetools==5.3.2",
+        "gdown==5.0.1",
+        "tqdm==4.65.2",
+        "fonttools==4.47.2",
+        "transformers==4.31.0",
+        "protobuf==4.25.2",
+        "jsonschema==4.17.3",
+        "beautifulsoup4==4.12.3",
+        "antlr4-python3-runtime==4.9.3",
+        "rsa==4.9",
+        "typing-extensions==4.8.0",
+        "anyio==4.2.0",
+        "ordered-set==4.1.0",
+        "lightgbm==4.1.0",
+        "readchar==4.0.5",
+        "pycryptodome==3.20.0",
+        "zipp==3.17.0",
+        "platformdirs==3.11.0",
+        "orjson==3.9.12",
+        "aiohttp==3.9.3",
+        "filelock==3.9.0",
+        "nltk==3.8.1",
+        "matplotlib==3.7.4",
+        "spacy==3.7.2",
+        "rapidfuzz==3.6.1",
+        "markdown==3.5.2",
+        "xxhash==3.4.1",
+        "idna==3.4",
+        "langcodes==3.3.0",
+        "inquirer==3.2.3",
+        "oauthlib==3.2.2",
+        "threadpoolctl==3.2.0",
+        "jinja2==3.1.2",
+        "pyparsing==3.1.1",
+        "spacy-legacy==3.0.12",
+        "preshed==3.0.9",
+        "werkzeug==3.0.1",
+        "cloudpickle==3.0.0",
+        "networkx==3.0",
+        "markdown-it-py==3.0.0",
+        "imageio==2.33.1",
+        "requests==2.28.2",
+        "google-auth==2.27.0",
+        "pygments==2.17.2",
+        "oss2==2.17.0",
+        "aliyun-python-sdk-kms==2.16.2",
+        "datasets==2.16.1",
+        "google-api-core==2.16.1",
+        "aliyun-python-sdk-core==2.14.0",
+        "tensorboard==2.14.0",
+        "types-python-dateutil==2.8.19.20240106",
+        "python-dateutil==2.8.2",
+        "pyjwt==2.8.0",
+        "fastai==2.7.13",
+        "ray==2.6.3",
+        "tensorboardx==2.6.2.2",
+        "soupsieve==2.5",
+        "srsly==2.4.8",
+        "nptyping==2.4.1",
+        "codecarbon==2.3.4",
+        "omegaconf==2.2.3",
+        "backoff==2.2.1",
+        "markupsafe==2.1.3",
+        "itsdangerous==2.1.2",
+        "charset-normalizer==2.1.1",
+        "absl-py==2.1.0",
+        "catalogue==2.0.10",
+        "lightning==2.0.9.post0",
+        "pytorch-lightning==2.0.9.post0",
+        "cymem==2.0.8",
+        "xgboost==2.0.3",
+        "pandas==2.0.3",
+        "torch==2.0.1+cpu",
+        "googleapis-common-protos==1.62.0",
+        "grpcio==1.60.0",
+        "boto3==1.34.31",
+        "botocore==1.34.31",
+        "urllib3==1.26.13",
+        "numpy==1.24.4",
+        "blessed==1.20.0",
+        "sympy==1.12",
+        "pydantic==1.10.14",
+        "yarl==1.9.4",
+        "scipy==1.9.1",
+        "xmod==1.8.1",
+        "pytorch-metric-learning==1.7.3",
+        "pysocks==1.7.1",
+        "crcmod==1.7",
+        "websocket-client==1.7.0",
+        "editor==1.6.6",
+        "fastcore==1.5.29",
+        "kiwisolver==1.4.5",
+        "frozenlist==1.4.1",
+        "croniter==1.4.1",
+        "pywavelets==1.4.1",
+        "statsforecast==1.4.0",
+        "pkgutil-resolve-name==1.3.10",
+        "scikit-learn==1.3.2",
+        "joblib==1.3.2",
+        "requests-oauthlib==1.3.1",
+        "aiosignal==1.3.1",
+        "text-unidecode==1.3",
+        "sniffio==1.3.0",
+        "mpmath==1.3.0",
+        "arrow==1.3.0",
+        "starsessions==1.3.0",
+        "runs==1.2.2",
+        "seqeval==1.2.2",
+        "catboost==1.2.2",
+        "exceptiongroup==1.2.0",
+        "nlpaug==1.1.11",
+        "torchmetrics==1.1.2",
+        "wasabi==1.1.2",
+        "contourpy==1.1.1",
+        "gpustat==1.1.1",
+        "murmurhash==1.0.10",
+        "msgpack==1.0.7",
+        "spacy-loggers==1.0.5",
+        "fastprogress==1.0.3",
+        "autogluon==1.0.0",
+        "autogluon.timeseries==1.0.0",
+        "autogluon.tabular==1.0.0",
+        "google-auth-oauthlib==1.0.0",
+        "autogluon.core==1.0.0",
+        "autogluon.features==1.0.0",
+        "autogluon.multimodal==1.0.0",
+        "autogluon.common==1.0.0",
+        "fastapi==0.109.0",
+        "multiprocess==0.70.15",
+        "numba==0.58.1",
+        "wheel==0.42.0",
+        "llvmlite==0.41.1",
+        "starlette==0.35.1",
+        "uvicorn==0.27.0.post1",
+        "accelerate==0.21.0",
+        "huggingface-hub==0.20.3",
+        "graphviz==0.20.1",
+        "scikit-image==0.20.0",
+        "pyrsistent==0.20.0",
+        "prometheus-client==0.19.0",
+        "future==0.18.3",
+        "responses==0.18.0",
+        "cloudpathlib==0.16.0",
+        "torchvision==0.15.2+cpu",
+        "gluonts==0.14.3",
+        "statsmodels==0.14.1",
+        "h11==0.14.0",
+        "tokenizers==0.13.3",
+        "toolz==0.12.1",
+        "cycler==0.12.1",
+        "opencensus==0.11.4",
+        "py4j==0.10.9.7",
+        "lightning-utilities==0.10.1",
+        "mlforecast==0.10.0",
+        "s3transfer==0.10.0",
+        "jmespath==0.10.0",
+        "timm==0.9.12",
+        "typer==0.9.0",
+        "tabulate==0.9.0",
+        "blis==0.7.11",
+        "tensorboard-data-server==0.7.2",
+        "defusedxml==0.7.1",
+        "aiohttp-cors==0.7.0",
+        "dateutils==0.6.12",
+        "pyarrow-hotfix==0.6",
+        "lightning-cloud==0.5.64",
+        "patsy==0.5.6",
+        "colorful==0.5.6",
+        "pyasn1==0.5.1",
+        "colorama==0.4.6",
+        "safetensors==0.4.2",
+        "evaluate==0.4.1",
+        "py-spy==0.3.14",
+        "pytesseract==0.3.10",
+        "openmim==0.3.9",
+        "distlib==0.3.8",
+        "dill==0.3.7",
+        "weasel==0.3.4",
+        "lazy-loader==0.3",
+        "pyasn1-modules==0.3.0",
+        "wcwidth==0.2.13",
+        "hyperopt==0.2.7",
+        "sentencepiece==0.1.99",
+        "model-index==0.1.11",
+        "confection==0.1.4",
+        "opencensus-context==0.1.3",
+        "mdurl==0.1.2",
+        "openxlab==0.0.34",
+        "window-ops==0.0.14",
+        "opendatalab==0.0.10",
+        "utilsforecast==0.0.10",
+        "fastdownload==0.0.7",
+        "python-multipart==0.0.6"
+    ],
+    "config": {
+        "dataset": "cif_2016_dataset",
+        "model": "autogluon",
+        "output_dir": "mnt_data/autogluon",
+        "ds_seed": -1,
+        "epochs": 100,
+        "datadir": "mnt_data/data",
+        "cpu_monitor_interval": 0.5,
+        "seed": 42,
+        "timestamp": "2024_01_31_17_00_22"
+    },
+    "execution_platform": {
+        "System": "Linux",
+        "Node Name": "lamarrws03",
+        "Release": "6.5.0-15-generic",
+        "Version": "#15~22.04.1-Ubuntu SMP PREEMPT_DYNAMIC Fri Jan 12 18:54:30 UTC 2",
+        "Machine": "x86_64",
+        "Processor": "Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz",
+        "Physical cores": 4,
+        "Total cores": 8,
+        "Max Frequency": 4000.0,
+        "Min Frequency": 800.0,
+        "Current Frequency": 1700.40375,
+        "Total": 33525596160,
+        "Available": 31955636224,
+        "Used": 1077989376
+    },
+    "emissions": {
+        "timestamp": {
+            "0": "2024-01-31T17:03:46"
+        },
+        "project_name": {
+            "0": "codecarbon"
+        },
+        "run_id": {
+            "0": "6c618c88-1474-4bc4-958d-f71662f8d490"
+        },
+        "duration": {
+            "0": 200.23956537246704
+        },
+        "emissions": {
+            "0": 0.000751560873593
+        },
+        "emissions_rate": {
+            "0": 3.753308554156632e-06
+        },
+        "cpu_power": {
+            "0": 8.386511136931606
+        },
+        "gpu_power": {
+            "0": 0.0
+        },
+        "ram_power": {
+            "0": 11.70867919921875
+        },
+        "cpu_energy": {
+            "0": 0.0014063317361755
+        },
+        "gpu_energy": {
+            "0": 0
+        },
+        "ram_energy": {
+            "0": 0.0006500517670081
+        },
+        "energy_consumed": {
+            "0": 0.0020563835031837
+        },
+        "country_name": {
+            "0": "Germany"
+        },
+        "country_iso_code": {
+            "0": "DEU"
+        },
+        "region": {
+            "0": NaN
+        },
+        "cloud_provider": {
+            "0": NaN
+        },
+        "cloud_region": {
+            "0": NaN
+        },
+        "os": {
+            "0": "Linux-6.5.0-15-generic-x86_64-with-glibc2.10"
+        },
+        "python_version": {
+            "0": "3.8.18"
+        },
+        "codecarbon_version": {
+            "0": "2.3.4"
+        },
+        "cpu_count": {
+            "0": 8
+        },
+        "cpu_model": {
+            "0": "Intel(R) Core(TM) i7-6700 CPU @ 3.40GHz"
+        },
+        "gpu_count": {
+            "0": NaN
+        },
+        "gpu_model": {
+            "0": NaN
+        },
+        "longitude": {
+            "0": NaN
+        },
+        "latitude": {
+            "0": NaN
+        },
+        "ram_total_size": {
+            "0": 31.22314453125
+        },
+        "tracking_mode": {
+            "0": "machine"
+        },
+        "on_cloud": {
+            "0": "N"
+        },
+        "pue": {
+            "0": 1.0
+        }
+    },
+    "full_log": "results/merged_autogluon/train_2024_01_31_17_00_22.tar.gz"
+}
