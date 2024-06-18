@@ -53,6 +53,7 @@ if __name__ == "__main__":
         os.makedirs(RES_DIR)
 
     database = assemble_database(args.output_dir, mergedir, None, PROPERTIES)
+    # database = pd.read_pickle(db_file)
     # merge for having a single task
     merged_database = []
     for group_field_vals, data in database.groupby(['dataset', 'environment', 'model']):
@@ -63,6 +64,7 @@ if __name__ == "__main__":
         merged_database.append(merged)
     database = pd.concat(merged_database)
     database = database[~database['dataset'].str.contains('austra')]
+    database = database.reset_index(drop=True)
     database.to_pickle(db_file)
 
     # # load all dbs
