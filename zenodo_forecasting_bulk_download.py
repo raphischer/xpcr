@@ -3,7 +3,7 @@ import os
 import subprocess
 import json
 
-directory='mnt_data/data'
+directory='/data/d1/xpcr/data'
 
 response = requests.get('https://zenodo.org/api/records',
                         params={'communities': 'forecasting', 'size': 1000, 'status': 'published',
@@ -14,7 +14,7 @@ dataset_meta = {}
 
 for hit in resp['hits']['hits']:
     if len(hit['files']) > 1:
-        raise Exception
+        print('there are multiple files for', hit['files'][0]['key'], '- will only download the first!')
     ds_name = hit['files'][0]['key'].replace('.zip', '')
     hit_id = hit['id']
     ds_name_tsf = f'{ds_name}.tsf'

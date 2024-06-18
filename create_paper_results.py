@@ -52,14 +52,19 @@ def create_all(database, meta, seed=0):
     from plotly.subplots import make_subplots
     import plotly.express as px
     from plotly.express.colors import sample_colorscale
+    from mlprops.index_and_rate import rate_database
     from mlprops.elex.graphs import create_scatter_graph, add_rating_background
     from mlprops.elex.util import RATING_COLORS, RATING_COLOR_SCALE
+    from strep.util import prop_dict_to_val
 
     monash = pd.read_csv('monash.csv', delimiter=';', index_col='Dataset')
     monash = monash.replace('-', np.nan).astype(float)
 
     fix_seed(seed)
-    meta_learned_db = pd.read_pickle('results/meta_learn_results.pkl')
+    meta_learned_db = pd.read_pickle('results/meta_learn_results_new.pkl')
+    dnns = pd.unique(meta_learned_db['model']).tolist()
+    pred_cols = list(meta['properties'].keys())
+    pred_col_shortnames = [meta['properties'][col]['shortname'] for col in pred_cols]
     os.chdir('paper_results')
 
     print('Generating tables')
@@ -84,7 +89,7 @@ def create_all(database, meta, seed=0):
     #### MODEL X DATA PERFORMANCE
     models = sorted(pd.unique(database['model']).tolist())
     rows = ['Data set & ' + ' & '.join(meta['model'][mod]['short'] for mod in models) + r' \\' + '\n' + r'        \midrule']
-    for ds, data in database.groupby(['dataset_orig']):
+    for ds, data in database.groupby('dataset_orig'):
         subd = data[data['dataset'] == ds]
         row = [ get_ds_short(meta['dataset'][ds]['name']) ]
         results = [subd[subd['model'] == mod]['compound_index'].iloc[0] for mod in models]
@@ -106,20 +111,18 @@ def create_all(database, meta, seed=0):
         ' & '.join([ ' ' ] + ['PCR', r'$f_{\text{MASE}}$', 'kWh'] * 6) + r' \\',
         r'\midrule',
     ]
-    for idx, ((ds), data) in enumerate(meta_learned_db.groupby(['dataset'])):
+    for ds, data in meta_learned_db.groupby('dataset'):
         if data['dataset_orig'].iloc[0] == ds:
             row = [ get_ds_short(meta['dataset'][ds]['name']) ]
 
             # best XPCR
-            xpcr_rec_config = data.sort_values('compound_index_pred', ascending=False).iloc[0]
-            xpcr = database[database['configuration'] == xpcr_rec_config['configuration']].iloc[0]
-            assert(xpcr['compound_index'] == xpcr_rec_config['compound_index'])
+            xpcr_rec_config = data.sort_values(('index', 'compound_index_test_pred'), ascending=False).iloc[0]
+            xpcr = database[(database['dataset'] == xpcr_rec_config['dataset']) & (database['model'] == xpcr_rec_config['model'])].iloc[0]
             values = [ (xpcr['compound_index'], xpcr[COL_SEL]['index'], xpcr['train_power_draw']['value'] / 3.6e3) ]
 
             # AutoForecast / simulates metsa-learned selection based on best estimated error
-            aufo_rec_config = data.sort_values(f'{COL_SEL}_pred', ascending=False).iloc[0]
-            aufo = database[database['configuration'] == aufo_rec_config['configuration']].iloc[0]
-            assert(aufo['compound_index'] == aufo_rec_config['compound_index'])
+            aufo_rec_config = data.sort_values(('index', f'{COL_SEL}_test_pred'), ascending=False).iloc[0]
+            aufo = database[(database['dataset'] == aufo_rec_config['dataset']) & (database['model'] == aufo_rec_config['model'])].iloc[0]
             values.append( (aufo['compound_index'], aufo[COL_SEL]['index'], aufo['train_power_draw']['value'] / 3.6e3) )
             # random
             # sel_rand = sort_xpcr.iloc[np.random.randint(1, sort_xpcr.shape[0])]
@@ -203,14 +206,13 @@ def create_all(database, meta, seed=0):
 
     # ## EXPLANATIONS
     data = meta_learned_db[meta_learned_db['dataset'] == DS_SEL]
-    best_model = data.iloc[np.argmax(data['compound_index_pred'])]
-    cols_to_plot = [col for col in data.columns if col.endswith('_pred') and 'compound' not in col]
-    contrib = np.array([best_model[col] * best_model[col.replace('_pred', '')]['weight'] for col in cols_to_plot])
+    best_model = meta_learned_db[meta_learned_db['dataset'] == DS_SEL].iloc[np.argmax(data[('index', 'compound_index_test_pred')])]
+    contrib = np.array([best_model[('index', f'{col}_test_pred')] * meta['properties'][col]['weight'] for col in pred_cols])
     contrib = contrib / contrib.sum() * 100
     # why recommendation?
     title = f"Q1: Why use {meta['model'][best_model['model']]['short']} on {meta['dataset'][DS_SEL]['name']}?"
     fig=px.bar(
-    title=title, x=[meta['properties'][col.replace('_pred', '')]['shortname'] for col in cols_to_plot],
+    title=title, x=[meta['properties'][col]['shortname'] for col in pred_cols],
     y=contrib, color=np.array(contrib) * -1.0, color_continuous_scale=RATING_COLOR_SCALE
     )
     fig.update_yaxes(title='E1 - Importance [%]')
@@ -219,36 +221,39 @@ def create_all(database, meta, seed=0):
     fig.update(layout_coloraxis_showscale=False)
     fig.write_image("why_recommended.pdf")
     # why ERROR estimate?
-    mod_path = os.path.join(os.path.dirname(os.getcwd()), 'results', f'{COL_SEL}_models', f'model{int(best_model["split_index"])}.pkl')
-    with open(mod_path, 'rb') as modfile:
-        model = pickle.load(modfile)
-    ft_imp = model.named_steps['regressor'].feature_importances_
-    ft_names = [None] * ft_imp.size
-    transf_ind = model.named_steps['preprocessor'].output_indices_
-    transf = model.named_steps['preprocessor'].named_transformers_
-    ft_names[transf_ind['num']] = transf['num'].feature_names_in_ # numerical feature names
-    ft_names[transf_ind['freq']] = ['freq']
-    cat_names = []
-    for ft, cat in zip(transf['cat'].feature_names_in_, transf['cat'].named_steps['onehot'].categories):
-        cat_names = cat_names + [f'{ft}_{val}' for val in cat[1:]]
-    ft_names[transf_ind['cat']] = cat_names # categorical feature names
-    title = f"Q2: Reasons for {COL_SEL} estimate?"
-    model_idc = [i for i, ft in enumerate(ft_names) if ft.startswith('model')]
-    # summarize the importance of onehot encoded model choices
-    ft_names = ['Model Choice'] + [FT_NAMES[ft] for i, ft in enumerate(ft_names) if i not in model_idc]
-    ft_imp = np.array( [np.sum([ft_imp[i] for i in model_idc])] + [imp for i, imp in enumerate(ft_imp) if i not in model_idc] ) * 100
-    fig=px.bar(title=title, x=ft_names, y=ft_imp, color=ft_imp * -1.0, color_continuous_scale=RATING_COLOR_SCALE)
-    fig.update_yaxes(title='E2 - Importance [%]')
-    fig.update_xaxes(title='Meta-feature', tickangle=90)
-    fig.update_layout(title_x=0.5, title_y=0.99, width=PLOT_WIDTH / 2, height=PLOT_HEIGHT, margin={'l': 0, 'r': 0, 'b': 0, 't': 24})
-    fig.update(layout_coloraxis_showscale=False)
-    fig.write_image("why_error.pdf")
+    try:
+        mod_path = os.path.join(os.path.dirname(os.getcwd()), 'results', f'{COL_SEL}_models', f'model{int(best_model["split_index"])}.pkl')
+        with open(mod_path, 'rb') as modfile:
+            model = pickle.load(modfile)
+        ft_imp = model.named_steps['regressor'].feature_importances_
+        ft_names = [None] * ft_imp.size
+        transf_ind = model.named_steps['preprocessor'].output_indices_
+        transf = model.named_steps['preprocessor'].named_transformers_
+        ft_names[transf_ind['num']] = transf['num'].feature_names_in_ # numerical feature names
+        ft_names[transf_ind['freq']] = ['freq']
+        cat_names = []
+        for ft, cat in zip(transf['cat'].feature_names_in_, transf['cat'].named_steps['onehot'].categories):
+            cat_names = cat_names + [f'{ft}_{val}' for val in cat[1:]]
+        ft_names[transf_ind['cat']] = cat_names # categorical feature names
+        title = f"Q2: Reasons for {COL_SEL} estimate?"
+        model_idc = [i for i, ft in enumerate(ft_names) if ft.startswith('model')]
+        # summarize the importance of onehot encoded model choices
+        ft_names = ['Model Choice'] + [FT_NAMES[ft] for i, ft in enumerate(ft_names) if i not in model_idc]
+        ft_imp = np.array( [np.sum([ft_imp[i] for i in model_idc])] + [imp for i, imp in enumerate(ft_imp) if i not in model_idc] ) * 100
+        fig=px.bar(title=title, x=ft_names, y=ft_imp, color=ft_imp * -1.0, color_continuous_scale=RATING_COLOR_SCALE)
+        fig.update_yaxes(title='E2 - Importance [%]')
+        fig.update_xaxes(title='Meta-feature', tickangle=90)
+        fig.update_layout(title_x=0.5, title_y=0.99, width=PLOT_WIDTH / 2, height=PLOT_HEIGHT, margin={'l': 0, 'r': 0, 'b': 0, 't': 24})
+        fig.update(layout_coloraxis_showscale=False)
+        fig.write_image("why_error.pdf")
+    except Exception:
+        print('WHY ERROR ESTIMATE FAILED!!')
 
 
 
     ### PCR trade-offs scatters
     for xaxis, yaxis in [['running_time', COL_SEL], ['train_power_draw', 'RMSE']]:#, ['parameters', 'MAPE']]:
-        for idx, (ds, data) in enumerate(database.groupby(['dataset_orig'])):
+        for idx, (ds, data) in enumerate(database.groupby('dataset_orig')):
             # if ds == DS_SEL:
             subd = data[data['dataset'] == ds]
             plot_data = {}
@@ -279,29 +284,28 @@ def create_all(database, meta, seed=0):
 
 
     ######## META LEARN RESULTS #######
-    pred_cols = [col.replace('_true', '') for col in meta_learned_db.columns if '_true' in col and 'compound' not in col]
-    pred_col_shortnames = [meta['properties'][col]['shortname'] for col in pred_cols]
     star_cols = pred_cols + [pred_cols[0]]
     star_cols_short = pred_col_shortnames + [pred_col_shortnames[0]]
 
     # access statistics per data set
     top_increasing_k_stats = {}
-    for idx, ((ds), data) in enumerate(meta_learned_db.groupby(['dataset'])):
-        sorted_by_pred_err = data.sort_values(f'{COL_SEL}_pred', ascending=False)
+    for ds, data in database.groupby('dataset'):
+        meta_data = meta_learned_db[meta_learned_db['dataset'] == ds]
+        sorted_by_pred_err = meta_data.sort_values(('index', f'{COL_SEL}_test_pred'), ascending=False)
         lowest_err = min([entry['value'] for entry in data[COL_SEL]])
-        lowest_ene = sum([entry['value'] for entry in data['train_power_draw']]) / 3.6e3
+        lowest_ene = sum([entry['value'] for entry in data['train_power_draw']])
         # save ene and err for increasing k
         if not np.isinf(lowest_err) and not np.isinf(lowest_ene):
             top_increasing_k_stats[ds] = {'err': [], 'ene': []}
-            for k in range(1, data.shape[0] + 1):
-                subd = sorted_by_pred_err.iloc[:k]
-                top_increasing_k_stats[ds]['err'].append( lowest_err / min([entry['value'] for entry in subd[COL_SEL]]))
-                top_increasing_k_stats[ds]['ene'].append( sum([entry['value'] for entry in subd['train_power_draw']]) / (3.6e3 * lowest_ene) )
+            for k in range(1, meta_data.shape[0] + 1):
+                model_results = [data[data['model']==m].iloc[0] for m in sorted_by_pred_err.iloc[:k]['model']]
+                top_increasing_k_stats[ds]['err'].append( lowest_err / min([res[COL_SEL]['value'] for res in model_results]))
+                top_increasing_k_stats[ds]['ene'].append( sum([res['train_power_draw']['value'] for res in model_results]) / lowest_ene )
 
         if data['dataset_orig'].iloc[0] == ds:
             ######### STAR PLOTS with recommendation vs best
-            pred_afo = data.sort_values(f'MASE_pred', ascending=False).iloc[0]['model']
-            pred_xpcr = data.sort_values(f'compound_index_pred', ascending=False).iloc[0]['model']
+            pred_afo = meta_data.sort_values(('index', f'{COL_SEL}_test_pred'), ascending=False).iloc[0]['model']
+            pred_xpcr = meta_data.sort_values(('index', 'compound_index_test_pred'), ascending=False).iloc[0]['model']
             fig = go.Figure()
             for model, m_str, col_idx in zip([pred_xpcr, pred_afo, 'autogluon'], ['XPCR', 'AFo', 'AGl'], [0, 2, 4]):
                 name = m_str if meta['model'][model]['short'] == m_str else f"{m_str} / {meta['model'][model]['short']}"
@@ -346,22 +350,24 @@ def create_all(database, meta, seed=0):
         'Inters (e)': {}
     }
 
+    rated_db = rate_database(meta_learned_db.loc[:,database.drop(['compound_index', 'compound_rating'], axis=1).columns], meta['properties'], indexmode='best')[0]
+    index_db = prop_dict_to_val(rated_db, 'index')
     k_best = 5
     error_threshold = 0.1
     for col in pred_cols:
         for key in result_scores.keys():
             result_scores[key][col] = []
 
-        for _, sub_data in iter(meta_learned_db.groupby(['split_index'])):
+        for _, sub_data in iter(meta_learned_db.groupby(('split_index', ''))):
             top_1, top_k, overlap, error, error_acc = [], [], [], [], []
 
-            for (ds), data in iter(sub_data.groupby(['dataset'])):
-                sorted_by_true = data.sort_values(f'{col}_true', ascending=False)
-                sorted_by_pred = data.sort_values(f'{col}_pred', ascending=False)
+            for ds, data in sub_data.groupby('dataset'):
+                sorted_by_true = index_db.loc[data.index].sort_values('compound_index' if 'direct' in col else col, ascending=False)
+                sorted_by_pred = data.sort_values(('index', f'{col}_test_pred'), ascending=False)
                 top_5_true = sorted_by_true.iloc[:k_best]['model'].values
                 top_5_pred = sorted_by_pred.iloc[:k_best]['model'].values
                 best_model = sorted_by_true.iloc[0]['model']
-                err = data[f'{col}_pred_error'].mean()
+                err = data[('index', f'{col}_test_err')].mean()
 
                 top_1.append(best_model == sorted_by_pred.iloc[0]['model'])
                 top_k.append(best_model in top_5_pred)

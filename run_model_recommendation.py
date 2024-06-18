@@ -20,7 +20,8 @@ from sklearn.tree import DecisionTreeRegressor
 
 from create_paper_results import COL_SEL
 from data_loader import TIMEDELTA_MAP, FREQUENCY_MAP
-from mlprops.util import fix_seed
+from strep.util import fix_seed
+
 FREQ_TO_SECS = {v: TIMEDELTA_MAP[k].total_seconds() for k, v in FREQUENCY_MAP.items()}
 
 
@@ -157,7 +158,7 @@ def evaluate_recommendation(database, seed=0):
             task = f'Regression of {col}'
             print(f'\n\n:::::::::::::::::::::::::::: {task:^35} ::::::::::::::::::::::::::::')
             
-            predictions, true, proba = {}, {}, {}
+            predictions, true = {}, {}
             best_models, best_name, best_score, best_scores = None, '', np.inf, None
             split_index = np.zeros((database.shape[0], 1))
 
@@ -174,9 +175,8 @@ def evaluate_recommendation(database, seed=0):
                         transformers[enc] = (enc, ENCODERS[enc](config), [ft for ft, enc_ in FEATURES_ENCODING.items() if enc_ == enc])
                 preprocessor = ColumnTransformer(transformers=list(transformers.values()))
 
-                predictions[model_name] = np.zeros_like(y, dtype=np.float)
-                true[model_name] = np.zeros_like(y, dtype=np.float)
-                proba[model_name] = np.zeros_like(y, dtype=np.float)
+                predictions[model_name] = np.zeros_like(y, dtype=float)
+                true[model_name] = np.zeros_like(y, dtype=float)
                 
                 # init scoring dict
                 scores = {}
@@ -188,15 +188,13 @@ def evaluate_recommendation(database, seed=0):
                 models = []
                 for split_idx, (train_idx, test_idx) in enumerate(cv_splitted):
                     split_index[test_idx] = split_idx
-                    X_train, X_test, y_train, y_test = database.iloc[train_idx], database.iloc[test_idx], y[train_idx], y[test_idx]
+                    X_train, X_test, y_train, y_test = database.iloc[train_idx][FEATURES_ENCODING.keys()], database.iloc[test_idx][FEATURES_ENCODING.keys()], y[train_idx], y[test_idx]
                     model = Pipeline(steps=[('preprocessor', preprocessor), ('regressor', clone(model_cls))])
                     model.fit(X_train, y_train)
                     y_train_pred = model.predict(X_train)
                     # safe the predictions per model for later usage
                     predictions[model_name][test_idx] = model.predict(X_test)
                     true[model_name][test_idx] = y_test
-                    if hasattr(model, "predict_proba"):
-                        proba[model_name] = model.predict_proba(X_test)
                     # calculate scoring
                     for score_name, score in SCORING.items():
                         scores[f'train_{score_name}'].append(score(y_train, y_train_pred))
@@ -214,11 +212,9 @@ def evaluate_recommendation(database, seed=0):
             print_cv_scoring_results(best_name, SCORING.keys(), best_scores)
 
             # store true label and prediction in database
-            database[f'{col}_pred'] = predictions[best_name]
-            database[f'{col}_true'] = true[best_name]
-            database[f'{col}_prob'] = proba[best_name]
-            database[f'{col}_pred_model'] = best_name
-            database[f'{col}_pred_error'] = np.abs(database[f'{col}_pred'] - database[f'{col}_true'])
+            database[('index', f'{col}_test_pred')] = predictions[best_name]
+            database[('index', f'{col}_pred_model')] = best_name
+            database[('index', f'{col}_test_err')] = np.abs(database[('index', f'{col}_test_pred')] - true[best_name])
             database['split_index'] = split_index
             
             # write models in order to check feature importance later on
@@ -231,10 +227,9 @@ def evaluate_recommendation(database, seed=0):
                         pickle.dump(model, outfile)
 
     # train regressors to predict compound rating based on the predicted metrics
-    database['compound_index_true'] = database['compound_index']
-    pred_cols = [col for col in database.columns if col.endswith('_pred')]
+    pred_cols = [col for col in database.columns if isinstance(col, tuple) and col[1].endswith('_pred')]
     X = database[pred_cols].values
-    y = database['compound_index_true'].values
+    y = database['compound_index'].values
     y_pred = np.zeros_like(y)
 
     for split, data in database.groupby('split_index'):
@@ -246,9 +241,8 @@ def evaluate_recommendation(database, seed=0):
         model = Pipeline(steps=[ ('scaler', StandardScaler()), ('regressor', LinearRegression()) ])
         model.fit(X_train, y_train)
         y_pred[data.index] = model.predict(X_test)
-        print(split, np.mean(np.abs(y_test - y_pred[data.index])), np.mean(data['compound_index_direct_pred_error']))
-    database['compound_index_ensemble_true'] = database['compound_index_true']
-    database['compound_index_pred'] = y_pred
-    database['compound_index_pred_error'] = np.abs(database['compound_index_pred'] - database['compound_index_true'] )
+        print(split, np.mean(np.abs(y_test - y_pred[data.index])), np.mean(data[('index', 'compound_index_direct_test_err')]))
+    database[('index', 'compound_index_test_pred')] = y_pred
+    database[('index', 'compound_index_test_err')] = np.abs(database[('index', 'compound_index_test_pred')] - database['compound_index'] )
 
     database.to_pickle('results/meta_learn_results.pkl')

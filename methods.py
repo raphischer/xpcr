@@ -7,6 +7,7 @@ from itertools import chain
 from typing import List
 
 import numpy as np
+np.bool = np.bool_
 import pandas as pd
 
 from gluonts.dataset.common import ListDataset

@@ -21,6 +21,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--mode", default='interactive', choices=['meta', 'interactive', 'paper', 'label', 'stats'])
+    parser.add_argument('--datadir', default='/data/d1/xpcr/data')
     parser.add_argument("--property-extractors-module", default="properties", help="python file with PROPERTIES dictionary, which maps properties to executable extractor functions")
     parser.add_argument("--boundaries", default="boundaries.json")
     parser.add_argument("--dropsubsampled", default=False, type=bool)
@@ -56,7 +57,7 @@ if __name__ == '__main__':
     database['configuration'] = database.aggregate(lambda row: ' - '.join([row['task'], row['dataset'], row['model']]), axis=1)
     database['environment'] = database['environment'].map(lambda env: env.split(' - ')[0])
     database['dataset_orig'] = database['dataset'].map(subsampled_to_orig) # retrieve original dataset from all subsampled versions
-    database = database.reset_index()
+    database = database.reset_index(drop=True)
 
     if args.mode == 'stats':
         grouped_by = database.groupby(['environment', 'dataset'])
@@ -111,13 +112,13 @@ if __name__ == '__main__':
         else:
             # drop the automl competitor results and calculate the meta-features
             rated_database = rated_database.drop(rated_database[rated_database['model'].str.contains('auto')].index)
-            for idx, ((ds), data) in enumerate(iter(rated_database.groupby(['dataset']))):
+            for ds, data in rated_database.groupby('dataset'):
                 # store dataset specific meta features
                 ds_name = data['dataset_orig'].iloc[0]
                 subsample_str = ds.replace(ds_name, '').replace('_', '')
                 ds_seed = -1 if len(subsample_str) == 0 else int(subsample_str)
 
-                full_path = os.path.join('mnt_data/data', ds_name + '.tsf')
+                full_path = os.path.join(args.datadir, ds_name + '.tsf')
                 hc = LOOKUP[ds_name][1] if len(LOOKUP[ds_name]) > 1 else None
                 ts_data, freq, seasonality, fh, miss_values, equal_len = load_data(full_path, ds_sample_seed=ds_seed, ext_fc_horizon=hc)
                 rated_database.loc[data.index,'num_ts'] = ts_data.shape[0]
