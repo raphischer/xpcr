@@ -5,7 +5,16 @@ import pickle
 import pandas as pd
 import numpy as np
 
-from mlprops.util import fix_seed
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+import plotly.express as px
+from plotly.express.colors import sample_colorscale
+
+from strep.util import fix_seed
+from strep.index_and_rate import rate_database
+from strep.elex.graphs import create_scatter_graph, add_rating_background
+from strep.elex.util import RATING_COLORS, RATING_COLOR_SCALE
+from strep.util import prop_dict_to_val
 
 PLOT_WIDTH = 900
 PLOT_HEIGHT = PLOT_WIDTH // 4
@@ -48,14 +57,6 @@ def rgb_to_rgba(rgb, alpha):
 
 
 def create_all(database, meta, seed=0):
-    import plotly.graph_objects as go
-    from plotly.subplots import make_subplots
-    import plotly.express as px
-    from plotly.express.colors import sample_colorscale
-    from mlprops.index_and_rate import rate_database
-    from mlprops.elex.graphs import create_scatter_graph, add_rating_background
-    from mlprops.elex.util import RATING_COLORS, RATING_COLOR_SCALE
-    from strep.util import prop_dict_to_val
 
     monash = pd.read_csv('monash.csv', delimiter=';', index_col='Dataset')
     monash = monash.replace('-', np.nan).astype(float)

@@ -18,7 +18,7 @@ from gluonts.model.forecast import SampleForecast
 from gluonts.dataset.util import forecast_start
 
 from data_loader import convert_tsf_to_dataframe as load_data
-from mlprops.util import read_json
+from strep.util import read_json
 
 
 class HorizonFCEnsemble:
@@ -180,42 +180,6 @@ class AutoKeras(HorizonFCEnsemble):
             mod.export_model().save(fname, save_format="tf")
             fsize += os.path.getsize(fname)
         return fsize
-
-
-class AutoPyTorch(HorizonFCEnsemble):
-    
-    def __init__(self, freq, context_length, prediction_length, samples_per_series=100):
-        super().__init__(freq, context_length, prediction_length, samples_per_series)
-        
-
-    def train(self, training_data):
-        sampled_window_starts = []
-        # identify context windows to train on
-        for ser in training_data:
-            valid_starts = np.arange(ser['target'].size - self.context_length - self.prediction_length + 1)
-            if valid_starts.size == 0:
-                continue
-            if valid_starts.size > self.samples_per_series:
-                sampled_window_starts.append( (ser['target'], np.random.choice(valid_starts, size=self.samples_per_series)) )
-            else:
-                sampled_window_starts.append( (ser['target'], valid_starts) )
-        n_samples = int(np.sum([starts.size for _, starts in sampled_window_starts]))
-        # run a training step for each individual model
-        print(f'Training AutoLearn regressor {pred_idx+1} / {self.prediction_length}')
-        y = np.zeros((n_samples), dtype=training_data[0]['target'].dtype)
-        X = np.zeros((n_samples, self.context_length), dtype=training_data[0]['target'].dtype)
-        idx = 0
-        for ser, starts in sampled_window_starts:
-            for start in starts:
-                X[idx,:] = ser[start:(start + self.context_length)]
-                y[idx] = ser[start + self.context_length + pred_idx]
-                idx += 1
-        self.fit(pred_idx, X, y)
-
-        print(1)
-
-    def predict(self, dataset, num_samples):
-        print(2)
 
 
 with open('meta_model.json', 'r') as meta:

@@ -6,7 +6,7 @@ from distutils.util import strtobool
 import numpy as np
 import pandas as pd
 
-from mlprops.util import fix_seed
+from strep.util import fix_seed
 
 from data_lookup_info import LOOKUP
 

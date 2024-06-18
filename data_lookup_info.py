@@ -45,11 +45,11 @@ LOOKUP = { # taken from https://github.com/rakshitha123/TSForecasting
 def set_temporal_budget():
     import json
     import pandas as pd
-    from mlprops.util import read_json
+    from strep.util import read_json
 
     ds_meta = 'meta_dataset.json'
     dataset_meta = read_json(ds_meta)
-    database = pd.read_pickle('results/dnns.pkl')
+    database = pd.read_pickle('results/logs.pkl')
 
     for ds in dataset_meta.keys():
         ds_results = database[database['dataset'] == ds]

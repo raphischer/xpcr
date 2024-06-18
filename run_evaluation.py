@@ -13,7 +13,7 @@ from data_loader import subsampled_to_orig
 
 from sklearn.impute import KNNImputer
 
-DB_PATH = 'results'
+from run_log_processing import RES_DIR, DB_COMPLETE, DB_BL
 DATABASES = ['autokeras.pkl', 'autosklearn.pkl', 'autogluon.pkl', 'dnns.pkl']
 
 if __name__ == '__main__':
@@ -34,7 +34,7 @@ if __name__ == '__main__':
 
     database = []
     for fname in DATABASES:
-        database.append(pd.read_pickle(os.path.join(DB_PATH, fname)))
+        database.append(pd.read_pickle(os.path.join(RES_DIR, fname)))
         print(f'{fname:<20} shape {database[-1].shape}, env {pd.unique(database[-1]["environment"])} {len(pd.unique(database[-1]["dataset"]))} datasets')
     database = pd.concat(database)
     # merge infer and train tasks

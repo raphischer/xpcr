@@ -2,6 +2,7 @@ import argparse
 from datetime import timedelta
 import json
 import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1" # only use CPU for fairer comparison
 import time
 import traceback
 import shutil
@@ -11,7 +12,7 @@ from codecarbon import OfflineEmissionsTracker
 
 from data_lookup_info import LOOKUP
 from methods import init_model_and_data, run_validation, evaluate
-from mlprops.util import fix_seed, create_output_dir, PatchedJSONEncoder
+from strep.util import fix_seed, create_output_dir, PatchedJSONEncoder
 
 
 def main(args):
@@ -84,8 +85,8 @@ def main(args):
                 fsize = model.get_fsize(output_dir)
             except Exception: # GluonTS model
                 model.serialize(Path(output_dir))
-                relevant_files = [os.path.join(output_dir, fname) for fname in ['input_transform.json', 'parameters.json', 'prediction_net-0000.params', 'prediction_net-network.json', 'type.txt', 'version.json']]
-                fsize = sum([os.path.getsize(fname) for fname in relevant_files])
+                relevant_files = [os.path.join(output_dir, fname) for fname in ['input_transform.json', 'parameters.json', 'prediction_net-0000.params', 'prediction_net-network.json', 'type.txt', 'version.json', 'gluonts-config.json']]
+                fsize = sum([os.path.getsize(fname) for fname in relevant_files if os.path.isfile(fname)])
 
             model_stats = { 'params': num_params, 'fsize': fsize }
         except Exception:
@@ -128,7 +129,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset',                            default='m1_quarterly_dataset')
     parser.add_argument('--model',                              default='deepar')
-    parser.add_argument('--output-dir',                         default='/data/d1/xpcr/logs')
+    parser.add_argument('--output-dir',                         default='/data/d1/xpcr/debug')
     parser.add_argument('--ds-seed', type=int,                  default=-1)
     parser.add_argument('--epochs', type=int,                   default=100)
     parser.add_argument('--datadir',                            default='/data/d1/xpcr/data')
