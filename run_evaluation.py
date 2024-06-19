@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--mode", default='paper', choices=['interactive', 'paper', 'stats'])
+    parser.add_argument("--mode", default='interactive', choices=['interactive', 'paper', 'stats'])
     parser.add_argument("--boundaries", default="boundaries.json")
     parser.add_argument("--dropsubsampled", default=False, type=bool)
     args = parser.parse_args()
