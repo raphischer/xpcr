@@ -16,11 +16,11 @@ from strep.elex.graphs import create_scatter_graph, add_rating_background
 from strep.elex.util import RATING_COLORS, RATING_COLOR_SCALE
 from strep.util import prop_dict_to_val
 
+from run_meta_learning import DS_SEL, COL_SEL, MOD_SEL
+
+
 PLOT_WIDTH = 900
 PLOT_HEIGHT = PLOT_WIDTH // 4
-
-DS_SEL = 'car_parts_dataset_without_missing_values'
-COL_SEL = 'MASE'
 
 
 FT_NAMES = {
@@ -32,7 +32,10 @@ FT_NAMES = {
     'avg_ts_mean':                  'Avg Mean',
     'avg_ts_min':                   'Avg Min',
     'avg_ts_max':                   'Avg Max',
-    'contain_equal_length_True':    'Equal length'
+    'contain_equal_length_True':    'Equal length',
+    'contain_equal_length_False':   'Div length',
+    'contain_missing_values_True':  'With NAN',
+    'contain_missing_values_False':  'No NAN',
 }
 
 
@@ -56,13 +59,12 @@ def rgb_to_rgba(rgb, alpha):
     return rgb.replace('rgb', 'rgba').replace(')', f',{alpha:3.1f})')
 
 
-def create_all(database, meta, seed=0):
+def create_all(database, meta_learned_db, meta, seed=0):
 
     monash = pd.read_csv('monash.csv', delimiter=';', index_col='Dataset')
     monash = monash.replace('-', np.nan).astype(float)
 
     fix_seed(seed)
-    meta_learned_db = pd.read_pickle('results/meta_learn_results_new.pkl')
     dnns = pd.unique(meta_learned_db['model']).tolist()
     pred_cols = list(meta['properties'].keys())
     pred_col_shortnames = [meta['properties'][col]['shortname'] for col in pred_cols]
@@ -88,12 +90,11 @@ def create_all(database, meta, seed=0):
         outf.write(final_text)
     
     #### MODEL X DATA PERFORMANCE
-    models = sorted(pd.unique(database['model']).tolist())
-    rows = ['Data set & ' + ' & '.join(meta['model'][mod]['short'] for mod in models) + r' \\' + '\n' + r'        \midrule']
+    rows = ['Data set & ' + ' & '.join(meta['model'][mod]['short'] for mod in dnns) + r' \\' + '\n' + r'        \midrule']
     for ds, data in database.groupby('dataset_orig'):
         subd = data[data['dataset'] == ds]
         row = [ get_ds_short(meta['dataset'][ds]['name']) ]
-        results = [subd[subd['model'] == mod]['compound_index'].iloc[0] for mod in models]
+        results = [subd[subd['model'] == mod]['compound_index'].iloc[0] for mod in dnns]
         max_r = max(results)
         for res in results:
             if res == max_r:
@@ -108,7 +109,7 @@ def create_all(database, meta, seed=0):
 
     ######### METHOD COMPARISON TABLE
     rows = [
-        ' & '.join(['Data set'] + [r'\multicolumn{3}{c}{' + mod + '}' for mod in ['AutoXPCR (ours)', 'AutoForecast \cite{abdallah/etal/22}', 'AutoGluonTS \cite{shchur_autogluon-timeseries_2023}', 'AutoKeras \cite{jin2019auto}', 'AutoSklearn \cite{JMLR:v23:21-0992}', 'Exhaustive']]) + r' \\',
+        ' & '.join(['Data set'] + [r'\multicolumn{3}{c}{' + mod + '}' for mod in ['AutoXPCR', 'AutoXP ($\approx$ \cite{abdallah/etal/22})', 'AutoGluonTS \cite{shchur_autogluon-timeseries_2023}', 'AutoKeras \cite{jin2019auto}', 'AutoSklearn \cite{JMLR:v23:21-0992}', 'Exhaustive']]) + r' \\',
         ' & '.join([ ' ' ] + ['PCR', r'$f_{\text{MASE}}$', 'kWh'] * 6) + r' \\',
         r'\midrule',
     ]
@@ -131,9 +132,12 @@ def create_all(database, meta, seed=0):
     
             # autokeras & autosklearn
             for auto in ['autogluon', 'autokeras', 'autosklearn']:
-                auto_res = database[(database['dataset'] == ds) & (database['model'] == auto)].iloc[0]
-                qual = auto_res[COL_SEL]['index'] if isinstance(auto_res[COL_SEL], dict) else np.nan
-                powr = auto_res['train_power_draw']['value'] / 3.6e3 if isinstance(auto_res['train_power_draw'], dict) else np.nan
+                try:
+                    auto_res = database[(database['dataset'] == ds) & (database['model'] == auto)].iloc[0]
+                    qual = auto_res[COL_SEL]['index'] if isinstance(auto_res[COL_SEL], dict) else np.nan
+                    powr = auto_res['train_power_draw']['value'] / 3.6e3 if isinstance(auto_res['train_power_draw'], dict) else np.nan
+                except:
+                    qual, powr = 0, 0
                 values.append( (auto_res['compound_index'], qual, powr) )
             
             # testing all - except automl search models, hence filter for "auto" keyword
@@ -179,7 +183,7 @@ def create_all(database, meta, seed=0):
 
 
     ### SOTA COMPARISON
-    mod_map = {meta['model'][mod]['name']: (mod, meta['model'][mod]['short']) for mod in models}
+    mod_map = {meta['model'][mod]['name']: (mod, meta['model'][mod]['short']) for mod in dnns}
     ds_overlap = list(reversed([ds for ds in pd.unique(database['dataset']) if ds in monash.index]))
     ds_short = [get_ds_short(meta['dataset'][ds]['name']) for ds in ds_overlap]
 
@@ -207,7 +211,7 @@ def create_all(database, meta, seed=0):
 
     # ## EXPLANATIONS
     data = meta_learned_db[meta_learned_db['dataset'] == DS_SEL]
-    best_model = meta_learned_db[meta_learned_db['dataset'] == DS_SEL].iloc[np.argmax(data[('index', 'compound_index_test_pred')])]
+    best_model = meta_learned_db[(meta_learned_db['dataset'] == DS_SEL) & (meta_learned_db['model'] == MOD_SEL)].iloc[0]
     contrib = np.array([best_model[('index', f'{col}_test_pred')] * meta['properties'][col]['weight'] for col in pred_cols])
     contrib = contrib / contrib.sum() * 100
     # why recommendation?
@@ -222,33 +226,28 @@ def create_all(database, meta, seed=0):
     fig.update(layout_coloraxis_showscale=False)
     fig.write_image("why_recommended.pdf")
     # why ERROR estimate?
-    try:
-        mod_path = os.path.join(os.path.dirname(os.getcwd()), 'results', f'{COL_SEL}_models', f'model{int(best_model["split_index"])}.pkl')
-        with open(mod_path, 'rb') as modfile:
-            model = pickle.load(modfile)
-        ft_imp = model.named_steps['regressor'].feature_importances_
-        ft_names = [None] * ft_imp.size
-        transf_ind = model.named_steps['preprocessor'].output_indices_
-        transf = model.named_steps['preprocessor'].named_transformers_
-        ft_names[transf_ind['num']] = transf['num'].feature_names_in_ # numerical feature names
-        ft_names[transf_ind['freq']] = ['freq']
-        cat_names = []
-        for ft, cat in zip(transf['cat'].feature_names_in_, transf['cat'].named_steps['onehot'].categories):
-            cat_names = cat_names + [f'{ft}_{val}' for val in cat[1:]]
-        ft_names[transf_ind['cat']] = cat_names # categorical feature names
-        title = f"Q2: Reasons for {COL_SEL} estimate?"
-        model_idc = [i for i, ft in enumerate(ft_names) if ft.startswith('model')]
-        # summarize the importance of onehot encoded model choices
-        ft_names = ['Model Choice'] + [FT_NAMES[ft] for i, ft in enumerate(ft_names) if i not in model_idc]
-        ft_imp = np.array( [np.sum([ft_imp[i] for i in model_idc])] + [imp for i, imp in enumerate(ft_imp) if i not in model_idc] ) * 100
-        fig=px.bar(title=title, x=ft_names, y=ft_imp, color=ft_imp * -1.0, color_continuous_scale=RATING_COLOR_SCALE)
-        fig.update_yaxes(title='E2 - Importance [%]')
-        fig.update_xaxes(title='Meta-feature', tickangle=90)
-        fig.update_layout(title_x=0.5, title_y=0.99, width=PLOT_WIDTH / 2, height=PLOT_HEIGHT, margin={'l': 0, 'r': 0, 'b': 0, 't': 24})
-        fig.update(layout_coloraxis_showscale=False)
-        fig.write_image("why_error.pdf")
-    except Exception:
-        print('WHY ERROR ESTIMATE FAILED!!')
+    mod_path = os.path.join(os.path.dirname(os.getcwd()), 'results', f'{COL_SEL}_models', f'model{int(best_model[("split_index", "")])}.pkl')
+    with open(mod_path, 'rb') as modfile:
+        model = pickle.load(modfile)
+    ft_imp = model.named_steps['regressor'].feature_importances_
+    ft_names = [None] * ft_imp.size
+    transf_ind = model.named_steps['preprocessor'].output_indices_
+    transf = model.named_steps['preprocessor'].named_transformers_
+    ft_names[transf_ind['num']] = transf['num'].feature_names_in_ # numerical feature names
+    ft_names[transf_ind['frq']] = ['freq']
+    cat_names = []
+    for ft, cat in zip(transf['cat'].feature_names_in_, transf['cat'].named_steps['onehot'].categories_):
+        cat_names = cat_names + ([f'{ft}_{val}' for val in cat[1:]] if hasattr(model, 'fit_intercept') else [f'{ft}_{val}' for val in cat])
+    ft_names[transf_ind['cat']] = cat_names # categorical feature names
+    title = f"Q2: Reasons for {COL_SEL} estimate?"
+    # summarize the importance of onehot encoded model choices
+    ft_names = [FT_NAMES[ft] for i, ft in enumerate(ft_names)]
+    fig=px.bar(title=title, x=ft_names, y=ft_imp, color=ft_imp * -1.0, color_continuous_scale=RATING_COLOR_SCALE)
+    fig.update_yaxes(title='E2 - Importance [%]')
+    fig.update_xaxes(title='Meta-feature', tickangle=90)
+    fig.update_layout(title_x=0.5, title_y=0.99, width=PLOT_WIDTH / 2, height=PLOT_HEIGHT, margin={'l': 0, 'r': 0, 'b': 0, 't': 24})
+    fig.update(layout_coloraxis_showscale=False)
+    fig.write_image("why_error.pdf")
 
 
 
@@ -308,7 +307,7 @@ def create_all(database, meta, seed=0):
             pred_afo = meta_data.sort_values(('index', f'{COL_SEL}_test_pred'), ascending=False).iloc[0]['model']
             pred_xpcr = meta_data.sort_values(('index', 'compound_index_test_pred'), ascending=False).iloc[0]['model']
             fig = go.Figure()
-            for model, m_str, col_idx in zip([pred_xpcr, pred_afo, 'autogluon'], ['XPCR', 'AFo', 'AGl'], [0, 2, 4]):
+            for model, m_str, col_idx in zip([pred_xpcr, pred_afo, 'autogluon'], ['XPCR', 'XP', 'AGl'], [0, 2, 4]):
                 name = m_str if meta['model'][model]['short'] == m_str else f"{m_str} / {meta['model'][model]['short']}"
                 row = database[(database['dataset'] == ds) & (database['model'] == model)].iloc[0]
                 fig.add_trace(go.Scatterpolar(
@@ -368,7 +367,7 @@ def create_all(database, meta, seed=0):
                 top_5_true = sorted_by_true.iloc[:k_best]['model'].values
                 top_5_pred = sorted_by_pred.iloc[:k_best]['model'].values
                 best_model = sorted_by_true.iloc[0]['model']
-                err = data[('index', f'{col}_test_err')].mean()
+                err = np.abs(data[('index', f'{col}_test_err')]).mean()
 
                 top_1.append(best_model == sorted_by_pred.iloc[0]['model'])
                 top_k.append(best_model in top_5_pred)

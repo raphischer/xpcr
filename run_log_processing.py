@@ -3,10 +3,9 @@ import os
 
 import pandas as pd
 import numpy as np
-from sklearn.impute import KNNImputer
 
 from strep.load_experiment_logs import assemble_database
-from strep.util import format_software, format_hardware, write_json
+from strep.util import format_software, format_hardware
 from data_loader import subsampled_to_orig
 
 PROPERTIES = {

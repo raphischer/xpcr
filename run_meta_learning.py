@@ -6,6 +6,7 @@ warnings.warn = warn
 import argparse
 import os
 import time
+import pickle
 
 import pandas as pd
 import numpy as np
@@ -30,6 +31,11 @@ from strep.util import load_meta, prop_dict_to_val
 from data_lookup_info import LOOKUP
 from data_loader import convert_tsf_to_dataframe as load_data
 from data_loader import subsampled_to_orig, TIMEDELTA_MAP, FREQUENCY_MAP
+from run_log_processing import RES_DIR
+
+DS_SEL = 'car_parts_dataset_without_missing_values'
+MOD_SEL = 'feedforward'
+COL_SEL = 'MASE'
 
 FREQ_TO_SECS = {v: TIMEDELTA_MAP[k].total_seconds() for k, v in FREQUENCY_MAP.items()}
 
@@ -49,7 +55,6 @@ CV_SCORER = 'test_MAE'
 FEATURES_ENCODING = {
     'contain_missing_values':   'cat',
     'contain_equal_length':     'cat',
-    'environment':              'cat',
     'freq':                     'frq',
     'forecast_horizon':         'num',
     'num_ts':                   'num',
@@ -83,7 +88,7 @@ REGRESSORS = {
 }
 
 
-def evaluate_regressor(regr, X, y, cv_splitted, seed, scale):
+def evaluate_regressor(regr, X, y, cv_splitted, seed, scale, output=None):
     results = pd.DataFrame(index=X.index, columns=['train_pred', 'test_pred', 'train_err', 'test_err'])
     model_cls, params = REGRESSORS[regr]
     if model_cls not in [DummyRegressor, LinearRegression, SVR]:
@@ -102,6 +107,9 @@ def evaluate_regressor(regr, X, y, cv_splitted, seed, scale):
         model.fit(X_train, y_train)
         results.loc[X.iloc[train_idx].index,f'train_pred{split_idx}'] = model.predict(X_train)
         results.loc[X.iloc[test_idx].index,'test_pred'] = model.predict(X_test)
+        if output is not None:
+            with open(output.format(split_idx), 'wb') as outfile:
+                pickle.dump(model, outfile)
     results['train_pred'] = results[[c_ for c_ in results.columns if 'train_pred' in c_]].mean(axis=1)
     results = results.drop([f'train_pred{split}' for split in range(len(cv_splitted))], axis=1)
     if scale == 'index': 
@@ -163,13 +171,13 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--seed", type=int, default=42, help="Seed to use")
     parser.add_argument('--datadir', default='/data/d1/xpcr/data')
+    parser.add_argument('--db', default='results/logs.pkl')
     args = parser.parse_args()
 
     meta = load_meta()
     weights = {col: val['weight'] for col, val in meta['properties'].items()}
-    database = load_database('results/dnns_merged.pkl')
+    database = load_database(args.db)
     database['dataset_orig'] = database['dataset'].map(subsampled_to_orig)
-    # database['MASE'] = database['MASE'].clip(upper=100)
     numeric = database.select_dtypes('number')
     numeric[np.isinf(numeric)] = np.nan
     imputer = KNNImputer(n_neighbors=5, weights="uniform")
@@ -179,7 +187,7 @@ if __name__ == '__main__':
     rated_db = rate_database(database, meta, indexmode='best')[0]
     index_db, value_db = prop_dict_to_val(rated_db, 'index'), prop_dict_to_val(rated_db, 'value')
     meta_features = load_meta_features(pd.unique(index_db['dataset']), args.datadir)
-    meta_ft_cols = list(meta_features.columns) + ['environment']
+    meta_ft_cols = list(meta_features.columns)
 
     best_regr = {}
     
@@ -227,7 +235,8 @@ if __name__ == '__main__':
                     # TODO also store sorted_models.index[0] (best model name?)
 
                     # 2. train and evaluate best model on full data!
-                    best_model_results = evaluate_regressor(best_model, algo_db[meta_ft_cols], algo_db[col], cv_splits, args.seed, scale)
+                    output = os.path.join(RES_DIR, f'{col}_models', 'model{}.pkl') if (algo == MOD_SEL) and (col == COL_SEL) and (scale=='index') else None
+                    best_model_results = evaluate_regressor(best_model, algo_db[meta_ft_cols], algo_db[col], cv_splits, args.seed, scale, output)
                     best_results_renamed = best_model_results.rename(lambda c_ : f'{col}_{c_}', axis=1)
                     all_results[scale].loc[algo_db.index,best_results_renamed.columns] = best_results_renamed
                     if scale == 'index': # recalculate index predictions to real value predictions
@@ -258,6 +267,6 @@ if __name__ == '__main__':
         final_results['split_index'] = split_index['index']
         final_results['split_index_value'] = split_index['value']
         final_results = pd.concat([final_results, database], axis=1)
-        final_results.to_pickle('results/meta_learn_results_new.pkl')
+        final_results.to_pickle(args.db.replace('.pkl', '_meta.pkl'))
 
     print(best_regr)

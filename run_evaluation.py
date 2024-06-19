@@ -4,8 +4,8 @@ import sys
 import pandas as pd
 import numpy as np
 
-from mlprops.index_and_rate import rate_database
-from mlprops.util import load_meta
+from strep.index_and_rate import rate_database
+from strep.util import load_meta
 
 from data_lookup_info import LOOKUP
 from data_loader import convert_tsf_to_dataframe as load_data
@@ -13,51 +13,24 @@ from data_loader import subsampled_to_orig
 
 from sklearn.impute import KNNImputer
 
-from run_log_processing import RES_DIR, DB_COMPLETE, DB_BL
+from run_log_processing import DB_COMPLETE, DB_BL, DB_META
+from run_meta_learning import FreqTransformer # import needed for loading the MASE models for paper result creation
+
 DATABASES = ['autokeras.pkl', 'autosklearn.pkl', 'autogluon.pkl', 'dnns.pkl']
 
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--mode", default='interactive', choices=['meta', 'interactive', 'paper', 'label', 'stats'])
+    parser.add_argument("--mode", default='paper', choices=['meta', 'interactive', 'paper', 'label', 'stats'])
     parser.add_argument('--datadir', default='/data/d1/xpcr/data')
     parser.add_argument("--property-extractors-module", default="properties", help="python file with PROPERTIES dictionary, which maps properties to executable extractor functions")
     parser.add_argument("--boundaries", default="boundaries.json")
     parser.add_argument("--dropsubsampled", default=False, type=bool)
     # interactive exploration params
-    parser.add_argument("--host", default='localhost', type=str, help="default host") # '0.0.0.0'
-    parser.add_argument("--port", default=8888, type=int, help="default port")
-    parser.add_argument("--debug", default=False, type=bool, help="debugging")
 
     args = parser.parse_args()
-
-    database = []
-    for fname in DATABASES:
-        database.append(pd.read_pickle(os.path.join(RES_DIR, fname)))
-        print(f'{fname:<20} shape {database[-1].shape}, env {pd.unique(database[-1]["environment"])} {len(pd.unique(database[-1]["dataset"]))} datasets')
-    database = pd.concat(database)
-    # merge infer and train tasks
-    merged_database = []
-    for group_field_vals, data in database.groupby(['dataset', 'environment', 'model']):
-        assert data.shape[0] < 3, "found too many values"
-        data = data.sort_values('task')
-        merged = data.fillna(method='bfill').head(1)
-        merged.loc[:,'task'] = 'Train and Test'
-        merged_database.append(merged)
-    database = pd.concat(merged_database)
-    # impute missing values (only few corner cases)
-    database.loc[database['parameters'] <= 0, 'parameters'] = np.nan
-    numeric = database.select_dtypes('number')
-    numeric[np.isinf(numeric)] = np.nan
-    imputer = KNNImputer(n_neighbors=5, weights="uniform")
-    database.loc[:,numeric.columns] = imputer.fit_transform(numeric)
-    assert not np.any(np.isnan(database.select_dtypes('number')))
-    # prepare for rating
-    database['configuration'] = database.aggregate(lambda row: ' - '.join([row['task'], row['dataset'], row['model']]), axis=1)
-    database['environment'] = database['environment'].map(lambda env: env.split(' - ')[0])
-    database['dataset_orig'] = database['dataset'].map(subsampled_to_orig) # retrieve original dataset from all subsampled versions
-    database = database.reset_index(drop=True)
+    database = pd.concat(pd.read_pickle(db) for db in [DB_COMPLETE, DB_BL]).reset_index(drop=True)
 
     if args.mode == 'stats':
         grouped_by = database.groupby(['environment', 'dataset'])
@@ -97,13 +70,13 @@ if __name__ == '__main__':
     print(f'Database constructed from logs has {rated_database.shape} entries')
 
     if args.mode == 'interactive':
-        from mlprops.elex.app import Visualization
+        from strep.elex.app import Visualization
         app = Visualization(rated_database, boundaries, real_boundaries, meta)
-        app.run_server(debug=args.debug, host=args.host, port=args.port)
+        app.run_server(debug=False)
 
     if args.mode == 'paper':
         from create_paper_results import create_all
-        create_all(rated_database, meta)
+        create_all(rated_database, pd.read_pickle(DB_META), meta)
     
     if args.mode == 'meta':
         meta_database_path = "results/database_for_meta.pkl"
