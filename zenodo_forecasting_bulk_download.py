@@ -39,5 +39,5 @@ for hit in resp['hits']['hits']:
         print('ERROR   ', ds_name)
     print('--------------------------------------')
 
-with open('meta_datasets.json', 'w') as meta:
+with open('meta_dataset.json', 'w') as meta:
     json.dump(dataset_meta, meta, indent=4)

@@ -1,6 +1,12 @@
+# auto-sklearn
+codecarbon
+gluonts[mxnet]==0.14.4
+mxnet==1.9.1
+
 # rating and results generation (ELEx)
-pandas==1.4
-scikit-learn==1.3.0
+pandas==2.1.4
+scikit-learn==1.4.2
+seedpy
 dash
 plotly
 dash-bootstrap-components

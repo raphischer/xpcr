@@ -1,8 +1,15 @@
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1" # only use CPU for fairer comparison
+# os.environ['OPENBLAS_NUM_THREADS'] = '4' # ENABLE IF AUTOSKLEARN THROWS BLAS ERRORS!
+
+# import tempfile as tmp
+# os.environ['JOBLIB_TEMP_FOLDER'] = tmp.gettempdir()
+# os.environ['OMP_NUM_THREADS'] = '1'
+# os.environ['MKL_NUM_THREADS'] = '1'
+
 import argparse
 from datetime import timedelta
 import json
-import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1" # only use CPU for fairer comparison
 import time
 import traceback
 import shutil

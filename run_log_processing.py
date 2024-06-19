@@ -53,6 +53,8 @@ if __name__ == "__main__":
     db_file = os.path.join(RES_DIR, f'{basename}.pkl')
     if not os.path.isdir(RES_DIR):
         os.makedirs(RES_DIR)
+    if not os.path.isdir(mergedir):
+        os.makedirs(mergedir)
 
     database = assemble_database(args.output_dir, mergedir, None, PROPERTIES)
     # database = pd.concat([pd.read_pickle(os.path.join(RES_DIR, f'{fname}.pkl')) for fname in ['autokeras', 'autosklearn', 'autogluon']])

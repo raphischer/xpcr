@@ -18,6 +18,7 @@ autokeras==v1.1.0
 tensorflow==2.14.0
 auto-sklearn==0.15.0
 ```
+If you encounter problems with `autosklearn`, you might want to play around with the `'OPENBLAS_NUM_THREADS'` variable (see our [run.py](./run.py) for an example.)
 
 ## Usage
 You can [run our evaluation](./run_evaluation.py) locally and pass different modes: start the interactive app (default), generate paper results, run the meta learning, etc.
