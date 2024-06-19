@@ -33,7 +33,7 @@ from data_loader import convert_tsf_to_dataframe as load_data
 from data_loader import subsampled_to_orig, TIMEDELTA_MAP, FREQUENCY_MAP
 from run_log_processing import RES_DIR
 
-DS_SEL = 'car_parts_dataset_without_missing_values'
+DS_SEL = 'hospital_dataset'
 MOD_SEL = 'feedforward'
 COL_SEL = 'MASE'
 

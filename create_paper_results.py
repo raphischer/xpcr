@@ -65,7 +65,7 @@ def create_all(database, meta_learned_db, meta, seed=0):
     monash = monash.replace('-', np.nan).astype(float)
 
     fix_seed(seed)
-    dnns = pd.unique(meta_learned_db['model']).tolist()
+    dnns = sorted(pd.unique(meta_learned_db['model']).tolist())
     pred_cols = list(meta['properties'].keys())
     pred_col_shortnames = [meta['properties'][col]['shortname'] for col in pred_cols]
     os.chdir('paper_results')
@@ -92,19 +92,17 @@ def create_all(database, meta_learned_db, meta, seed=0):
     #### MODEL X DATA PERFORMANCE
     rows = ['Data set & ' + ' & '.join(meta['model'][mod]['short'] for mod in dnns) + r' \\' + '\n' + r'        \midrule']
     for ds, data in database.groupby('dataset_orig'):
-        subd = data[data['dataset'] == ds]
-        row = [ get_ds_short(meta['dataset'][ds]['name']) ]
-        results = [subd[subd['model'] == mod]['compound_index'].iloc[0] for mod in dnns]
-        max_r = max(results)
+        meta_sub = meta_learned_db[meta_learned_db['dataset'] == ds]
+        results = meta_sub.sort_values(['model'])[('index', 'compound_index_test_pred')].tolist()
         for res in results:
-            if res == max_r:
+            if res == max(results):
                 row.append(r'\textbf{' + f'{res:3.2f}' + r'}')
             else:
                 row.append(f'{res:3.2f}')
         rows.append(' & '.join(row) + r' \\')
     final_text = TEX_TABLE_GENERAL.replace('$DATA', '\n        '.join(rows))
     final_text = final_text.replace('$ALIGN', r'{l|ccccccccccc}')
-    with open('ds_model_index.tex', 'w') as outf:
+    with open('ds_model_pred_pcr.tex', 'w') as outf:
         outf.write(final_text)
 
     ######### METHOD COMPARISON TABLE
