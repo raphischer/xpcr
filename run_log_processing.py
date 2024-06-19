@@ -7,6 +7,7 @@ from sklearn.impute import KNNImputer
 
 from strep.load_experiment_logs import assemble_database
 from strep.util import format_software, format_hardware, write_json
+from data_loader import subsampled_to_orig
 
 PROPERTIES = {
     'meta': {
@@ -34,8 +35,9 @@ PROPERTIES = {
 }
 
 RES_DIR = 'results'
-DB_COMPLETE = os.path.join(RES_DIR, 'dnns.pkl')
-DB_BL = os.path.join(RES_DIR, 'baselines.pkl')
+DB_COMPLETE = os.path.join(RES_DIR, 'logs.pkl') # later logs.pkl
+DB_BL = os.path.join(RES_DIR, 'baselines_fixed.pkl')
+DB_META = DB_COMPLETE.replace('.pkl', '_meta.pkl')
 
 if __name__ == "__main__":
 
@@ -53,7 +55,9 @@ if __name__ == "__main__":
         os.makedirs(RES_DIR)
 
     database = assemble_database(args.output_dir, mergedir, None, PROPERTIES)
-    # database = pd.read_pickle(db_file)
+    # database = pd.concat([pd.read_pickle(os.path.join(RES_DIR, f'{fname}.pkl')) for fname in ['autokeras', 'autosklearn', 'autogluon']])
+    # database = pd.read_pickle(os.path.join(RES_DIR, 'logs.pkl'))
+    database = database[~database['dataset'].str.contains('austra')] # ditch australian_electricity_demand_dataset
     # merge for having a single task
     merged_database = []
     for group_field_vals, data in database.groupby(['dataset', 'environment', 'model']):
@@ -62,9 +66,18 @@ if __name__ == "__main__":
         merged = data.bfill().head(1)
         merged.loc[:,'task'] = 'Train and Test'
         merged_database.append(merged)
-    database = pd.concat(merged_database)
-    database = database[~database['dataset'].str.contains('austra')]
-    database = database.reset_index(drop=True)
+    database = pd.concat(merged_database).reset_index(drop=True)
+    # discard inf MASE values
+    database.loc[np.isinf(database['MASE']),'MASE'] = database.loc[~np.isinf(database['MASE']),'MASE'].max()
+    numeric = database.select_dtypes('number')
+    if np.any(np.isinf(numeric)):
+        print('WARNING - found inf values in DB!')
+    if np.any(np.isnan(numeric)):
+        print('WARNING - found nan values in DB!')
+    database = database.dropna().reset_index(drop=True)
+    database['environment'] = database['environment'].map(lambda env: env.split(' - ')[0])
+    database['dataset_orig'] = database['dataset'].map(subsampled_to_orig) # retrieve original dataset from all subsampled versions
+    database['configuration'] = database.aggregate(lambda row: ' - '.join([row['task'], row['dataset'], row['model']]), axis=1)
     database.to_pickle(db_file)
 
     # # load all dbs
