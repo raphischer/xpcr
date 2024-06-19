@@ -90,20 +90,21 @@ def create_all(database, meta_learned_db, meta, seed=0):
         outf.write(final_text)
     
     #### MODEL X DATA PERFORMANCE
-    rows = ['Data set & ' + ' & '.join(meta['model'][mod]['short'] for mod in dnns) + r' \\' + '\n' + r'        \midrule']
-    for ds, data in database.groupby('dataset_orig'):
-        meta_sub = meta_learned_db[meta_learned_db['dataset'] == ds]
-        results = meta_sub.sort_values(['model'])[('index', 'compound_index_test_pred')].tolist()
-        for res in results:
-            if res == max(results):
-                row.append(r'\textbf{' + f'{res:3.2f}' + r'}')
-            else:
-                row.append(f'{res:3.2f}')
-        rows.append(' & '.join(row) + r' \\')
-    final_text = TEX_TABLE_GENERAL.replace('$DATA', '\n        '.join(rows))
-    final_text = final_text.replace('$ALIGN', r'{l|ccccccccccc}')
-    with open('ds_model_pred_pcr.tex', 'w') as outf:
-        outf.write(final_text)
+    # rows = ['Data set & ' + ' & '.join(meta['model'][mod]['short'] for mod in dnns) + r' \\' + '\n' + r'        \midrule']
+    # for ds, data in database.groupby('dataset_orig'):
+    #     meta_sub = meta_learned_db[meta_learned_db['dataset'] == ds]
+    #     results = meta_sub.sort_values(['model'])[('index', 'compound_index_test_pred')].tolist()
+    #     row = [met]
+    #     for res in results:
+    #         if res == max(results):
+    #             row.append(r'\textbf{' + f'{res:3.2f}' + r'}')
+    #         else:
+    #             row.append(f'{res:3.2f}')
+    #     rows.append(' & '.join(row) + r' \\')
+    # final_text = TEX_TABLE_GENERAL.replace('$DATA', '\n        '.join(rows))
+    # final_text = final_text.replace('$ALIGN', r'{l|ccccccccccc}')
+    # with open('ds_model_pred_pcr.tex', 'w') as outf:
+    #     outf.write(final_text)
 
     ######### METHOD COMPARISON TABLE
     rows = [
@@ -189,11 +190,12 @@ def create_all(database, meta_learned_db, meta, seed=0):
     for name, (code_name, short) in mod_map.items():
         for ds in ds_overlap:
             subdb = database[(database['model'] == code_name) & (database['dataset'] == ds)]
-            monash.loc[ds, f'{name}_mase'] = subdb['MASE'].iloc[0]['value']
-            monash.loc[ds, f'{name}_compound'] = subdb['compound_index'].iloc[0]
+            monash.loc[ds,f'{name}_mase'] = subdb['MASE'].iloc[0]['value']
+            monash.loc[ds,f'{name}_compound'] = subdb['compound_index'].iloc[0]
             if name in monash.columns:
                 monash.loc[ds, f'{name}_mase_diff'] = np.abs(subdb[COL_SEL].iloc[0]['value'] - monash.loc[ds,name])
 
+    min_max = {}
     all_rel_cols = [[col for col in monash.columns if '_mase' in col], [col for col in monash.columns if '_compound' in col], [col for col in monash.columns if '_mase_diff' in col]]
     fig = make_subplots(rows=1, cols=3, shared_yaxes=True, horizontal_spacing=0.1, subplot_titles=([COL_SEL, 'PCR Score', 'Diff to Monash MASE']))
     for idx, rel_cols in enumerate(all_rel_cols):
@@ -201,11 +203,36 @@ def create_all(database, meta_learned_db, meta, seed=0):
         colorbar = {'x': 0.367*(idx+1)-0.105}
         if idx==0:
             sub_monash = np.log(sub_monash)
-            colorbar.update( dict(tick0=0, tickmode= 'array', tickvals=[-10, -5, 0, 5, 10, 15], ticktext=["1e-10", "1e-5", "1", "1e5", "e10", "1e15"]) )
-        fig.add_trace(go.Heatmap(go.Heatmap(z=sub_monash.values, x=[mod_map[mod.split('_')[0]][1] for mod in sub_monash], y=ds_short, colorscale=RATING_COLOR_SCALE, reversescale=idx==1, colorbar=colorbar)), row=1, col=idx+1)
+            colorbar.update( dict(tick0=0, tickmode= 'array', tickvals=[-10, -5, 0, 5, 10, 15], ticktext=["e-10", "e-5", "1", "e5", "e10", "e15"]) )
+        min_max[idx] = sub_monash.values.min(), sub_monash.values.max()
+        fig.add_trace(go.Heatmap(z=sub_monash.values, x=[mod_map[mod.split('_')[0]][1] for mod in sub_monash], y=ds_short, colorscale=RATING_COLOR_SCALE, reversescale=idx==1, colorbar=colorbar, zmin=min_max[idx][0], zmax=min_max[idx][1]), row=1, col=idx+1)
     fig.update_layout(width=PLOT_WIDTH, height=PLOT_HEIGHT*1.5, margin={'l': 0, 'r': 0, 'b': 0, 't': 18})
-    fig.write_image("sota_comparison.pdf")
+    fig.show()
 
+    # autoxpcr pcr estimation
+    for name, (code_name, short) in dnn_map.items():
+        for ds in ds_overlap:
+            sub_meta = meta_learned_db[(meta_learned_db['model'] == code_name) & (meta_learned_db['dataset'] == ds)]
+            monash.loc[ds,f'{name}_est_mase'] = sub_meta[('value', 'MASE_test_pred')].iloc[0]
+            monash.loc[ds,f'{name}_est_compound'] = sub_meta[('index', 'compound_index_test_pred')].iloc[0]
+            monash.loc[ds,f'{name}_est_compound_err'] = sub_meta[('index', 'compound_index_test_err')].iloc[0]
+    all_rel_cols2 = [[c for c in monash.columns if c.endswith('_est_mase')], [c for c in monash.columns if c.endswith('_est_compound')], [c for c in monash.columns if c.endswith('_est_compound_err')]]
+    fig = make_subplots(rows=1, cols=3, shared_yaxes=True, horizontal_spacing=0.1, subplot_titles=(['Estimated MASE', 'Estimated PCR Score', 'Estimation Error']))
+    for idx, rel_cols in enumerate(all_rel_cols2):
+        sub_monash = monash.loc[ds_overlap,rel_cols]
+        colorbar = {'x': 0.367*(idx+1)-0.105}
+        if idx==0:
+            sub_monash = np.log(sub_monash)
+            colorbar.update( dict(tick0=0, tickmode= 'array', tickvals=[-10, -5, 0, 5, 10, 15], ticktext=["e-10", "e-5", "1", "e5", "e10", "e15"]) )
+        if idx < 1:
+            zmin, zmax = min_max[idx]
+        else:
+            zmin, zmax = sub_monash.values.min(), sub_monash.values.max()
+        
+        fig.add_trace(go.Heatmap(z=sub_monash.values, x=[mod_map[mod.split('_')[0]][1] for mod in sub_monash], y=ds_short, colorscale=RATING_COLOR_SCALE, reversescale=idx>0, colorbar=colorbar, zmin=zmin, zmax=zmax), row=1, col=idx+1)
+    fig.update_layout(width=PLOT_WIDTH, height=PLOT_HEIGHT*1.5, margin={'l': 0, 'r': 0, 'b': 0, 't': 18})
+    fig.show()
+    fig.write_image("pcr_estimation.pdf")
 
 
     # ## EXPLANATIONS
@@ -277,7 +304,7 @@ def create_all(database, meta_learned_db, meta, seed=0):
             scatter = create_scatter_graph(plot_data, axis_names, False, ax_border=0.15, marker_width=PLOT_WIDTH / 90)
             scatter.update_traces(textposition='top center', textfont_size=16, textfont_color='black')
             add_rating_background(scatter, rating_pos2, 'optimistic mean', False)
-            scatter.update_layout(width=PLOT_WIDTH / 2, height=PLOT_HEIGHT, margin={'l': 0, 'r': 0, 'b': 0, 't': 0})
+            scatter.update_layout(width=PLOT_WIDTH / 2, height=PLOT_HEIGHT*1.2, margin={'l': 0, 'r': 0, 'b': 0, 't': 0})
             scatter.write_image(f'landscape_{ds}_{xaxis}_{yaxis}.pdf')
 
 
