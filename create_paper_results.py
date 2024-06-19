@@ -183,13 +183,14 @@ def create_all(database, meta_learned_db, meta, seed=0):
 
 
     ### SOTA COMPARISON
-    mod_map = {meta['model'][mod]['name']: (mod, meta['model'][mod]['short']) for mod in dnns}
+    dnn_map = {meta['model'][mod]['name']: (mod, meta['model'][mod]['short']) for mod in dnns}
+    mod_map = {meta['model'][mod]['name']: (mod, meta['model'][mod]['short']) for mod in pd.unique(database['model'])}
     ds_overlap = list(reversed([ds for ds in pd.unique(database['dataset']) if ds in monash.index]))
     ds_short = [get_ds_short(meta['dataset'][ds]['name']) for ds in ds_overlap]
 
-    for name in mod_map.keys():
+    for name, (code_name, short) in mod_map.items():
         for ds in ds_overlap:
-            subdb = database[(database['model'] == mod_map[name][0]) & (database['dataset'] == ds)]
+            subdb = database[(database['model'] == code_name) & (database['dataset'] == ds)]
             monash.loc[ds, f'{name}_mase'] = subdb['MASE'].iloc[0]['value']
             monash.loc[ds, f'{name}_compound'] = subdb['compound_index'].iloc[0]
             if name in monash.columns:
@@ -350,7 +351,7 @@ def create_all(database, meta_learned_db, meta, seed=0):
         'Inters (e)': {}
     }
 
-    rated_db = rate_database(meta_learned_db.loc[:,database.drop(['compound_index', 'compound_rating'], axis=1).columns], meta['properties'], indexmode='best')[0]
+    rated_db = rate_database(meta_learned_db.loc[:,database.drop(['compound_index', 'quality_index', 'resource_index', 'compound_rating', 'quality_rating', 'resource_rating'], axis=1).columns], meta['properties'], indexmode='best')[0]
     index_db = prop_dict_to_val(rated_db, 'index')
     k_best = 5
     error_threshold = 0.1

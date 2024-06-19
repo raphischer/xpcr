@@ -35,7 +35,7 @@ PROPERTIES = {
 
 RES_DIR = 'results'
 DB_COMPLETE = os.path.join(RES_DIR, 'logs.pkl') # later logs.pkl
-DB_BL = os.path.join(RES_DIR, 'baselines_fixed.pkl')
+DB_BL = os.path.join(RES_DIR, 'baselines.pkl')
 DB_META = DB_COMPLETE.replace('.pkl', '_meta.pkl')
 
 if __name__ == "__main__":
