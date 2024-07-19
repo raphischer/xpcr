@@ -19,6 +19,7 @@ if __name__ == '__main__':
     parser.add_argument("--mode", default='paper', choices=['interactive', 'paper', 'stats'])
     parser.add_argument("--boundaries", default="boundaries.json")
     parser.add_argument("--dropsubsampled", default=False, type=bool)
+    parser.add_argument("--local", default=True)
     args = parser.parse_args()
 
     database = pd.concat(pd.read_pickle(db) for db in [DB_COMPLETE, DB_BL]).reset_index(drop=True)
@@ -73,7 +74,10 @@ if __name__ == '__main__':
         from strep.elex.app import Visualization
         db = {'DB': (rated_database, meta, metrics, xaxis_default, yaxis_default, boundaries, real_boundaries, references)}
         app = Visualization(db)
-        app.run_server(debug=False)
+        if args.local:
+            app.run_server(debug=False)
+        else:
+            app.run_server(host="0.0.0.0", port=8989, debug=False)
 
     if args.mode == 'paper':
         from create_paper_results import create_all
