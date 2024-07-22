@@ -1,6 +1,9 @@
 # Explainable Multi-Objective Model Selection for Time Series Forecasting
 
-Code and results for the associated research paper (accepted for publication at [KDD 2024](https://kdd2024.kdd.org/), preprint available [here](https://arxiv.org/abs/2312.13038)).
+Code and results for the associated research paper, accepted for publication at [KDD 2024](https://kdd2024.kdd.org/), preprint available [here](https://arxiv.org/abs/2312.13038). Check out our promotional pitch video:
+
+[![Promotional video](https://img.youtube.com/vi/utfpJNdpsRc/3.jpg)](https://www.youtube.com/watch?v=utfpJNdpsRc)
+
 To investigate the results you can use our publicly available [Exploration tool](http://167.99.254.41/), so no code needs to be run on your machine (note that results might slightly differ from the preprint paper).
 
 ## Structure
