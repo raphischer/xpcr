@@ -1,10 +1,10 @@
 # Explainable Multi-Objective Model Selection for Time Series Forecasting
 
-Code and results for the associated research paper, accepted for publication at [KDD 2024](https://kdd2024.kdd.org/), preprint available [here](https://arxiv.org/abs/2312.13038). Check out our promotional pitch video:
+Code and results for the associated research paper, accepted for publication at [KDD 2024](https://kdd2024.kdd.org/), preprint available [here](https://arxiv.org/abs/2312.13038) (note that the  preprint results might slightly differ from this repo). Also check out our promotional pitch video:
 
 [![Promotional video](https://img.youtube.com/vi/utfpJNdpsRc/0.jpg)](https://www.youtube.com/watch?v=utfpJNdpsRc)
 
-To investigate the results you can use our publicly available [Exploration tool](https://xpcr.onrender.com), so no code needs to be run on your machine (note that results might slightly differ from the preprint paper).
+To investigate the results you can use our publicly available [Exploration tool](https://xpcr.onrender.com), so no code needs to be run on your machine. Note that this tool is only provided on demand (for saving compute resources). Booting up will take approx. 3 minutes, before the page appears to be loading.
 
 ## Structure
 All experiments were executed with the top-level Python scripts.
