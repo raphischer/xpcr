@@ -1,7 +1,7 @@
 from strep.elex.app import Visualization
 from strep.index_and_rate import find_relevant_metrics
 
-from run_paper_evaluation import database, rated_database, meta, metrics, xaxis_default, yaxis_default, boundaries, real_boundaries, references
+from run_paper_evaluation import database, rated_database, meta, boundaries, real_boundaries, references
 
 # else interactive
 database, metrics, xaxis_default, yaxis_default = find_relevant_metrics(database, meta)
