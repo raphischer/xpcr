@@ -180,8 +180,8 @@ def create_page(databases, indexmode, rating_mode):
     ]
 
     row1 = [
-        dbc.Col(loading(graph_scatter), width=8),
-        dbc.Col(loading(graph_bars), width=4)
+        dbc.Col(graph_scatter, width=8),
+        dbc.Col(graph_bars, width=4)
     ]
 
     row2 = [
