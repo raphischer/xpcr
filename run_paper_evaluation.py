@@ -1,24 +1,13 @@
-import argparse
-import sys
 import pandas as pd
-import numpy as np
 from sklearn.linear_model import LinearRegression
 
-from strep.index_and_rate import rate_database, find_relevant_metrics
+from strep.index_and_rate import rate_database
 from strep.util import load_meta
-from strep.elex.app import Visualization
 
 from run_log_processing import DB_COMPLETE, DB_BL, DB_META
-from run_meta_learning import FreqTransformer # import needed for loading the MASE models for paper result creation
+from run_autoxpcr import FreqTransformer # import needed for loading the MASE models for paper result creation
 
 DATABASES = ['autokeras.pkl', 'autosklearn.pkl', 'autogluon.pkl', 'dnns.pkl']
-
-# parser = argparse.ArgumentParser()
-
-# parser.add_argument("--mode", default='interactive', choices=['interactive', 'paper'])
-# parser.add_argument("--boundaries", default="boundaries.json")
-# parser.add_argument("--dropsubsampled", default=False, type=bool)
-# args = parser.parse_args()
 
 database = pd.concat(pd.read_pickle(db) for db in [DB_COMPLETE, DB_BL]).reset_index(drop=True)
 # GluonTS has no num params -> interpolate from file size and inf running time
@@ -41,19 +30,9 @@ for ds in pd.unique(database['dataset']):
             meta['dataset'][ds] = meta['dataset'][orig].copy()
             meta['dataset'][ds]['name'] = meta['dataset'][ds]['name'] + ds.replace(orig + '_', '') # append the ds seed to name
 
-database, metrics, xaxis_default, yaxis_default = find_relevant_metrics(database, meta)
 rated_database, boundaries, real_boundaries, references = rate_database(database, given_meta=meta['properties'], boundaries="boundaries.json")
 print(f'Database constructed from logs has {rated_database.shape} entries')
 
-# if args.mode == 'paper':
-#     from create_paper_results import create_all
-#     create_all(rated_database, pd.read_pickle(DB_META), meta)
-#     sys.exit(0)
-
-# else interactive
-db = {'DB': (rated_database, meta, metrics, xaxis_default, yaxis_default, boundaries, real_boundaries, references)}
-app = Visualization(db)
-server = app.server
-
 if __name__ == '__main__':
-    app.run_server(debug=False)
+    from create_paper_results import create_all
+    create_all(rated_database, pd.read_pickle(DB_META), meta)

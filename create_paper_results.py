@@ -16,7 +16,7 @@ from strep.elex.graphs import create_scatter_graph, add_rating_background
 from strep.elex.util import RATING_COLORS, RATING_COLOR_SCALE
 from strep.util import prop_dict_to_val
 
-from run_meta_learning import DS_SEL, COL_SEL, MOD_SEL
+from run_autoxpcr import DS_SEL, COL_SEL, MOD_SEL
 
 
 PLOT_WIDTH = 900
