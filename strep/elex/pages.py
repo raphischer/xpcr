@@ -126,7 +126,7 @@ def create_page(databases, indexmode, rating_mode):
     # label display & tables
     label_display = html.Div(children=[
         html.H3('Energy Label:'),
-        html.Img(id='model-label', className="img-fluid"),
+        dcc.Loading([html.Img(id='model-label', className="img-fluid")], overlay_style={"visibility":"visible", "filter": "blur(2px)"}, type="circle"),
         dbc.Tooltip("Click to enlarge", target="model-label"),
     ])
 
