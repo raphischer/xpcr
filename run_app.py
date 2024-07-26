@@ -8,4 +8,4 @@ database, metrics, xaxis_default, yaxis_default = find_relevant_metrics(database
 db = {'DB': (rated_database, meta, metrics, xaxis_default, yaxis_default, boundaries, real_boundaries, references)}
 app = Visualization(db)
 server = app.server
-app.run_server(debug=False)
+app.run_server(debug=False, host='0.0.0.0', port=10000)
