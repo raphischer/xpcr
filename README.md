@@ -1,6 +1,6 @@
-# Explainable Multi-Objective Model Selection for Time Series Forecasting
+# AutoXPCR - Explainable Multi-Objective Model Selection for Time Series Forecasting
 
-Code and results for the associated research paper, accepted for publication at [KDD 2024](https://kdd2024.kdd.org/), preprint available [here](https://arxiv.org/abs/2312.13038) (note that the  preprint results might slightly differ from this repo). Also check out our promotional pitch video:
+Code and results for our associated research paper, published and presented at [KDD 2024 (open access)](https://dl.acm.org/doi/10.1145/3637528.3672057). Also check out our promotional pitch video:
 
 [![Promotional video](https://img.youtube.com/vi/utfpJNdpsRc/0.jpg)](https://www.youtube.com/watch?v=utfpJNdpsRc)
 
@@ -41,7 +41,7 @@ The prodedure for reproducing the results is the following:
 6. Explore results via our [exploration tool](./run_app_.py)
 
 ## Issues
-If there are any issues, feel free to contect the paper authors.
+If there are any issues, feel free to reach out - contact information given in the [paper](https://dl.acm.org/doi/10.1145/3637528.3672057).
 
 ## Terms of Use
 Copyright (c) 2024 Raphael Fischer
