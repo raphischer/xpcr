@@ -20,7 +20,7 @@ def create_axis_option(x=True):
     return dbc.AccordionItem(content, title=f'{xy}-Axis Configuration')
 
 def loading(element):
-    return dcc.Loading([element], overlay_style={"visibility":"visible", "filter": "blur(2px)"}, type="circle")
+    return dcc.Loading([element])#, overlay_style={"visibility":"visible", "filter": "blur(2px)"}, type="circle")
 
 style_btn_cfg = {
     'width': '90%',
