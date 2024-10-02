@@ -4,7 +4,7 @@ Code and results for our associated research paper, published and presented at [
 
 [![Promotional video](https://img.youtube.com/vi/utfpJNdpsRc/0.jpg)](https://www.youtube.com/watch?v=utfpJNdpsRc)
 
-To investigate the results you can use our publicly available [Exploration tool](https://xpcr.onrender.com), so no code needs to be run on your machine. Note that this tool is only provided on demand (for saving compute resources). Booting up will take approx. 3 minutes, before the page appears to be loading.
+To investigate the results you can use our publicly available [Exploration tool](https://strep.onrender.com/?database=XPCR-Forecasting), so no code needs to be run on your machine. Note that this webpage is [work in progress](https://github.com/raphischer/strep) and subject to change, so you might encounter delays, off-times, and slight differences to our paper.
 
 ## Structure
 All experiments were executed with the top-level Python scripts.
@@ -40,8 +40,33 @@ The prodedure for reproducing the results is the following:
 5. Run AutoXPCR / meta-learning via the [corresponding script](./run_autoxpcr.py)
 6. Explore results via our [exploration tool](./run_app_.py)
 
-## Issues
-If there are any issues, feel free to reach out - contact information given in the [paper](https://dl.acm.org/doi/10.1145/3637528.3672057).
+## Issues and Contribution
+If you experience any issues or want to contribute, feel free to reach out via the contact information in our paper!
 
-## Terms of Use
-Copyright (c) 2024 Raphael Fischer
+## Citation
+If you appreciate our work and code, please cite [our paper](https://dl.acm.org/doi/10.1145/3637528.3672057) as given by ACM:
+
+Raphael Fischer and Amal Saadallah. 2024. AutoXPCR: Automated Multi-Objective Model Selection for Time Series Forecasting. In Proceedings of the 30th ACM SIGKDD Conference on Knowledge Discovery and Data Mining (KDD '24). Association for Computing Machinery, New York, NY, USA, 806–815. https://doi.org/10.1145/3637528.3672057
+
+or using the bibkey below:
+```
+@inproceedings{10.1145/3637528.3672057,
+author = {Fischer, Raphael and Saadallah, Amal},
+title = {AutoXPCR: Automated Multi-Objective Model Selection for Time Series Forecasting},
+year = {2024},
+isbn = {9798400704901},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3637528.3672057},
+doi = {10.1145/3637528.3672057},
+abstract = {Automated machine learning (AutoML) streamlines the creation of ML models, but few specialized methods have approached the challenging domain of time series forecasting. Deep neural networks (DNNs) often deliver state-of-the-art predictive performance for forecasting data, however these models are also criticized for being computationally intensive black boxes. As a result, when searching for the "best" model, it is crucial to also acknowledge other aspects, such as interpretability and resource consumption. In this paper, we propose AutoXPCR - a novel method that produces DNNs for forecasting under consideration of multiple objectives in an automated and explainable fashion. Our approach leverages meta-learning to estimate any model's performance along PCR criteria, which encompass (P)redictive error, (C)omplexity, and (R)esource demand. Explainability is addressed on multiple levels, as AutoXPCR pro-vides by-product explanations of recommendations and allows to interactively control the desired PCR criteria importance and trade-offs. We demonstrate the practical feasibility AutoXPCR across 108 forecasting data sets from various domains. Notably, our method outperforms competing AutoML approaches - on average, it only requires 20\% of computation costs for recommending highly efficient models with 85\% of the empirical best quality.},
+booktitle = {Proceedings of the 30th ACM SIGKDD Conference on Knowledge Discovery and Data Mining},
+pages = {806–815},
+numpages = {10},
+keywords = {automl, explainable ai, meta-learning, resource-aware ml, time series forecasting},
+location = {Barcelona, Spain},
+series = {KDD '24}
+}
+```
+
+© Raphael Fischer
