@@ -4,7 +4,7 @@ Code and results for our associated research paper, published and presented at [
 
 [![Promotional video](https://img.youtube.com/vi/utfpJNdpsRc/0.jpg)](https://www.youtube.com/watch?v=utfpJNdpsRc)
 
-To investigate the results you can use our publicly available [Exploration tool](https://strep.onrender.com/?database=XPCR-Forecasting), so no code needs to be run on your machine. Note that this webpage is [work in progress](https://github.com/raphischer/strep) and subject to change, so you might encounter delays, off-times, and slight differences to our paper.
+To investigate the results you can use our publicly available [Exploration tool](https://strep.onrender.com/?database=XPCR), so no code needs to be run on your machine. Note that this software is [work in progress](https://github.com/raphischer/strep) and subject to change, so you might encounter delays, off-times, and slight differences to our paper.
 
 ## Structure
 All experiments were executed with the top-level Python scripts.
